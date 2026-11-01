@@ -280,8 +280,14 @@ function renderPlayers(){
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function peerSheet(){
  const all=Object.assign({},players);all[uid]=me;const now=Date.now();
- sheet.innerHTML=`<h3 style="margin:0 0 6px">旅伴們（${Object.keys(all).length}/4）</h3>`+Object.entries(all).map(([id,p])=>`<div class="pe"><div class="a">${avatar(p.av)}</div><div><b>${esc(p.name||'旅伴')}</b>${id===uid?'（你）':''}<br><small>${SC[p.loc]?SC[p.loc].e+' '+SC[p.loc].n:''}</small></div><span class="dot ${now-(p.ts||0)<200000?'on':''}"></span></div>`).join('')+
- `<button class="big ghost" onclick="sheet.style.display='none'">關閉</button>`;sheet.style.display='block';
+ sheet.innerHTML=`<h3 style="margin:0 0 6px">旅伴們（${Object.keys(all).length}/4）</h3>`+Object.entries(all).map(([id,p])=>`<div class="pe"><div class="a">${avatar(p.av)}</div><div><b>${esc(p.name||'旅伴')}</b>${id===uid?'（你）':''}<br><small>${SC[p.loc]?SC[p.loc].e+' '+SC[p.loc].n:''}</small></div><span class="dot ${now-(p.ts||0)<200000?'on':''}"></span><button class="opt" data-rm="${id}" style="margin-left:6px">🗑 移除</button></div>`).join('')+
+ `<div style="font-size:12px;opacity:.6;margin-top:8px">移除後，對方若還開著頁面會再出現，請請對方關掉頁面或自己按「移除」重建角色。</div><button class="big ghost" onclick="sheet.style.display='none'">關閉</button>`;sheet.style.display='block';
+ sheet.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{
+  if(b.dataset.arm!=='1'){b.dataset.arm='1';b.textContent='再按一次確定';b.style.background='var(--ac)';b.style.color='#fff';setTimeout(()=>{if(b.isConnected){b.dataset.arm='';b.textContent='🗑 移除';b.style.background='';b.style.color=''}},4000);return}
+  const id=b.dataset.rm;
+  if(id===uid){try{localStorage.removeItem('me')}catch(e){}
+   (db?db.collection('players').doc(uid).delete().catch(()=>{}):Promise.resolve()).then(()=>location.reload())}
+  else{delete players[id];if(db)db.collection('players').doc(id).delete().catch(()=>{});renderPlayers();peerSheet()}});
 }
 function albumSheet(){
  const url=info.album||'';
