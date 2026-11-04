@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="zh-Hant"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0e0b16"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Tokyo Squad">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"><meta name="theme-color" content="#1b1620"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Tokyo Squad">
 <title>TOKYO SQUAD · 東京 2027</title>
 <style>
 :root{--bg:#f6f1ea;--fg:#2a2230;--card:#fff;--line:#e4dbd0;--ac:#e5484d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -84,8 +84,9 @@ body{background:radial-gradient(900px 520px at 50% -8%,#34194f,#0e0b16 62%) fixe
 .bg4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0;font-size:14px}.bg4 small{display:block;opacity:.55;font-size:11px}
 .bpf{display:flex;gap:6px;flex-wrap:wrap}.bpf a{text-decoration:none;color:inherit}
 .okf{outline:2px solid #2ecc71;outline-offset:1px}
-.mprev{width:190px;min-height:190px;display:flex;align-items:flex-end;justify-content:center;padding:10px}
+.mprev{width:150px;min-height:150px;display:flex;align-items:flex-end;justify-content:center;padding:10px}
 .mprev .ms{width:100%}
+.opt[data-mg]{min-width:64px;min-height:40px;font-size:15px;touch-action:manipulation}
 .mrow{display:flex;align-items:center;gap:8px;margin:8px 0}.mrow .ml{width:44px;opacity:.65;font-size:13px}.mrow .mn{flex:1;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
 .mt{border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;min-height:84px}
@@ -93,6 +94,63 @@ body{background:radial-gradient(900px 520px at 50% -8%,#34194f,#0e0b16 62%) fixe
 .pl.mp .tag{bottom:calc(100% - 4px)}
 .pe .a .ms{width:40px}
 .ms{display:block;width:100%;height:auto;image-rendering:pixelated;-webkit-user-drag:none;user-select:none}
+/* ===== 墮落城市風：暗色磚牆、黃昏紫橘天空、混凝土面板、警示條紋 ===== */
+:root:root:root{--bg:#1b1620;--fg:#f4ead6;--card:#2a2430;--line:#4d4558;--ac:#f0a02c;--ink:#120c18}
+body{background:linear-gradient(180deg,#3d2860 0,#8a4670 150px,#d9804a 260px,rgba(217,128,74,0) 330px) top/100% 330px no-repeat,linear-gradient(rgba(24,14,28,.52),rgba(24,14,28,.52)),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='32'%3E%3Crect width='48' height='32' fill='%238a4636'/%3E%3Cpath d='M0 15h48M0 31h48M23 0v15M47 0v15M11 16v15M35 16v15' stroke='%235a2a20' stroke-width='2'/%3E%3C/svg%3E") #4a2a24;background-attachment:scroll}
+.hd h1{font-family:'Press Start 2P',ui-monospace,Menlo,monospace;font-size:25px;font-weight:400;letter-spacing:0;line-height:1.3;color:#f4ead6;text-shadow:3px 3px 0 var(--ink),-1px -1px 0 var(--ink),1px -1px 0 var(--ink),-1px 1px 0 var(--ink)}
+.hd h1 b{color:var(--ac)}
+.hd p{opacity:1;color:#f4ead6;text-shadow:1px 1px 0 var(--ink)}
+.pill{border-radius:4px;border:2px solid var(--ink);background:#2a2430}
+.card{border-radius:6px;border:3px solid var(--ink);background:var(--card);box-shadow:inset 0 0 0 2px #5a5266,0 4px 0 #0a060e}
+#stage{border-radius:4px;border:4px solid var(--ink);box-shadow:0 0 0 2px #7a6a86,0 6px 0 #0a060e}
+.chip{border-radius:4px;border:2px solid var(--ink);background:#3a3342;color:var(--fg)}
+.chip.on{background:var(--ac);border-color:var(--ink);color:var(--ink);font-weight:800}
+.emo button,.dock button{border-radius:4px;border:2px solid var(--ink);background:#3a3342;box-shadow:0 3px 0 #0a060e,inset 0 0 0 1px #5a5266}
+.emo button:active,.dock button:active,.opt:active,.chip:active{transform:translateY(2px)}
+.big:not(.ghost){background:var(--ac);color:var(--ink);border:3px solid var(--ink);border-radius:4px;box-shadow:0 4px 0 #a05a10;text-shadow:none}
+.big:not(.ghost):active{transform:translateY(3px);box-shadow:0 1px 0 #a05a10}
+.big.ghost{border:3px solid var(--ink);background:#3a3342;border-radius:4px;color:var(--fg)}
+input,input[type=text],input[type=url],select,textarea{border-radius:4px;border:2px solid var(--ink);background:#15101a;box-shadow:inset 0 2px 0 rgba(0,0,0,.45);color:var(--fg)}
+.opt{border-radius:4px;border:2px solid var(--ink);background:#3a3342;color:var(--fg)}
+.opt.on{background:var(--ac);color:var(--ink);font-weight:800}
+.chat button{border-radius:4px;border:2px solid var(--ink);background:var(--ac);color:var(--ink);font-weight:800}
+.stop,.bp,.mt{border-radius:4px;border:2px solid var(--ink)}
+.stop{background:#322b3a}
+#sheet{border-radius:8px 8px 0 0;border:3px solid var(--ink);border-bottom:0;box-shadow:inset 0 0 0 2px #5a5266,0 -6px 0 rgba(0,0,0,.35)}
+.banner{border-radius:4px;border:2px solid var(--ink)}
+.bar{background:#1b1620;border-top:3px solid var(--ink);backdrop-filter:none}
+.bar::before{content:'';position:absolute;left:0;right:0;top:-12px;height:9px;background:repeating-linear-gradient(-45deg,#f2c230 0 9px,var(--ink) 9px 18px);border-top:2px solid var(--ink)}
+.bar .chip{border:0;background:none;color:#a89fb8;border-radius:0}
+.bar .chip.on{background:none;color:var(--ac);font-weight:800}
+.tag{background:rgba(10,6,14,.8);border:1px solid #000;border-radius:3px;color:#fff;padding:1px 6px}
+.tag.me{background:var(--ac);color:var(--ink);font-weight:700}
+.say{border-radius:4px;border:2px solid var(--ink);background:#fff8e6;box-shadow:2px 2px 0 rgba(0,0,0,.4)}
+.pos{color:#7de29a}.neg{color:#ff8a6b}
+.mprev,.prev{border-radius:4px;border:3px solid var(--ink);background:linear-gradient(#5a3a7a,#c8704a)}
+/* ===== 行程頁 ===== */
+.dch{gap:6px}.dchip{display:flex;flex-direction:column;align-items:center;min-width:58px;line-height:1.15;position:relative;padding:6px 8px;font-weight:800}
+.dchip small{font-size:10px;font-weight:500;opacity:.8}.dchip .cn{position:absolute;top:-6px;right:-4px;font-style:normal;background:#ff8a6b;color:var(--ink);border:2px solid var(--ink);border-radius:9px;font-size:10px;font-weight:800;min-width:18px;height:18px;line-height:14px;text-align:center}
+.dhd{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:6px 2px 8px;color:#f4ead6;text-shadow:1px 1px 0 var(--ink)}.dhd b{font-size:17px}
+.flw{display:flex;gap:4px;align-items:center;overflow-x:auto;padding-bottom:4px}.flw .opt{white-space:nowrap}.flw .ar{opacity:.5}
+.swr{margin-top:6px;position:relative}.swr.dragging{z-index:20;opacity:.92;filter:drop-shadow(0 6px 0 rgba(0,0,0,.4));transition:none}
+.swr:not(.dragging){transition:transform .15s}
+.stop.tl{align-items:center;margin-top:0;gap:8px;padding:8px 10px}.stop.tl.open{border-color:var(--ac)}
+.hdl{font-size:20px;line-height:1;opacity:.7;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;padding:8px 4px;margin:-8px -2px -8px -6px}
+.nb{width:26px;height:26px;flex:none;border-radius:50%;background:var(--ac);color:var(--ink);font-weight:900;font-size:13px;display:grid;place-items:center;border:2px solid var(--ink)}.nb.sm{width:20px;height:20px;font-size:11px}
+.sb{flex:1;min-width:0;cursor:pointer}.stop.tl .tm{min-width:42px;font-size:13px}
+.pn{background:#231d2b;border:2px solid var(--ink);border-top:0;padding:8px;margin:0 6px}.pn iframe,.lgf{height:230px;margin:0;border:2px solid var(--ink);border-radius:4px}
+.lgf{display:block;width:calc(100% - 24px);margin:0 0 4px 22px}
+.leg{border-left:3px dashed var(--ac)}
+.ov .ovr{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:0;border-top:1px dashed var(--line);padding:7px 2px;color:inherit}.ov .otm{opacity:.6;font-size:12px;min-width:38px;font-variant-numeric:tabular-nums}
+.opt:disabled{opacity:.35}
+.sb small{display:block;margin-top:2px}.sb b{word-break:break-all}
+/* ===== 楓之谷用語快捷鍵 ===== */
+.emo{display:block;margin:10px 0 6px}
+.qp{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.qp button{font-size:13px;font-weight:700;padding:7px 10px;width:auto;height:auto;min-height:34px;border-radius:4px;border:2px solid var(--ink);background:#3a3342;color:var(--fg);box-shadow:0 3px 0 #0a060e,inset 0 0 0 1px #5a5266}
+.qp button:active{transform:translateY(2px);box-shadow:0 1px 0 #0a060e}
+.qp #jp{background:var(--ac);color:var(--ink);font-size:13px}
+.say{white-space:normal;width:max-content;max-width:150px;text-align:center;line-height:1.3;padding:3px 8px;overflow:visible;text-overflow:clip;word-break:break-all}
 </style></head>
 <body><div id="app"></div><div id="sheet"></div>
 <script>
@@ -177,7 +235,7 @@ function msUrl(mp,o){o=o||{};const sk=MSKIN.find(s=>s[0]===mp.skin)||MSKIN[0];
  const json=JSON.stringify(ent);
  const q=new URLSearchParams({showears:'false',showLefEars:'false',showHighLefEars:'false',resize:String(o.resize||2),flipX:'false',renderMode:'0',padX:String(o.padX==null?20:o.padX),padY:String(o.padY==null?20:o.padY)});
  return MS.base+'/character/'+encodeURIComponent(json.slice(1,-1))+'/'+(o.stance||'stand1')+'/0?'+q.toString()}
-function avHtml(p,o){if(p&&p.useMaple&&p.mp)return `<img class="ms" src="${msUrl(p.mp,o)}" alt="" draggable="false" data-av="${encodeURIComponent(JSON.stringify(p.av||{}))}">`;return avatar(p.av)}
+function avHtml(p,o){p=p||{};return `<img class="ms" src="${msUrl(p.mp||MSDEF(),o)}" alt="" draggable="false" data-av="${encodeURIComponent(JSON.stringify(p.av||{}))}">`}
 /* 圖片載入失敗（網路、對方服務異常）時自動換回原創角色 */
 document.addEventListener('error',e=>{const t=e.target;if(t&&t.classList&&t.classList.contains('ms')){try{const a=JSON.parse(decodeURIComponent(t.dataset.av||'%7B%7D'));if(a&&a.skin!=null){t.outerHTML=avatar(a);return}}catch(_){}t.style.display='none'}},true);
 const MSCAT={};
@@ -195,37 +253,86 @@ async function msPicker(slot,after){
   $('#mgrid').innerHTML=L.slice(0,shown).map(i=>`<button class="mt" data-id="${i.id}"><img loading="lazy" alt="" src="${MS.base}/${MS.region}/${MS.version}/item/${i.id}/icon" onerror="this.style.visibility='hidden'"><span>${esc(i.n)}</span></button>`).join('')||'<div style="grid-column:1/-1;opacity:.7;padding:12px 0">沒有符合的項目</div>';
   $('#mmore').style.display=L.length>shown?'block':'none';$('#mmore').textContent=`顯示更多（還有 ${L.length-shown} 件）`;
   $('#mgrid').querySelectorAll('.mt').forEach(b=>b.onclick=()=>{const it=list.find(x=>String(x.id)===b.dataset.id);if(!it)return;me.mp[slot]={id:it.id,n:it.n};closeSheet();after&&after()})};
- try{list=await msCatalog(slot)}catch(e){const gr=$('#mgrid');if(gr)gr.innerHTML=`<div style="grid-column:1/-1;padding:12px 0">${esc(e.message||'讀取失敗')}。可能是網路或對方服務暫時無法使用，稍後再試，或改用「原創造型」。</div>`;return}
+ try{list=await msCatalog(slot)}catch(e){const gr=$('#mgrid');if(gr)gr.innerHTML=`<div style="grid-column:1/-1;padding:12px 0">${esc(e.message||'讀取失敗')}。可能是網路或對方服務暫時無法使用，請稍後再試。</div>`;return}
  if(!$('#mq'))return;draw();
  $('#mq').oninput=e=>{q=e.target.value.trim().toLowerCase();shown=PAGE;draw()};
  $('#mmore').onclick=()=>{shown+=PAGE;draw()}}
 
 /* ---------- scenes ---------- */
-function floor(c1,c2,ln){let s=`<defs><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs><rect y="300" width="400" height="260" fill="url(#fg)"/>`;
- for(let i=-4;i<=12;i++)s+=`<line x1="200" y1="300" x2="${i*50}" y2="560" stroke="${ln}" opacity=".3"/>`;
- [318,345,382,432,500].forEach(y=>s+=`<line x1="0" y1="${y}" x2="400" y2="${y}" stroke="${ln}" opacity=".28"/>`);return s}
-function sky(a,b,c){return `<defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset=".6" stop-color="${b}"/><stop offset="1" stop-color="${c}"/></linearGradient></defs><rect width="400" height="300" fill="url(#sk)"/>`}
-function city(seed,col,win,minH,maxH){let x=0,s='',r=seed;const rnd=()=>(r=(r*9301+49297)%233280)/233280;
- while(x<400){const w=22+rnd()*30,h=minH+rnd()*(maxH-minH);s+=`<rect x="${x}" y="${300-h}" width="${w}" height="${h}" fill="${col}"/>`;
-  for(let y=300-h+8;y<290;y+=12)for(let k=x+5;k<x+w-6;k+=9)if(rnd()>.55)s+=`<rect x="${k}" y="${y}" width="4" height="5" fill="${win}" opacity=".85"/>`;x+=w+2}return s}
-function pine(x,y,z){return `<rect x="${x-2*z}" y="${y-6*z}" width="${4*z}" height="${8*z}" fill="#5b3b25"/><polygon points="${x},${y-46*z} ${x-15*z},${y-4*z} ${x+15*z},${y-4*z}" fill="#1f5b46"/><polygon points="${x},${y-58*z} ${x-11*z},${y-26*z} ${x+11*z},${y-26*z}" fill="#2a7459"/><polygon points="${x},${y-58*z} ${x-5*z},${y-44*z} ${x+5*z},${y-44*z}" fill="#fff" opacity=".9"/>`}
+/* ---------- 楓之谷風場景（墮落城市氛圍：暗夜磚牆、霓虹、鐵絲網） ---------- */
+const OL='#120c24';
+const hx=c=>[1,3,5].map(i=>parseInt(c.slice(i,i+2),16));
+const smix=(a,b,t)=>{const A=hx(a),B=hx(b);return '#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('')};
+const mkr=seed=>{let r=seed;return()=>(r=(r*9301+49297)%233280)/233280};
+const DEFS=`<defs><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.5"/></filter><radialGradient id="lg"><stop offset="0" stop-color="#ffd98a" stop-opacity=".85"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></radialGradient><pattern id="cl" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M0 0L8 8M8 0L0 8" stroke="#9a94b8" stroke-width="1"/></pattern><pattern id="pk" width="8" height="12" patternUnits="userSpaceOnUse"><rect width="8" height="12" fill="#8a5a33"/><rect x="7" width="1" height="12" fill="#4e2f19"/><rect y="11" width="8" height="1" fill="#5a3820" opacity=".7"/></pattern></defs>`;
+const brickP=(id,base,line)=>`<pattern id="${id}" width="16" height="8" patternUnits="userSpaceOnUse"><rect width="16" height="8" fill="${base}"/><rect y="7" width="16" height="1" fill="${line}"/><rect width="1" height="4" fill="${line}"/><rect x="8" y="4" width="1" height="4" fill="${line}"/></pattern>`;
+function pxSky(a,b,c,seed){const rnd=mkr(seed||3);let s='';const N=14,H=300/N;
+ for(let i=0;i<N;i++){const t=i/(N-1);s+=`<rect y="${(i*H).toFixed(1)}" width="400" height="${(H+1).toFixed(1)}" fill="${t<.6?smix(a,b,t/.6):smix(b,c,(t-.6)/.4)}"/>`}
+ for(let i=0;i<16;i++){const x=Math.floor(rnd()*50)*8,y=Math.floor(rnd()*8)*8,z=i%4?2:4;s+=`<rect x="${x}" y="${y}" width="${z}" height="${z}" fill="#fff" opacity="${(.5+rnd()*.5).toFixed(2)}"/>`}
+ for(let i=0;i<7;i++){const cx=Math.floor(rnd()*44)*8,cy=70+Math.floor(rnd()*12)*8,w=40+Math.floor(rnd()*6)*8;s+=`<rect x="${cx+8}" y="${cy-8}" width="${w-16}" height="8" fill="${smix(b,'#ffffff',.18)}" opacity=".55"/><rect x="${cx}" y="${cy}" width="${w}" height="8" fill="${smix(b,'#ffffff',.22)}" opacity=".6"/><rect x="${cx+4}" y="${cy+8}" width="${w-12}" height="6" fill="${smix(c,'#ff9a4a',.5)}" opacity=".55"/>`}
+ return s}
+function pxDisc(cx,cy,r,col,st,op){st=st||4;let s='';for(let y=-r;y<r;y+=st){const w=Math.sqrt(r*r-(y+st/2)**2);s+=`<rect x="${(cx-w).toFixed(1)}" y="${cy+y}" width="${(2*w).toFixed(1)}" height="${st}" fill="${col}" opacity="${op==null?1:op}"/>`}return s}
+function hills(col,base,amp,ph,cap){let s='';for(let x=0;x<400;x+=8){const h=Math.round((base+amp*Math.sin(x/58+ph)+amp*.5*Math.sin(x/23+ph*2))/4)*4;s+=`<rect x="${x}" y="${300-h}" width="8" height="${h}" fill="${col}"/>`;if(cap)s+=`<rect x="${x}" y="${300-h}" width="8" height="${cap[1]}" fill="${cap[0]}"/>`}return s}
+function farRow(seed,col,win,a,b){const r=mkr(seed);let x=-6,s='';while(x<400){const w=24+((r()*3)|0)*8,h=a+(((r()*(b-a))/8)|0)*8;s+=`<rect x="${x}" y="${300-h}" width="${w}" height="${h}" fill="${col}"/>`;for(let y=300-h+8;y<292;y+=12)for(let k=x+4;k<x+w-6;k+=8)if(r()>.62)s+=`<rect x="${k}" y="${y}" width="3" height="4" fill="${win}" opacity=".9"/>`;x+=w}return s}
+function bld(x,w,top,pid,win,seed,lit){const rnd=mkr(seed);let s=`<rect x="${x}" y="${top}" width="${w}" height="${300-top}" fill="url(#${pid})" stroke="${OL}" stroke-width="2"/><rect x="${x-3}" y="${top-5}" width="${w+6}" height="8" fill="#2a1d3d" stroke="${OL}" stroke-width="2"/><rect x="${x+w-7}" y="${top}" width="7" height="${300-top}" fill="#000" opacity=".22"/>`;
+ for(let y=top+12;y<280;y+=22)for(let k=x+7;k<x+w-16;k+=16){const on=rnd()<(lit||.5);s+=`<rect x="${k}" y="${y}" width="9" height="12" fill="${on?win:'#1b1630'}" stroke="${OL}" stroke-width="1.5"/>`+(on?`<rect x="${k+1}" y="${y+1}" width="7" height="3" fill="#fff" opacity=".35"/>`:'')}
+ return s}
+const pipe=(x,y1,y2)=>`<rect x="${x}" y="${y1}" width="5" height="${y2-y1}" fill="#6d5c82" stroke="${OL}" stroke-width="1.5"/><rect x="${x-2}" y="${y1+((y2-y1)>>1)}" width="9" height="4" fill="#4e4064" stroke="${OL}" stroke-width="1.5"/>`;
+const neon=(t,x,y,c,fs)=>`<text x="${x}" y="${y}" text-anchor="middle" font-size="${fs||13}" font-weight="900" fill="none" stroke="${c}" stroke-width="5" opacity=".4" filter="url(#glow)">${t}</text><text x="${x}" y="${y}" text-anchor="middle" font-size="${fs||13}" font-weight="900" fill="#fff" stroke="${c}" stroke-width="1.1">${t}</text>`;
+const sign=(x,y,w,h,t,c,fs)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#1b1230" stroke="${c}" stroke-width="2"/>`+neon(t,x+w/2,y+h/2+(fs||13)*.35,c,fs);
+const lamp=x=>`<circle cx="${x}" cy="226" r="34" fill="url(#lg)"/><rect x="${x-2}" y="228" width="4" height="70" fill="#3a2f55" stroke="${OL}" stroke-width="1.5"/><rect x="${x-9}" y="222" width="18" height="7" fill="#ffd98a" stroke="${OL}" stroke-width="2"/><rect x="${x-12}" y="217" width="24" height="5" fill="#3a2f55" stroke="${OL}" stroke-width="1.5"/>`;
+const crate=(x,y,s)=>`<rect x="${x}" y="${y-s}" width="${s}" height="${s}" fill="#9a6a38" stroke="${OL}" stroke-width="2"/><path d="M${x} ${y-s}L${x+s} ${y}M${x+s} ${y-s}L${x} ${y}" stroke="#5a3a1c" stroke-width="2"/>`;
+const barrel=(x,y,c)=>`<rect x="${x}" y="${y-26}" width="20" height="26" rx="3" fill="${c}" stroke="${OL}" stroke-width="2"/><rect x="${x}" y="${y-19}" width="20" height="3" fill="#000" opacity=".3"/><rect x="${x}" y="${y-8}" width="20" height="3" fill="#000" opacity=".3"/><rect x="${x+3}" y="${y-24}" width="3" height="20" fill="#fff" opacity=".22"/>`;
+const vend=(x,y,c)=>`<rect x="${x}" y="${y-44}" width="26" height="44" fill="${c}" stroke="${OL}" stroke-width="2"/><rect x="${x+3}" y="${y-40}" width="16" height="26" fill="#cfe9ff" stroke="${OL}" stroke-width="1.5"/>`+[0,1,2].map(i=>[0,1].map(j=>`<rect x="${x+5+j*7}" y="${y-37+i*8}" width="5" height="6" fill="${['#ff6b6b','#ffd93d','#6bcB77','#4d96ff','#ff9f43','#c77dff'][i*2+j]}"/>`).join('')).join('')+`<rect x="${x+21}" y="${y-38}" width="3" height="6" fill="#ffd98a"/><rect x="${x+5}" y="${y-9}" width="16" height="5" fill="#120c24"/>`;
+function lights(x1,y1,x2,y2,sag,cols){let s='';const n=11;let d=`M${x1} ${y1}`;for(let i=1;i<=n*2;i++){const t=i/(n*2);d+=`L${(x1+(x2-x1)*t).toFixed(1)} ${(y1+(y2-y1)*t+sag*Math.sin(Math.PI*t)).toFixed(1)}`}
+ s+=`<path d="${d}" stroke="${OL}" stroke-width="1.5" fill="none"/>`;for(let i=1;i<n;i++){const t=i/n,x=x1+(x2-x1)*t,y=y1+(y2-y1)*t+sag*Math.sin(Math.PI*t),c=cols[i%cols.length];s+=`<circle cx="${x.toFixed(1)}" cy="${(y+5).toFixed(1)}" r="7" fill="${c}" opacity=".35" filter="url(#glow)"/><rect x="${(x-2.5).toFixed(1)}" y="${(y+1).toFixed(1)}" width="5" height="7" fill="${c}" stroke="${OL}" stroke-width="1"/>`}return s}
+const graf=(x,w,t,c1,c2)=>`<rect x="${x}" y="240" width="${w}" height="56" fill="#8c8992" stroke="${OL}" stroke-width="2"/><rect x="${x}" y="240" width="${w}" height="6" fill="#6c6974"/><rect x="${x+6}" y="262" width="22" height="3" fill="#5c5964" opacity=".5"/><text x="${x+w*.7}" y="266" text-anchor="middle" font-size="26" font-weight="900" font-style="italic" fill="${c1}" stroke="${c2}" stroke-width="3" paint-order="stroke" letter-spacing="2">${t}</text><rect x="${x+w*.62}" y="270" width="3" height="9" fill="${c1}"/><rect x="${x+w*.8}" y="270" width="3" height="6" fill="${c1}"/><rect x="${x+8}" y="250" width="12" height="4" fill="#ff5fa2"/><rect x="${x+w-24}" y="252" width="14" height="4" fill="#4fe3ff"/>`;
+const fence=(x,w)=>`<rect x="${x}" y="262" width="${w}" height="34" fill="url(#cl)" opacity=".55"/><rect x="${x}" y="260" width="${w}" height="4" fill="#4e4064" stroke="${OL}" stroke-width="1.5"/>`+[...Array(Math.floor(w/48)+1)].map((_,i)=>`<rect x="${x+i*48}" y="258" width="4" height="40" fill="#4e4064" stroke="${OL}" stroke-width="1.5"/>`).join('');
+function pxFloor(c1,c2,ln,curb,hz){let s='';const N=13,H=260/N;for(let i=0;i<N;i++)s+=`<rect y="${(300+i*H).toFixed(1)}" width="400" height="${(H+1).toFixed(1)}" fill="${smix(c1,c2,i/(N-1))}"/>`;
+ for(let i=-4;i<=12;i++)s+=`<line x1="200" y1="300" x2="${i*50}" y2="560" stroke="${ln}" stroke-width="1.5" opacity=".32"/>`;
+ [316,338,368,408,462,530].forEach(y=>s+=`<rect y="${y}" width="400" height="2" fill="${ln}" opacity=".32"/>`);
+ const rnd=mkr(9);for(let i=0;i<46;i++){const y=310+rnd()*240,x=rnd()*400,w=4+rnd()*8;s+=`<rect x="${x|0}" y="${y|0}" width="${w|0}" height="3" fill="#000" opacity=".15"/>`}
+ s+=`<rect y="294" width="400" height="12" fill="${curb}" stroke="${OL}" stroke-width="2"/>`;if(hz)for(let x=-4;x<404;x+=16)s+=`<polygon points="${x},306 ${x+8},306 ${x+12},294 ${x+4},294" fill="#f2c230"/>`;return s}
+function tokyoTower(cx){const hw=y=>30*(y-62)/238;let s=`<circle cx="${cx}" cy="168" r="40" fill="url(#lg)"/><path d="M${cx} 62L${cx-30} 300H${cx+30}Z" fill="#e0452e" stroke="${OL}" stroke-width="2.5" stroke-linejoin="round"/>`;
+ [118,196,246].forEach(y=>{const w=hw(y);s+=`<rect x="${cx-w}" y="${y-6}" width="${2*w}" height="12" fill="#f6efe4" stroke="${OL}" stroke-width="2"/>`});
+ s+=`<path d="M${cx-18} 260L${cx+18} 300M${cx+18} 260L${cx-18} 300M${cx-12} 216L${cx+12} 246M${cx+12} 216L${cx-12} 246" stroke="#8a2a1c" stroke-width="2"/>`;
+ const w=hw(150)+8;s+=`<rect x="${cx-w}" y="144" width="${2*w}" height="16" fill="#e0452e" stroke="${OL}" stroke-width="2"/><rect x="${cx-w+4}" y="149" width="${2*w-8}" height="5" fill="#ffd98a"/>`;
+ s+=`<path d="M${cx-14} 300Q${cx} 266 ${cx+14} 300Z" fill="${OL}"/><path d="M${cx} 62V28" stroke="${OL}" stroke-width="5"/><path d="M${cx} 62V28" stroke="#f6efe4" stroke-width="2"/><rect x="${cx-2}" y="24" width="4" height="4" fill="#ff5f5f"/>`;return s}
+function t101(cx){let s=`<rect x="${cx-22}" y="282" width="44" height="18" fill="#1f8d7a" stroke="${OL}" stroke-width="2"/>`;
+ for(let i=0;i<8;i++){const y=282-i*25;s+=`<path d="M${cx-11} ${y}L${cx-15} ${y-25}H${cx+15}L${cx+11} ${y}Z" fill="${i%2?'#27a58e':'#36c7a8'}" stroke="${OL}" stroke-width="2" stroke-linejoin="round"/><rect x="${cx-11}" y="${y-18}" width="4" height="14" fill="#fff" opacity=".28"/><rect x="${cx-12}" y="${y-12}" width="24" height="2" fill="#000" opacity=".2"/>`}
+ const t=282-8*25;s+=`<path d="M${cx-9} ${t}L${cx-6} ${t-14}H${cx+6}L${cx+9} ${t}Z" fill="#36c7a8" stroke="${OL}" stroke-width="2"/><path d="M${cx} ${t-14}V${t-44}" stroke="${OL}" stroke-width="5"/><path d="M${cx} ${t-14}V${t-44}" stroke="#bff3e6" stroke-width="2"/>`;return s}
+function pine(x,y,z){const t=(w,h,yy,c)=>`<polygon points="${x},${yy-h} ${x-w},${yy} ${x+w},${yy}" fill="${c}" stroke="${OL}" stroke-width="2" stroke-linejoin="round"/>`;
+ return `<rect x="${x-3*z}" y="${y-8*z}" width="${6*z}" height="${10*z}" fill="#5b3b25" stroke="${OL}" stroke-width="2"/>`+t(17*z,26*z,y-6*z,'#1d5a49')+t(13*z,26*z,y-24*z,'#26705a')+t(9*z,24*z,y-42*z,'#2f8368')+`<polygon points="${x},${y-66*z} ${x-5*z},${y-56*z} ${x+5*z},${y-56*z}" fill="#fff"/><polygon points="${x-8*z},${y-44*z} ${x},${y-50*z} ${x+8*z},${y-44*z} ${x+4*z},${y-40*z} ${x-4*z},${y-40*z}" fill="#fff" opacity=".9"/>`}
 const SCENE={
-tk:()=>sky('#1b1740','#7a3d8f','#ff9a6b')+[...Array(24)].map((_,i)=>`<circle cx="${(i*89)%400}" cy="${(i*47)%130+8}" r="${i%3?.8:1.4}" fill="#fff" opacity=".8"/>`).join('')+`<circle cx="70" cy="64" r="20" fill="#fff6d5"/><circle cx="62" cy="58" r="20" fill="#3a2a66" opacity=".0"/>`+city(7,'#2b2150','#ffd479',50,120)+
- `<path d="M300 112L284 300H316Z" fill="#e8472f"/><path d="M292 190L308 190M289 230L311 230M286 268L314 268" stroke="#fff" stroke-width="4"/><rect x="291" y="176" width="18" height="8" fill="#e8472f"/><rect x="294" y="146" width="12" height="7" fill="#e8472f"/><path d="M300 146V76" stroke="#e8472f" stroke-width="3"/><circle cx="300" cy="76" r="3" fill="#ffe27a"/>`+
- city(31,'#1d1740','#ffb86b',25,70)+floor('#322a4d','#1c1830','#9d8cff')+[...Array(6)].map((_,i)=>{const a=40+i*56;return `<polygon points="${a},395 ${a+30},395 ${a+40},428 ${a-8},428" fill="#fff" opacity=".2"/>`}).join('')+
- `<text x="200" y="285" text-anchor="middle" font-size="15" font-weight="700" fill="#ff5fa2" letter-spacing="6" opacity=".95">TOKYO</text>`+[...Array(8)].map((_,i)=>`<circle cx="${25+i*50}" cy="${310+(i%2)*6}" r="5" fill="#ff5a4d"/><path d="M${25+i*50} 300v5" stroke="#444"/>`).join(''),
-tw:()=>sky('#4b3a8c','#ff7aa0','#ffd8a0')+`<circle cx="95" cy="232" r="44" fill="#fff1c9" opacity=".92"/>`+
- `<path d="M0 300V245Q70 205 140 250T290 235T400 255V300Z" fill="#3d7d6a"/><path d="M0 300V268Q100 240 200 270T400 262V300Z" fill="#2c6552"/>`+
- [...Array(8)].map((_,i)=>{const w=30-i*2.2,y=292-i*26;return `<path d="M${265-w/2} ${y}L${265-w/2+1.5} ${y-24}H${265+w/2-1.5}L${265+w/2} ${y}Z" fill="${i%2?'#2f9e8a':'#3cc0a6'}"/><path d="M${265-w/2+1.5} ${y-12}H${265+w/2-1.5}" stroke="#fff" opacity=".35"/>`}).join('')+`<path d="M265 84V46" stroke="#2f9e8a" stroke-width="3"/>`+
- [[60,90,9],[150,60,7],[330,110,10],[210,130,6],[370,50,6],[30,160,7]].map(l=>`<circle cx="${l[0]}" cy="${l[1]}" r="${l[2]*2.4}" fill="#ffb347" opacity=".25"/><rect x="${l[0]-l[2]/1.4}" y="${l[1]-l[2]}" width="${l[2]*1.4}" height="${l[2]*1.7}" rx="2" fill="#ff8a3d"/>`).join('')+
- floor('#d9b48a','#b78a60','#8c6540')+`<path d="M45 330Q40 290 52 250" stroke="#6b4a2c" stroke-width="7" fill="none"/>`+[-70,-30,10,50,90].map(a=>`<ellipse cx="52" cy="248" rx="30" ry="7" fill="#2f8a50" transform="rotate(${a} 52 248)"/>`).join('')+
- `<text x="200" y="330" text-anchor="middle" font-size="14" font-weight="700" fill="#8c6540" letter-spacing="6" opacity=".6">TAIWAN</text>`,
-ys:()=>sky('#6fb4ff','#bfe2ff','#f1f9ff')+`<circle cx="320" cy="60" r="26" fill="#fff9d6"/>`+
- `<polygon points="-20,300 110,120 250,300" fill="#9db7d6"/><polygon points="110,120 84,160 104,152 118,170 134,150 146,166" fill="#fff"/><polygon points="130,300 280,90 440,300" fill="#7f9cc4"/><polygon points="280,90 250,136 272,128 286,148 304,126 318,140" fill="#fff"/>`+
- `<path d="M0 235L400 160" stroke="#444" stroke-width="1.5"/><path d="M320 178v14" stroke="#444" stroke-width="1.5"/><rect x="306" y="190" width="28" height="20" rx="5" fill="#e5484d"/><rect x="310" y="195" width="20" height="8" rx="2" fill="#cfeaff"/>`+
- `<path d="M0 300V262Q100 240 200 262T400 250V300Z" fill="#e9f3ff"/>`+[20,70,130,300,350,385].map((x,i)=>pine(x,300+i%2*8,.9+(i%3)*.2)).join('')+floor('#f6faff','#d6e6f7','#9fc0e0')+
- `<rect x="150" y="262" width="100" height="34" rx="6" fill="#8a5a3a"/><text x="200" y="285" text-anchor="middle" font-size="15" font-weight="700" fill="#fff6e8">湯澤 ♨ 滑雪場</text><rect x="196" y="296" width="8" height="8" fill="#5b3b25"/>`
+tk:()=>DEFS+brickP('k1','#ad5a3c','#6e3324')+brickP('k2','#8a8790','#5c5964')+pxSky('#2c1d58','#9a4a7c','#f0a463',11)+pxDisc(76,64,18,'#ffe9b8')+
+ farRow(4,'#3d2a5c','#ffd479',50,110)+tokyoTower(268)+farRow(17,'#2a1c40','#ffb86b',20,56)+
+ bld(-4,92,150,'k1','#ffcf6b',3,.55)+bld(86,52,206,'k2','#ff9ec4',8,.5)+bld(318,90,170,'k2','#ffcf6b',5,.5)+pipe(94,214,296)+pipe(325,176,296)+
+ sign(8,196,64,22,'ラーメン','#ff4fa0',13)+sign(326,208,66,22,'TOKYO','#4fe3ff',14)+
+ lights(140,200,318,190,20,['#ff5a4d','#ffd93d','#ff5a4d','#fff1c9'])+graf(146,176,'TOKYO','#ffd93d','#e0452e')+
+ vend(160,298,'#d94d4d')+vend(190,298,'#3d7fd9')+crate(238,298,22)+barrel(262,298,'#4a6f8a')+lamp(128)+lamp(300)+
+ pxFloor('#8a4a3a','#3a2224','#e0905a','#a5573a',1)+`<text x="200" y="330" text-anchor="middle" font-size="16" font-weight="900" fill="#ffd0a0" letter-spacing="8" opacity=".3">TOKYO</text>`,
+tw:()=>DEFS+brickP('t1','#b05c3a','#6e3324')+brickP('t2','#8a8790','#5c5964')+pxSky('#3a2470','#c25a7a','#ffb070',21)+pxDisc(92,226,40,'#ffe7b0')+
+ hills('#2c4a5e',52,22,0.6)+hills('#235043',34,18,2.1)+t101(262)+
+ [[60,80],[150,50],[330,104],[214,126],[372,48],[30,150]].map((l,i)=>`<circle cx="${l[0]+5}" cy="${l[1]+8}" r="20" fill="url(#lg)"/><rect x="${l[0]}" y="${l[1]}" width="10" height="14" fill="#ff9a3d" stroke="${OL}" stroke-width="1.5"/><rect x="${l[0]+2}" y="${l[1]+2}" width="6" height="6" fill="#ffe08a"/>`).join('')+
+ bld(-4,96,140,'t1','#ffcf6b',13,.55)+bld(92,48,200,'t2','#ff9ec4',19,.5)+bld(322,86,160,'t1','#ffcf6b',23,.5)+pipe(100,204,296)+pipe(330,166,296)+
+ sign(6,188,70,22,'夜市','#ff4fa0',15)+sign(330,196,64,22,'台灣','#4fe3ff',15)+
+ `<circle cx="116" cy="168" r="11" fill="#ff3d3d" stroke="${OL}" stroke-width="2"/><rect x="112" y="156" width="8" height="3" fill="${OL}"/><circle cx="352" cy="150" r="11" fill="#ff3d3d" stroke="${OL}" stroke-width="2"/>`+
+ lights(150,196,322,186,22,['#ff5a4d','#ffd93d','#52e0a0','#ff9ec4'])+graf(150,170,'台灣','#52e0c0','#1f6a5a')+
+ `<rect x="148" y="206" width="8" height="92" fill="#6b4a2c" stroke="${OL}" stroke-width="2"/>`+[-70,-30,10,50,90].map(a=>`<ellipse cx="152" cy="204" rx="28" ry="7" fill="#2f9a58" stroke="${OL}" stroke-width="1.5" transform="rotate(${a} 152 204)"/>`).join('')+
+ crate(196,298,22)+crate(220,298,16)+barrel(244,298,'#3e8a72')+barrel(268,298,'#8a4a3d')+lamp(300)+
+ pxFloor('#8a5440','#3a2420','#e8a070','#a8603f',1)+`<text x="200" y="330" text-anchor="middle" font-size="16" font-weight="900" fill="#ffd0a0" letter-spacing="8" opacity=".3">TAIWAN</text>`,
+ys:()=>DEFS+pxSky('#1a1840','#3f4f94','#c8a4c8',31)+pxDisc(318,58,22,'#f6f2d8')+
+ hills('#46618f',96,34,0.4,['#eaf3ff',10])+hills('#6f8fba',64,26,2.6,['#ffffff',8])+hills('#a9c4e4',34,16,1.2,['#ffffff',6])+
+ `<path d="M0 214L400 150" stroke="${OL}" stroke-width="2"/><path d="M300 164V186" stroke="${OL}" stroke-width="2"/><rect x="286" y="184" width="30" height="22" fill="#e5484d" stroke="${OL}" stroke-width="2"/><rect x="291" y="189" width="20" height="9" fill="#cfeaff"/>`+
+ `<rect x="118" y="214" width="164" height="84" fill="url(#pk)" stroke="${OL}" stroke-width="2.5"/><polygon points="106,216 200,164 294,216" fill="#f2f7ff" stroke="${OL}" stroke-width="2.5" stroke-linejoin="round"/><polygon points="106,216 294,216 288,224 112,224" fill="#cfe0f4" stroke="${OL}" stroke-width="2"/>`+
+ [136,168,230,252].map((x,i)=>`<rect x="${x}" y="236" width="18" height="22" fill="#ffd479" stroke="${OL}" stroke-width="2"/><path d="M${x+9} 236V258M${x} 247H${x+18}" stroke="${OL}" stroke-width="1.5"/><circle cx="${x+9}" cy="248" r="22" fill="url(#lg)" opacity=".5"/>`).join('')+
+ `<rect x="188" y="248" width="24" height="50" fill="#4e2f19" stroke="${OL}" stroke-width="2"/><rect x="205" y="272" width="3" height="3" fill="#ffd479"/><rect x="154" y="199" width="92" height="17" fill="#5b3b25" stroke="${OL}" stroke-width="2"/>`+
+ `<text x="200" y="212" text-anchor="middle" font-size="10" font-weight="900" fill="#fff6e8">湯澤 ♨ 滑雪場</text>`+
+ [18,64,120,300,352,388].map((x,i)=>pine(x,300+(i%2)*6,.8+(i%3)*.15)).join('')+
+ `<rect x="322" y="262" width="22" height="34" rx="2" fill="#fff" stroke="${OL}" stroke-width="2"/><rect x="326" y="244" width="14" height="18" fill="#fff" stroke="${OL}" stroke-width="2"/><rect x="329" y="249" width="3" height="3" fill="${OL}"/><rect x="335" y="249" width="3" height="3" fill="${OL}"/><rect x="331" y="254" width="6" height="3" fill="#ff9f43"/>`+
+ pxFloor('#dbe8f8','#8fa6c9','#7a93bd','#f4f9ff',0)+`<text x="200" y="330" text-anchor="middle" font-size="16" font-weight="900" fill="#5a78a8" letter-spacing="8" opacity=".35">YUZAWA</text>`
 };
+
 function flakes(){return [...Array(26)].map(()=>{const s=2+Math.random()*4;return `<i class="flake" style="left:${Math.random()*105}%;width:${s}px;height:${s}px;animation-duration:${5+Math.random()*7}s;animation-delay:-${Math.random()*10}s"></i>`}).join('')}
 
 /* ---------- state ---------- */
@@ -248,10 +355,6 @@ function splash(){
 }
 function creator(first){
  if(!me.mp)me.mp=MSDEF();
- let cm=me.useMaple!==false;
- const a=me.av;
- const sw=(arr,key)=>arr.map((c,i)=>`<button class="sw ${a[key]==i?'on':''}" data-k="${key}" data-i="${i}" style="background:${c}"></button>`).join('');
- const op=(arr,key)=>arr.map((c,i)=>`<button class="opt ${a[key]==i?'on':''}" data-k="${key}" data-i="${i}">${c}</button>`).join('');
  const keep=()=>{const v=$('#nm');if(v)me.name=v.value};
  const mg=me.mg==null?2:me.mg;
  const maple=`<div class="prev mprev" id="pv">${avHtml({useMaple:true,mp:me.mp,av:me.av})}</div>
@@ -259,35 +362,30 @@ function creator(first){
  <div class="lab">適用性別（只影響下面能選的服裝）</div><div class="row">${[[2,'全部'],[0,'男'],[1,'女']].map(([v,t])=>`<button class="opt ${mg===v?'on':''}" data-mg="${v}">${t}</button>`).join('')}</div>
  <div class="lab">膚色</div><div class="row">${MSKIN.map(s=>`<button class="opt ${me.mp.skin===s[0]?'on':''}" data-skin="${s[0]}">${s[1]}</button>`).join('')}</div>
  ${MSLOT.map(([k,lab])=>{const it=me.mp[k];return `<div class="mrow"><span class="ml">${lab}</span><b class="mn">${it?esc(it.n):'無'}</b><button class="opt" data-pick="${k}">選擇</button>${(k==='hat'||k==='shoes')&&it?`<button class="opt" data-clr="${k}">清除</button>`:''}</div>`}).join('')}
- <div id="msnote" class="lab">造型圖由 maplestory.io 即時提供；圖片載入失敗時，會自動改顯示原創角色。</div>`;
- const orig=`<div class="prev" id="pv">${avatar(a)}</div>
- <div class="lab">名字</div><input type="text" id="nm" maxlength="8" placeholder="旅伴暱稱" value="${esc(me.name||'')}">
- <div class="lab">膚色</div><div class="row">${sw(SK,'skin')}</div>
- <div class="lab">臉型</div><div class="row">${op(FACE,'face')}</div>
- <div class="lab">體型</div><div class="row">${op(BODY,'body')}</div>
- <div class="lab">髮型</div><div class="row">${op(HAIR,'hair')}</div>
- <div class="lab">髮色</div><div class="row">${sw(HC,'hc')}</div>
- <div class="lab">眼睛</div><div class="row">${op(EYE,'eye')}</div>
- <div class="lab">服裝</div><div class="row">${op(FIT,'fit')}</div>
- <div class="lab">衣服顏色</div><div class="row">${sw(OC,'oc')}</div>
- <div class="lab">配件</div><div class="row">${op(ACC,'acc')}</div>`;
+ <div id="msnote" class="lab">造型圖由 maplestory.io 即時提供。</div>`;
  app.innerHTML=`<div class="card"><h2 style="margin:0 0 8px">${first?'捏一個你的旅行分身':'編輯角色'}</h2>
- <div class="row"><button class="opt ${cm?'on':''}" data-m="1">🍁 楓之谷造型</button><button class="opt ${cm?'':'on'}" data-m="0">🎨 原創造型</button></div>
- ${cm?maple:orig}
+ ${maple}
  <button class="big ghost" id="rnd">🎲 隨機一個</button><button class="big" id="go">進入大廳 →</button></div>`;
  const again=()=>{keep();creator(first)};
- app.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{keep();me.useMaple=b.dataset.m==='1';creator(first)});
- app.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{me.av[b.dataset.k]=+b.dataset.i;again()});
- app.querySelectorAll('[data-mg]').forEach(b=>b.onclick=()=>{me.mg=+b.dataset.mg;again()});
+ app.querySelectorAll('[data-mg]').forEach(b=>b.onclick=async()=>{
+  const g=+b.dataset.mg;keep();me.mg=g;
+  app.querySelectorAll('[data-mg]').forEach(x=>x.classList.toggle('on',x===b));
+  const note=$('#msnote');
+  if(g!==2){
+   if(note)note.textContent='套用中…第一次要載入素材清單，請稍候';
+   try{for(const k of ['hair','face','coat','pants','hat','shoes']){const it=me.mp[k];if(!it)continue;const L=await msCatalog(k);const cur=L.find(x=>x.id===it.id);if(cur&&(cur.g===2||cur.g===g))continue;
+     if(k==='hat'||k==='shoes'){delete me.mp[k];continue}
+     const C=L.filter(i=>i.g===g);const pick=R(C.length?C:L.filter(i=>msGOK(i,g)));if(pick)me.mp[k]={id:pick.id,n:pick.n}}}catch(e){}
+  }
+  creator(first)});
  app.querySelectorAll('[data-skin]').forEach(b=>b.onclick=()=>{me.mp.skin=+b.dataset.skin;again()});
  app.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{keep();msPicker(b.dataset.pick,()=>creator(first))});
  app.querySelectorAll('[data-clr]').forEach(b=>b.onclick=()=>{delete me.mp[b.dataset.clr];again()});
  $('#rnd').onclick=async()=>{keep();
-  if(!cm){me.av=rndAv();creator(first);return}
   me.mp.skin=R(MSKIN)[0];const note=$('#msnote');if(note)note.textContent='隨機挑選中…';
   try{for(const k of ['hair','face','coat','pants']){const L=(await msCatalog(k)).filter(i=>msGOK(i,mg));const it=R(L);if(it)me.mp[k]={id:it.id,n:it.n}}}catch(e){if(note)note.textContent='素材清單讀取失敗，只換了膚色：'+(e.message||'')}
   creator(first)};
- $('#go').onclick=()=>{const n=$('#nm').value.trim();if(!n){$('#nm').focus();$('#nm').placeholder='請先取個名字 ✍️';return}me.useMaple=cm;save({name:n,useMaple:cm,mp:me.mp,mg:me.mg==null?2:me.mg});lobby()};
+ $('#go').onclick=()=>{const n=$('#nm').value.trim();if(!n){$('#nm').focus();$('#nm').placeholder='請先取個名字 ✍️';return}me.useMaple=true;save({name:n,useMaple:true,mp:me.mp,mg:me.mg==null?2:me.mg});lobby()};
 }
 
 /* ---------- lobby ---------- */
@@ -297,16 +395,16 @@ function lobbyView(){
  $('#view').innerHTML=`${mode==='solo'?'<div class="banner">單機預覽：目前只有你自己，尚未同步。</div>':''}
  <div class="top"><div><h1 id="ttl"></h1><small>${daysLeft()}</small></div><div class="pill" id="cnt"></div></div>
  <div class="chips" id="chips"></div>
- <div id="stage"><svg id="bg" viewBox="0 0 400 560" preserveAspectRatio="none"></svg><div id="fl"></div><div id="ptl"></div><div id="pls"></div><div class="hint">👆 點地板走路 · 走進傳送門換地圖</div></div>
- <div class="emo">${['👋','❤️','😂','⛷️','🍜'].map(e=>`<button data-e="${e}">${e}</button>`).join('')}<button id="jp">⬆️</button></div>
- <div class="chat"><input type="text" id="cm" maxlength="30" placeholder="說點什麼…（頭上會冒對話框）"><button id="cs">送出</button></div>
+ <div id="stage"><svg id="bg" viewBox="0 0 400 560" preserveAspectRatio="none" shape-rendering="crispEdges"></svg><div id="fl"></div><div id="ptl"></div><div id="pls"></div><div class="hint">👆 點地板走路 · 走進傳送門換地圖</div></div>
+ <div class="emo"><div class="qp">${["++ 組我！", "開門，集合！", "上 Buff 出發！", "吸歐氣～", "恭 c！", "掉寶啦！", "去打寶（逛街）", "掛網中，等我", "回村補藥水", "你在幾頻？", "廣：拉麵團 em", "好的，收到", "GG，辛苦了", "機體沒電了"].map(t=>`<button data-q="${esc(t)}">${esc(t)}</button>`).join('')}<button id="jp">跳</button></div></div>
+ <div class="chat"><input type="text" id="cm" maxlength="30" placeholder="說點什麼…（頭上顯示 1 分鐘）"><button id="cs">送出</button></div>
  <div class="dock"><button id="b1">✏️ 角色</button><button id="b2">📸 相簿</button><button id="b3">👥 旅伴</button><button id="b4">📍 定位</button></div>`;
  drawScene();
  const stg=$('#stage');stg.style.cursor='pointer';let lastT=0;
  const walk=e=>{if(e.target.closest&&e.target.closest('.ptl'))return;const now=Date.now();if(now-lastT<250)return;lastT=now;const r=stg.getBoundingClientRect();let x=(e.clientX-r.left)/r.width*100,y=(e.clientY-r.top)/r.height*100;
   x=Math.min(93,Math.max(7,x));y=Math.min(95,Math.max(60,y));save({x,y})};
  stg.addEventListener('pointerup',walk);stg.addEventListener('click',walk);
- app.querySelectorAll('[data-e]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();save({emote:b.dataset.e,ets:Date.now()})});
+ app.querySelectorAll('[data-q]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();save({msg:b.dataset.q,mts:Date.now()})});
  $('#jp').onclick=()=>save({jts:Date.now()});
  const say=()=>{const v=$('#cm').value.trim();if(!v)return;$('#cm').value='';save({msg:v,mts:Date.now()})};$('#cs').onclick=say;$('#cm').onkeydown=e=>{if(e.key==='Enter')say()};
  $('#b1').onclick=()=>creator(false);$('#b2').onclick=()=>go('pic');$('#b3').onclick=peerSheet;$('#b4').onclick=async()=>{const s=await geoScene();if(s){setScene(s,true)}else toast('沒有取得定位（可能未授權），請用上方按鈕手動切換')};
@@ -329,15 +427,15 @@ function renderPlayers(){
  const all=Object.assign({},players);all[uid]=me;
  for(const [id,p] of Object.entries(all)){
   if(!p||!p.av)continue;if(p.loc!==me.loc){other++;continue}here++;seen.add(id);
-  let n=box.querySelector(`[data-id="${id}"]`);const sig=JSON.stringify(p.av)+(p.useMaple?JSON.stringify(p.mp):'')+p.name+(id===uid);
+  let n=box.querySelector(`[data-id="${id}"]`);const sig=JSON.stringify(p.av)+JSON.stringify(p.mp||0)+p.name+(id===uid);
   if(!n){n=document.createElement('div');n.className='pl';n.dataset.id=id;n.innerHTML='<div class="fl"><div class="bob"></div></div>';box.appendChild(n)}
-  if(n.dataset.sig!==sig){n.dataset.sig=sig;n.querySelector('.bob').innerHTML=avHtml(p);n.classList.toggle('mp',!!(p.useMaple&&p.mp));n.querySelectorAll('.tag,.bub,.say').forEach(e=>e.remove());n.insertAdjacentHTML('beforeend',`<div class="tag ${id===uid?'me':''}">${esc(p.name||'旅伴')}</div><div class="bub"></div><div class="say"></div>`)}
+  if(n.dataset.sig!==sig){n.dataset.sig=sig;n.querySelector('.bob').innerHTML=avHtml(p);n.classList.add('mp');n.querySelectorAll('.tag,.bub,.say').forEach(e=>e.remove());n.insertAdjacentHTML('beforeend',`<div class="tag ${id===uid?'me':''}">${esc(p.name||'旅伴')}</div><div class="bub"></div><div class="say"></div>`)}
   const x=p.x??50,y=p.y??75,sc=.72+.5*Math.min(1,Math.max(0,(y-60)/35));
   if(n.dataset.x&&Math.abs(x-n.dataset.x)>.5){n.classList.add('walk');n.querySelector('.fl').style.transform=`scaleX(${x>n.dataset.x?1:-1})`;clearTimeout(n._t);n._t=setTimeout(()=>n.classList.remove('walk'),1000)}
-  n.dataset.x=x;n.style.left=x+'%';n.style.top=y+'%';n.style.width=((p.useMaple&&p.mp?30:19)*sc)+'%';n.style.zIndex=Math.round(y*10);
+  n.dataset.x=x;n.style.left=x+'%';n.style.top=y+'%';n.style.width=(16*sc)+'%';n.style.zIndex=Math.round(y*10);
   n.classList.toggle('off',id!==uid&&now-(p.ts||0)>200000);
   const b=n.querySelector('.bub'),live=p.ets&&now-p.ets<4500;b.textContent=live?p.emote:'';if(live)next=Math.max(next,p.ets+4600-now);
-  const sy=n.querySelector('.say'),sl=p.mts&&now-p.mts<6000;sy.textContent=sl?p.msg:'';if(sl)next=Math.max(next,p.mts+6100-now);
+  const sy=n.querySelector('.say'),sl=p.mts&&now-p.mts<60000;sy.textContent=sl?p.msg:'';if(sl)next=Math.max(next,p.mts+60100-now);
   if(p.jts&&String(p.jts)!==n.dataset.j){n.dataset.j=p.jts;if(now-p.jts<3000){const v=n.querySelector('.bob svg,.bob img');if(v){v.classList.remove('jmp');void v.getBoundingClientRect();v.classList.add('jmp')}}}
  }
  box.querySelectorAll('.pl').forEach(n=>{if(!seen.has(n.dataset.id))n.remove()});
@@ -392,28 +490,95 @@ const dl=i=>`${DAYS[i].getMonth()+1}/${DAYS[i].getDate()}（${WK[DAYS[i].getDay(
 const fdt=s=>s?s.slice(5).replace('T',' ').replace('-','/'):'—';
 
 /* ---- itinerary ---- */
+/* ---- itinerary（每天分頁、可拖曳排序、點地點展開 Google 地圖） ---- */
+let openStop=null,openLeg=null,planAll=false;
+const dayList=d=>{const A=Object.entries(D.stops).map(([id,s])=>({id,...s})).filter(s=>s.day===d);
+ const old=A.filter(s=>s.o==null).sort((a,b)=>(a.t||'99').localeCompare(b.t||'99')||(a.ts||0)-(b.ts||0)),nw=A.filter(s=>s.o!=null).sort((a,b)=>a.o-b.o||(a.ts||0)-(b.ts||0));return old.concat(nw)};
+const nextOrd=d=>Math.max(0,...Object.values(D.stops).filter(s=>s.day===d&&s.o!=null).map(s=>s.o))+10;
+function persistOrder(ids){let n=0;ids.forEach((id,i)=>{const s=D.stops[id];if(s&&s.o!==i*10){D.stops[id]=Object.assign({},s,{o:i*10});n++;if(db)db.collection('stops').doc(id).set(D.stops[id]).catch(()=>{})}});if(n)refresh()}
+function moveStop(id,dir){const ids=dayList(day).map(s=>s.id),i=ids.indexOf(id),j=i+dir;if(i<0||j<0||j>=ids.length)return;[ids[i],ids[j]]=[ids[j],ids[i]];persistOrder(ids)}
+const gq=n=>enc(n+' 日本');
+const gmEmbed=n=>`https://maps.google.com/maps?output=embed&hl=zh-TW&z=16&q=${gq(n)}`;
+const gmOpen=n=>`https://www.google.com/maps/search/?api=1&query=${gq(n)}`;
+const gmDir=(a,b,m)=>`https://www.google.com/maps/dir/?api=1&origin=${gq(a)}&destination=${gq(b)}&travelmode=${m||'transit'}`;
 function planView(){
- const L=Object.entries(D.stops).map(([id,s])=>({id,...s})).filter(s=>s.day===day).sort((a,b)=>(a.t||'99').localeCompare(b.t||'99')||a.ts-b.ts);
- const cnt=i=>Object.values(D.stops).filter(s=>s.day===i).length;
- const dir=(a,b)=>`https://www.google.com/maps/dir/?api=1&origin=${enc(a+' 日本')}&destination=${enc(b+' 日本')}&travelmode=transit`;
- let h=`<div class="chips">${DAYS.map((d,i)=>`<button class="chip ${i==day?'on':''}" data-d="${i}">${d.getMonth()+1}/${d.getDate()} ${WK[d.getDay()]}${cnt(i)?' · '+cnt(i):''}</button>`).join('')}</div><div style="font-weight:700;margin:2px 4px">${dl(day)}　${L.length} 個地點</div>`;
- const V=catF?L.filter(s=>s.c===catF):L;
- if(!L.length)h+='<div class="card" style="text-align:center;opacity:.7">這天還沒有行程，大家一起加地點吧 ✨</div>';
- else h+=`<div class="card"><div class="lab" style="margin:0 0 6px">🚏 順路 Flow（點地名開 Google 地圖）</div><div class="row" style="margin:0">${L.map((s,i)=>`<a class="opt" target="_blank" rel="noopener" style="text-decoration:none;color:inherit" href="https://www.google.com/maps/search/${enc(s.n+' 日本')}">${i+1}. ${esc(s.n)}</a>`).join('<span style="opacity:.4">→</span>')}</div></div><div class="chips" style="margin-top:8px"><button class="chip ${!catF?'on':''}" data-f="">全部</button>${Object.keys(CAT).map(k=>`<button class="chip ${catF===k?'on':''}" data-f="${k}">${CAT[k]} ${k}</button>`).join('')}</div>`;
- V.forEach((s,i)=>{h+=`<div class="stop"><div class="tm">${s.t||'--:--'}</div><div style="flex:1"><b>${CAT[s.c]||'📍'} ${esc(s.n)}</b>${s.note?`<div style="font-size:12px;opacity:.75">${esc(s.note)}</div>`:''}<small style="opacity:.5">${esc(nameOf(s.by))} 加入</small></div><button class="x" data-x="${s.id}">✕</button></div>`;
-  const nx=catF?null:L[i+1];if(nx)h+=`<div class="leg">${s.tr?`<span>${esc(s.tr)}</span>`:''}<a class="opt" target="_blank" rel="noopener" href="${dir(s.n,nx.n)}">🗺 即時路線 ↗</a></div>`});
- h+=`<button class="big" id="ap">＋ 新增地點</button>`;
- if(L.length>1)h+=`<button class="big ghost" id="rt">${routeOn?'收起':'🗺 顯示'}今日路線地圖</button>`+(routeOn?`<iframe loading="lazy" src="https://maps.google.com/maps?output=embed&saddr=${enc(L[0].n+' 日本')}&daddr=${L.slice(1).map(s=>enc(s.n+' 日本')).join('+to:')}&dirflg=r"></iframe>`:'');
- $('#view').innerHTML=h;
- $('#view').querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{day=+b.dataset.d;routeOn=false;planView()});
- $('#view').querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>del('stops',b.dataset.x));
- 
- $('#ap').onclick=stopSheet;$('#view').querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{catF=b.dataset.f||null;planView()});const rt=$('#rt');if(rt)rt.onclick=()=>{routeOn=!routeOn;planView()};
+ const L=dayList(day),cnt=i=>Object.values(D.stops).filter(s=>s.day===i).length;
+ let h=`<div class="chips dch"><button class="chip dchip ${planAll?'on':''}" data-all="1">📋<small>全部</small></button>${DAYS.map((d,i)=>`<button class="chip dchip ${!planAll&&i==day?'on':''}" data-d="${i}">D${i+1}<small>${d.getMonth()+1}/${d.getDate()} ${WK[d.getDay()]}</small>${cnt(i)?`<i class="cn">${cnt(i)}</i>`:''}</button>`).join('')}</div>`;
+ if(planAll){
+  h+=DAYS.map((d,i)=>{const A=dayList(i);return `<div class="card ov"><b>D${i+1} · ${dl(i)}</b><span style="opacity:.6;font-size:12px"> ${A.length?A.length+' 個地點':'還沒安排'}</span>${A.map((s,k)=>`<button class="ovr" data-go="${i}|${s.id}"><span class="nb sm">${k+1}</span><span class="otm">${s.t||''}</span><span>${CAT[s.c]||'📍'} ${esc(s.n)}</span></button>`).join('')}</div>`}).join('');
+  $('#view').innerHTML=h;
+ }else{
+  const V=catF?L.filter(s=>s.c===catF):L,nT=L.filter(s=>s.t).length;
+  h+=`<div class="dhd"><div><b>第 ${day+1} 天 · ${dl(day)}</b><div style="font-size:12px;opacity:.7">${L.length} 個地點${nT?`，${nT} 個有時間`:''}${L.length>1?'　⠿ 拖曳排順序':''}</div></div>${L.length>1?`<button class="opt" id="bytm">依時間排</button>`:''}</div>`;
+  if(!L.length)h+='<div class="card" style="text-align:center;opacity:.8">這天還沒有行程，大家一起加地點吧 ✨</div>';
+  else{
+   h+=`<div class="card"><div class="lab" style="margin:0 0 6px">🚏 今天的順序（點一下跳到該地點）</div><div class="flw">${L.map((s,i)=>`${i?'<span class="ar">→</span>':''}<button class="opt" data-fl="${s.id}"><b>${i+1}</b> ${esc(s.n)}</button>`).join('')}</div></div>`;
+   h+=`<div class="chips" style="margin-top:8px"><button class="chip ${!catF?'on':''}" data-f="">全部</button>${Object.keys(CAT).map(k=>`<button class="chip ${catF===k?'on':''}" data-f="${k}">${CAT[k]} ${k}</button>`).join('')}</div>`;
+  }
+  h+='<div id="sl">';
+  V.forEach(s=>{const i=L.indexOf(s),prev=L[i-1],nx=catF?null:L[i+1],op=openStop===s.id;
+   h+=`<div class="swr" data-id="${s.id}"><div class="stop tl ${op?'open':''}">${catF?'':'<div class="hdl" data-h="1">⠿</div>'}<span class="nb">${i+1}</span><div class="tm">${s.t||'--:--'}</div><div class="sb" data-o="${s.id}"><b>${CAT[s.c]||'📍'} ${esc(s.n)}</b>${s.note?`<div style="font-size:12px;opacity:.8">${esc(s.note)}</div>`:''}<small style="opacity:.5">${esc(nameOf(s.by))} 加入 · 點一下看地圖</small></div><button class="x" data-ed="${s.id}" title="編輯">✏️</button></div>`;
+   if(op)h+=`<div class="pn"><iframe loading="lazy" src="${gmEmbed(s.n)}"></iframe><div class="row" style="margin:8px 0 0"><a class="opt" target="_blank" rel="noopener" href="${gmOpen(s.n)}">在 Google 地圖開啟 ↗</a>${prev?`<a class="opt" target="_blank" rel="noopener" href="${gmDir(prev.n,s.n)}">🧭 從上一站過來 ↗</a>`:''}<button class="opt" data-near="${s.id}">🔎 看周邊</button>${catF?'':`<button class="opt" data-mv="${s.id}|-1" ${i==0?'disabled':''}>▲ 上移</button><button class="opt" data-mv="${s.id}|1" ${i==L.length-1?'disabled':''}>▼ 下移</button>`}</div></div>`;
+   if(nx){const lo=openLeg===s.id;h+=`<div class="leg">${s.tr?`<span>🚇 ${esc(s.tr)}</span>`:'<span style="opacity:.5">交通未填（點 ✏️ 可補）</span>'}<button class="opt" data-lg="${s.id}">🗺 路線 ${lo?'▲':'▼'}</button><a class="opt" target="_blank" rel="noopener" href="${gmDir(s.n,nx.n)}">即時 ↗</a></div>`+(lo?`<iframe class="lgf" loading="lazy" src="https://maps.google.com/maps?output=embed&hl=zh-TW&saddr=${gq(s.n)}&daddr=${gq(nx.n)}&dirflg=r"></iframe>`:'')}
+   h+='</div>'});
+  h+='</div>';
+  h+=`<button class="big" id="ap">＋ 新增地點到第 ${day+1} 天</button>`;
+  if(L.length>1)h+=`<button class="big ghost" id="rt">${routeOn?'收起':'🗺 顯示'}今日完整路線地圖</button>`+(routeOn?`<iframe loading="lazy" src="https://maps.google.com/maps?output=embed&hl=zh-TW&saddr=${gq(L[0].n)}&daddr=${L.slice(1).map(s=>gq(s.n)).join('+to:')}&dirflg=r"></iframe>`:'');
+  $('#view').innerHTML=h;
+ }
+ const v=$('#view');
+ v.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{day=+b.dataset.d;planAll=false;routeOn=false;openStop=null;openLeg=null;planView()});
+ v.querySelectorAll('[data-all]').forEach(b=>b.onclick=()=>{planAll=true;planView()});
+ v.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{const[a,id]=b.dataset.go.split('|');day=+a;planAll=false;openStop=id;catF=null;planView();const e=v.querySelector(`.swr[data-id="${id}"]`);e&&e.scrollIntoView({block:'center'})});
+ if(planAll)return;
+ v.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{catF=b.dataset.f||null;planView()});
+ v.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{openStop=openStop===b.dataset.o?null:b.dataset.o;planView();const e=v.querySelector(`.swr[data-id="${b.dataset.o}"]`);if(openStop&&e)e.scrollIntoView({block:'nearest'})});
+ v.querySelectorAll('[data-fl]').forEach(b=>b.onclick=()=>{openStop=b.dataset.fl;catF=null;planView();const e=v.querySelector(`.swr[data-id="${openStop}"]`);e&&e.scrollIntoView({block:'center'})});
+ v.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>stopSheet(b.dataset.ed));
+ v.querySelectorAll('[data-lg]').forEach(b=>b.onclick=()=>{openLeg=openLeg===b.dataset.lg?null:b.dataset.lg;planView()});
+ v.querySelectorAll('[data-near]').forEach(b=>b.onclick=()=>{const s=D.stops[b.dataset.near];if(s){MQ.place=s.n;MQ.ll=null;go('map')}});
+ v.querySelectorAll('[data-mv]').forEach(b=>b.onclick=()=>{const[id,d]=b.dataset.mv.split('|');moveStop(id,+d)});
+ const ap=$('#ap');if(ap)ap.onclick=()=>stopSheet();
+ const rt=$('#rt');if(rt)rt.onclick=()=>{routeOn=!routeOn;planView()};
+ const bt=$('#bytm');if(bt)bt.onclick=()=>{if(!bt.dataset.c){bt.dataset.c=1;bt.textContent='再按一次確認';return}
+  const ids=dayList(day).map((s,i)=>({id:s.id,t:s.t||'',i})).sort((a,b)=>(a.t||'99:99').localeCompare(b.t||'99:99')||a.i-b.i).map(x=>x.id);persistOrder(ids);planView()};
+ dragInit();
 }
-function stopSheet(){
- openSheet(`<h3 style="margin:0 0 6px">新增地點 · ${dl(day)}</h3><div class="lab">地點名稱（用 Google 地圖搜得到的名字）</div><input type="text" id="sn" placeholder="例：明治神宮"><div class="lab">類型</div><select id="sc">${Object.keys(CAT).map(k=>`<option value="${k}">${CAT[k]} ${k}</option>`).join('')}</select><div class="lab">時間（可留空）</div><input type="time" id="st"><div class="lab">備註</div><input type="text" id="sd" placeholder="例：先買票"><button class="big" id="ss">加入行程</button><button class="big ghost" id="sx">取消</button>`);
+/* 拖曳把手排序：用 transform 移動，放開後才寫入 */
+function dragInit(){
+ const box=$('#sl');if(!box)return;
+ box.querySelectorAll('.hdl').forEach(hd=>hd.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  const items=[...box.querySelectorAll('.swr')],el=hd.closest('.swr'),idx=items.indexOf(el);
+  box.querySelectorAll('.pn,.lgf').forEach(p=>p.style.display='none');
+  const R=items.map(x=>{const r=x.getBoundingClientRect();return{top:r.top+scrollY,h:r.height}});
+  const gap=6,hE=R[idx].h+gap,y0=e.pageY;let tgt=idx;
+  el.classList.add('dragging');try{hd.setPointerCapture(e.pointerId)}catch(_){}
+  const mv=ev=>{
+   const dy=ev.pageY-y0;el.style.transform=`translateY(${dy}px)`;
+   const c=R[idx].top+R[idx].h/2+dy;let t=0;R.forEach((r,j)=>{if(j!==idx&&r.top+r.h/2<c)t++});tgt=t;
+   items.forEach((x,j)=>{if(j===idx)return;let s=0;if(idx<tgt&&j>idx&&j<=tgt)s=-hE;else if(tgt<idx&&j>=tgt&&j<idx)s=hE;x.style.transform=s?`translateY(${s}px)`:''});
+   const vy=ev.clientY;if(vy<80)scrollBy(0,-12);else if(vy>innerHeight-110)scrollBy(0,12)};
+  const up=()=>{hd.removeEventListener('pointermove',mv);hd.removeEventListener('pointerup',up);hd.removeEventListener('pointercancel',up);
+   items.forEach(x=>{x.style.transform=''});el.classList.remove('dragging');
+   if(tgt!==idx){const ids=items.map(x=>x.dataset.id);const[m]=ids.splice(idx,1);ids.splice(tgt,0,m);persistOrder(ids)}else planView()};
+  hd.addEventListener('pointermove',mv);hd.addEventListener('pointerup',up);hd.addEventListener('pointercancel',up)}));
+}
+function stopSheet(id){
+ const e=id?D.stops[id]:null,S=e||{day,n:'',c:Object.keys(CAT)[0],t:'',note:'',tr:''};
+ openSheet(`<h3 style="margin:0 0 6px">${e?'編輯地點':'新增地點'}</h3><div class="lab">地點名稱（用 Google 地圖搜得到的名字）</div><input type="text" id="sn" placeholder="例：明治神宮" value="${esc(S.n)}"><button class="opt" id="sv" style="margin-top:6px">🔍 預覽 Google 地圖</button><div id="svp"></div>
+ <div class="lab">第幾天</div><select id="sdy">${DAYS.map((d,i)=>`<option value="${i}" ${i===S.day?'selected':''}>第 ${i+1} 天 · ${dl(i)}</option>`).join('')}</select>
+ <div class="lab">類型</div><select id="sc">${Object.keys(CAT).map(k=>`<option value="${k}" ${k===S.c?'selected':''}>${CAT[k]} ${k}</option>`).join('')}</select>
+ <div class="lab">時間（可留空）</div><input type="time" id="st" value="${esc(S.t||'')}"><div class="lab">備註</div><input type="text" id="sd" placeholder="例：先買票" value="${esc(S.note||'')}">
+ <div class="lab">前往下一個地點的交通與時間（可留空）</div><input type="text" id="str" placeholder="例：JR 山手線 15 分／步行 8 分" value="${esc(S.tr||'')}">
+ <button class="big" id="ss">${e?'儲存':'加入行程'}</button><button class="big ghost" id="sx">取消</button>${e?'<button class="big ghost" id="sdel" style="color:#ff8a6b">🗑 刪除這個地點</button>':''}`);
  $('#sx').onclick=closeSheet;
- $('#ss').onclick=()=>{const n=$('#sn').value.trim();if(!n)return $('#sn').focus();const id=Date.now().toString(36)+uid.slice(0,3);closeSheet();put('stops',id,{day,n,c:$('#sc').value,t:$('#st').value,note:$('#sd').value.trim(),by:uid,ts:Date.now()})};
+ $('#sv').onclick=()=>{const n=$('#sn').value.trim();if(!n)return $('#sn').focus();$('#svp').innerHTML=`<iframe loading="lazy" src="${gmEmbed(n)}" style="height:200px"></iframe>`};
+ if(e)$('#sdel').onclick=()=>{const b=$('#sdel');if(!b.dataset.c){b.dataset.c=1;b.textContent='再按一次確定刪除';return}closeSheet();if(openStop===id)openStop=null;del('stops',id)};
+ $('#ss').onclick=()=>{const n=$('#sn').value.trim();if(!n)return $('#sn').focus();const nd=+$('#sdy').value;
+  const obj=Object.assign({},e||{},{day:nd,n,c:$('#sc').value,t:$('#st').value,note:$('#sd').value.trim(),tr:$('#str').value.trim()});
+  if(!e){obj.by=uid;obj.ts=Date.now();obj.o=nextOrd(nd)}else if(e.day!==nd||e.o==null)obj.o=nextOrd(nd);
+  const nid=id||Date.now().toString(36)+uid.slice(0,3);day=nd;planAll=false;if(!e)openStop=nid;closeSheet();put('stops',nid,obj)};
 }
 /* ---- flights ---- */
 const AL={BR:['長榮航空','#00704a','https://www.evaair.com'],CI:['中華航空','#c4002f','https://www.china-airlines.com'],JX:['星宇航空','#9a7b3f','https://www.starlux-airlines.com'],IT:['台灣虎航','#f26a21','https://www.tigerairtw.com'],MM:['樂桃航空','#c3007a','https://www.flypeach.com'],TR:['酷航','#c9a000','https://www.flyscoot.com'],JL:['日本航空','#c8102e','https://www.jal.co.jp'],NH:['全日空','#1d3f94','https://www.ana.co.jp'],CX:['國泰航空','#006564','https://www.cathaypacific.com'],GK:['捷星日本','#ff5000','https://www.jetstar.com'],BC:['天馬航空','#0066b3','https://www.skymark.co.jp'],AE:['華信航空','#c4002f','https://www.mandarin-airlines.com'],B7:['立榮航空','#00843d','https://www.uniair.com.tw'],UA:['聯合航空','#0033a0','https://www.united.com'],SQ:['新加坡航空','#c98a00','https://www.singaporeair.com'],KE:['大韓航空','#0083c9','https://www.koreanair.com']};
