@@ -83,6 +83,16 @@ body{background:radial-gradient(900px 520px at 50% -8%,#34194f,#0e0b16 62%) fixe
 .rt{display:flex;align-items:baseline;gap:8px}.rt b{font-size:26px;letter-spacing:1px}.rt small{opacity:.6}.rt span{margin:0 4px;opacity:.5}
 .bg4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0;font-size:14px}.bg4 small{display:block;opacity:.55;font-size:11px}
 .bpf{display:flex;gap:6px;flex-wrap:wrap}.bpf a{text-decoration:none;color:inherit}
+.okf{outline:2px solid #2ecc71;outline-offset:1px}
+.mprev{width:190px;min-height:190px;display:flex;align-items:flex-end;justify-content:center;padding:10px}
+.mprev .ms{width:100%}
+.mrow{display:flex;align-items:center;gap:8px;margin:8px 0}.mrow .ml{width:44px;opacity:.65;font-size:13px}.mrow .mn{flex:1;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.mt{border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;min-height:84px}
+.mt img{width:40px;height:40px;image-rendering:pixelated;object-fit:contain}.mt span{max-width:100%;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;text-align:center}
+.pl.mp .tag{bottom:calc(100% - 4px)}
+.pe .a .ms{width:40px}
+.ms{display:block;width:100%;height:auto;image-rendering:pixelated;-webkit-user-drag:none;user-select:none}
 </style></head>
 <body><div id="app"></div><div id="sheet"></div>
 <script>
@@ -155,6 +165,41 @@ function avatar(a){
  return `<svg viewBox="0 0 48 64" xmlns="http://www.w3.org/2000/svg">${g}</svg>`;
 }
 
+/* ---------- MapleStory 角色（素材由 maplestory.io 提供；素材著作權屬 Nexon，僅供私人旅行頁使用） ----------
+   組圖網址的做法參考 AndyWang505/maple-atelier（MIT License, Copyright (c) 2026 andywang505） */
+const MS={region:'TWMS',version:'256',base:'https://maplestory.io/api'};
+const MSKIN=[[2000,'一般','KMS','338'],[2001,'黝黑','KMS','338'],[2002,'暗黑','KMS','338'],[2003,'蒼白','KMS','338'],[2004,'灰白','KMS','338'],[2005,'草綠','GMS','217'],[2006,'金色','JMS','390'],[2007,'銀色','JMS','390'],[2008,'銅色','JMS','390'],[2009,'純白','KMS','338'],[2010,'粉嫩','KMS','338'],[2011,'陶土','KMS','338'],[2012,'麥西迪斯','KMS','338'],[2013,'鬼怪','KMS','338'],[2014,'粉紅','JMS','390'],[2015,'柔粉','KMS','338'],[2016,'緋粉','KMS','338'],[2017,'朦朧','JMS','390'],[2018,'薰衣草','KMS','338'],[2019,'薰衣草頰','KMS','338']];
+const MSLOT=[['hair','髮型','Character','Hair'],['face','臉型','Character','Face'],['hat','帽子','Armor','Hat'],['coat','上衣','Armor','Top'],['pants','褲子','Armor','Bottom'],['shoes','鞋子','Armor','Shoes']];
+const MSDEF=()=>({skin:2000,hair:{id:30000,n:'預設髮型'},face:{id:20000,n:'預設臉型'},coat:{id:1040036,n:'預設上衣'},pants:{id:1060026,n:'預設褲子'}});
+function msUrl(mp,o){o=o||{};const sk=MSKIN.find(s=>s[0]===mp.skin)||MSKIN[0];
+ const ent=[{itemId:sk[0],region:sk[2],version:sk[3]},{itemId:sk[0]+10000,region:sk[2],version:sk[3]}];
+ ['hair','face','hat','coat','pants','shoes'].forEach(k=>{const it=mp[k];if(it&&it.id)ent.push(Object.assign({itemId:it.id,region:MS.region,version:MS.version},k==='face'?{animationName:'default'}:{}))});
+ const json=JSON.stringify(ent);
+ const q=new URLSearchParams({showears:'false',showLefEars:'false',showHighLefEars:'false',resize:String(o.resize||2),flipX:'false',renderMode:'0',padX:String(o.padX==null?20:o.padX),padY:String(o.padY==null?20:o.padY)});
+ return MS.base+'/character/'+encodeURIComponent(json.slice(1,-1))+'/'+(o.stance||'stand1')+'/0?'+q.toString()}
+function avHtml(p,o){if(p&&p.useMaple&&p.mp)return `<img class="ms" src="${msUrl(p.mp,o)}" alt="" draggable="false" data-av="${encodeURIComponent(JSON.stringify(p.av||{}))}">`;return avatar(p.av)}
+/* 圖片載入失敗（網路、對方服務異常）時自動換回原創角色 */
+document.addEventListener('error',e=>{const t=e.target;if(t&&t.classList&&t.classList.contains('ms')){try{const a=JSON.parse(decodeURIComponent(t.dataset.av||'%7B%7D'));if(a&&a.skin!=null){t.outerHTML=avatar(a);return}}catch(_){}t.style.display='none'}},true);
+const MSCAT={};
+async function msCatalog(slot){if(MSCAT[slot])return MSCAT[slot];const m=MSLOT.find(x=>x[0]===slot);
+ const u=`${MS.base}/${MS.region}/${MS.version}/item?overallCategoryFilter=Equip&categoryFilter=${enc(m[2])}&subCategoryFilter=${enc(m[3])}`;
+ const r=await fetch(u);if(!r.ok)throw new Error('素材清單讀取失敗（'+r.status+'）');const arr=await r.json();
+ if(!Array.isArray(arr))throw new Error('素材清單格式異常');
+ return MSCAT[slot]=arr.filter(x=>x&&x.id).map(x=>({id:x.id,n:x.name||('#'+x.id),g:x.requiredGender==null?2:x.requiredGender}))}
+const msGOK=(i,g)=>g===2||i.g===2||i.g===g;
+async function msPicker(slot,after){
+ const m=MSLOT.find(x=>x[0]===slot),PAGE=48;let q='',shown=PAGE,list=null;const g=me.mg==null?2:me.mg;
+ openSheet(`<h3 style="margin:0 0 8px">選擇${m[1]}</h3><input type="text" id="mq" placeholder="搜尋名稱或編號" style="margin-bottom:8px"><div id="mgrid" class="mgrid"><div style="grid-column:1/-1;opacity:.7;padding:12px 0">載入素材清單中…（第一次較久）</div></div><button class="big ghost" id="mmore" style="display:none">顯示更多</button><button class="big ghost" id="mx">關閉</button>`);
+ $('#mx').onclick=closeSheet;
+ const draw=()=>{const L=list.filter(i=>msGOK(i,g)&&(!q||i.n.toLowerCase().includes(q)||String(i.id).includes(q)));
+  $('#mgrid').innerHTML=L.slice(0,shown).map(i=>`<button class="mt" data-id="${i.id}"><img loading="lazy" alt="" src="${MS.base}/${MS.region}/${MS.version}/item/${i.id}/icon" onerror="this.style.visibility='hidden'"><span>${esc(i.n)}</span></button>`).join('')||'<div style="grid-column:1/-1;opacity:.7;padding:12px 0">沒有符合的項目</div>';
+  $('#mmore').style.display=L.length>shown?'block':'none';$('#mmore').textContent=`顯示更多（還有 ${L.length-shown} 件）`;
+  $('#mgrid').querySelectorAll('.mt').forEach(b=>b.onclick=()=>{const it=list.find(x=>String(x.id)===b.dataset.id);if(!it)return;me.mp[slot]={id:it.id,n:it.n};closeSheet();after&&after()})};
+ try{list=await msCatalog(slot)}catch(e){const gr=$('#mgrid');if(gr)gr.innerHTML=`<div style="grid-column:1/-1;padding:12px 0">${esc(e.message||'讀取失敗')}。可能是網路或對方服務暫時無法使用，稍後再試，或改用「原創造型」。</div>`;return}
+ if(!$('#mq'))return;draw();
+ $('#mq').oninput=e=>{q=e.target.value.trim().toLowerCase();shown=PAGE;draw()};
+ $('#mmore').onclick=()=>{shown+=PAGE;draw()}}
+
 /* ---------- scenes ---------- */
 function floor(c1,c2,ln){let s=`<defs><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs><rect y="300" width="400" height="260" fill="url(#fg)"/>`;
  for(let i=-4;i<=12;i++)s+=`<line x1="200" y1="300" x2="${i*50}" y2="560" stroke="${ln}" opacity=".3"/>`;
@@ -202,12 +247,21 @@ function splash(){
  $('#g2').onclick=()=>{me.loc='tw';me.auto=false;creator(true)};
 }
 function creator(first){
+ if(!me.mp)me.mp=MSDEF();
+ let cm=me.useMaple!==false;
  const a=me.av;
  const sw=(arr,key)=>arr.map((c,i)=>`<button class="sw ${a[key]==i?'on':''}" data-k="${key}" data-i="${i}" style="background:${c}"></button>`).join('');
  const op=(arr,key)=>arr.map((c,i)=>`<button class="opt ${a[key]==i?'on':''}" data-k="${key}" data-i="${i}">${c}</button>`).join('');
- app.innerHTML=`<div class="card"><h2 style="margin:0 0 8px">${first?'捏一個你的旅行分身':'編輯角色'}</h2>
- <div class="prev" id="pv">${avatar(a)}</div>
- <div class="lab">名字</div><input type="text" id="nm" maxlength="8" placeholder="旅伴暱稱" value="${me.name||''}">
+ const keep=()=>{const v=$('#nm');if(v)me.name=v.value};
+ const mg=me.mg==null?2:me.mg;
+ const maple=`<div class="prev mprev" id="pv">${avHtml({useMaple:true,mp:me.mp,av:me.av})}</div>
+ <div class="lab">名字</div><input type="text" id="nm" maxlength="8" placeholder="旅伴暱稱" value="${esc(me.name||'')}">
+ <div class="lab">適用性別（只影響下面能選的服裝）</div><div class="row">${[[2,'全部'],[0,'男'],[1,'女']].map(([v,t])=>`<button class="opt ${mg===v?'on':''}" data-mg="${v}">${t}</button>`).join('')}</div>
+ <div class="lab">膚色</div><div class="row">${MSKIN.map(s=>`<button class="opt ${me.mp.skin===s[0]?'on':''}" data-skin="${s[0]}">${s[1]}</button>`).join('')}</div>
+ ${MSLOT.map(([k,lab])=>{const it=me.mp[k];return `<div class="mrow"><span class="ml">${lab}</span><b class="mn">${it?esc(it.n):'無'}</b><button class="opt" data-pick="${k}">選擇</button>${(k==='hat'||k==='shoes')&&it?`<button class="opt" data-clr="${k}">清除</button>`:''}</div>`}).join('')}
+ <div id="msnote" class="lab">造型圖由 maplestory.io 即時提供；圖片載入失敗時，會自動改顯示原創角色。</div>`;
+ const orig=`<div class="prev" id="pv">${avatar(a)}</div>
+ <div class="lab">名字</div><input type="text" id="nm" maxlength="8" placeholder="旅伴暱稱" value="${esc(me.name||'')}">
  <div class="lab">膚色</div><div class="row">${sw(SK,'skin')}</div>
  <div class="lab">臉型</div><div class="row">${op(FACE,'face')}</div>
  <div class="lab">體型</div><div class="row">${op(BODY,'body')}</div>
@@ -216,11 +270,24 @@ function creator(first){
  <div class="lab">眼睛</div><div class="row">${op(EYE,'eye')}</div>
  <div class="lab">服裝</div><div class="row">${op(FIT,'fit')}</div>
  <div class="lab">衣服顏色</div><div class="row">${sw(OC,'oc')}</div>
- <div class="lab">配件</div><div class="row">${op(ACC,'acc')}</div>
+ <div class="lab">配件</div><div class="row">${op(ACC,'acc')}</div>`;
+ app.innerHTML=`<div class="card"><h2 style="margin:0 0 8px">${first?'捏一個你的旅行分身':'編輯角色'}</h2>
+ <div class="row"><button class="opt ${cm?'on':''}" data-m="1">🍁 楓之谷造型</button><button class="opt ${cm?'':'on'}" data-m="0">🎨 原創造型</button></div>
+ ${cm?maple:orig}
  <button class="big ghost" id="rnd">🎲 隨機一個</button><button class="big" id="go">進入大廳 →</button></div>`;
- app.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{me.av[b.dataset.k]=+b.dataset.i;me.name=$('#nm').value;creator(first)});
- $('#rnd').onclick=()=>{me.av=rndAv();me.name=$('#nm').value;creator(first)};
- $('#go').onclick=()=>{const n=$('#nm').value.trim();if(!n){$('#nm').focus();$('#nm').placeholder='請先取個名字 ✍️';return}save({name:n});lobby()};
+ const again=()=>{keep();creator(first)};
+ app.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{keep();me.useMaple=b.dataset.m==='1';creator(first)});
+ app.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{me.av[b.dataset.k]=+b.dataset.i;again()});
+ app.querySelectorAll('[data-mg]').forEach(b=>b.onclick=()=>{me.mg=+b.dataset.mg;again()});
+ app.querySelectorAll('[data-skin]').forEach(b=>b.onclick=()=>{me.mp.skin=+b.dataset.skin;again()});
+ app.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{keep();msPicker(b.dataset.pick,()=>creator(first))});
+ app.querySelectorAll('[data-clr]').forEach(b=>b.onclick=()=>{delete me.mp[b.dataset.clr];again()});
+ $('#rnd').onclick=async()=>{keep();
+  if(!cm){me.av=rndAv();creator(first);return}
+  me.mp.skin=R(MSKIN)[0];const note=$('#msnote');if(note)note.textContent='隨機挑選中…';
+  try{for(const k of ['hair','face','coat','pants']){const L=(await msCatalog(k)).filter(i=>msGOK(i,mg));const it=R(L);if(it)me.mp[k]={id:it.id,n:it.n}}}catch(e){if(note)note.textContent='素材清單讀取失敗，只換了膚色：'+(e.message||'')}
+  creator(first)};
+ $('#go').onclick=()=>{const n=$('#nm').value.trim();if(!n){$('#nm').focus();$('#nm').placeholder='請先取個名字 ✍️';return}me.useMaple=cm;save({name:n,useMaple:cm,mp:me.mp,mg:me.mg==null?2:me.mg});lobby()};
 }
 
 /* ---------- lobby ---------- */
@@ -262,16 +329,16 @@ function renderPlayers(){
  const all=Object.assign({},players);all[uid]=me;
  for(const [id,p] of Object.entries(all)){
   if(!p||!p.av)continue;if(p.loc!==me.loc){other++;continue}here++;seen.add(id);
-  let n=box.querySelector(`[data-id="${id}"]`);const sig=JSON.stringify(p.av)+p.name+(id===uid);
+  let n=box.querySelector(`[data-id="${id}"]`);const sig=JSON.stringify(p.av)+(p.useMaple?JSON.stringify(p.mp):'')+p.name+(id===uid);
   if(!n){n=document.createElement('div');n.className='pl';n.dataset.id=id;n.innerHTML='<div class="fl"><div class="bob"></div></div>';box.appendChild(n)}
-  if(n.dataset.sig!==sig){n.dataset.sig=sig;n.querySelector('.bob').innerHTML=avatar(p.av);n.querySelectorAll('.tag,.bub,.say').forEach(e=>e.remove());n.insertAdjacentHTML('beforeend',`<div class="tag ${id===uid?'me':''}">${esc(p.name||'旅伴')}</div><div class="bub"></div><div class="say"></div>`)}
+  if(n.dataset.sig!==sig){n.dataset.sig=sig;n.querySelector('.bob').innerHTML=avHtml(p);n.classList.toggle('mp',!!(p.useMaple&&p.mp));n.querySelectorAll('.tag,.bub,.say').forEach(e=>e.remove());n.insertAdjacentHTML('beforeend',`<div class="tag ${id===uid?'me':''}">${esc(p.name||'旅伴')}</div><div class="bub"></div><div class="say"></div>`)}
   const x=p.x??50,y=p.y??75,sc=.72+.5*Math.min(1,Math.max(0,(y-60)/35));
   if(n.dataset.x&&Math.abs(x-n.dataset.x)>.5){n.classList.add('walk');n.querySelector('.fl').style.transform=`scaleX(${x>n.dataset.x?1:-1})`;clearTimeout(n._t);n._t=setTimeout(()=>n.classList.remove('walk'),1000)}
-  n.dataset.x=x;n.style.left=x+'%';n.style.top=y+'%';n.style.width=(19*sc)+'%';n.style.zIndex=Math.round(y*10);
+  n.dataset.x=x;n.style.left=x+'%';n.style.top=y+'%';n.style.width=((p.useMaple&&p.mp?30:19)*sc)+'%';n.style.zIndex=Math.round(y*10);
   n.classList.toggle('off',id!==uid&&now-(p.ts||0)>200000);
   const b=n.querySelector('.bub'),live=p.ets&&now-p.ets<4500;b.textContent=live?p.emote:'';if(live)next=Math.max(next,p.ets+4600-now);
   const sy=n.querySelector('.say'),sl=p.mts&&now-p.mts<6000;sy.textContent=sl?p.msg:'';if(sl)next=Math.max(next,p.mts+6100-now);
-  if(p.jts&&String(p.jts)!==n.dataset.j){n.dataset.j=p.jts;if(now-p.jts<3000){const v=n.querySelector('.bob svg');if(v){v.classList.remove('jmp');void v.getBoundingClientRect();v.classList.add('jmp')}}}
+  if(p.jts&&String(p.jts)!==n.dataset.j){n.dataset.j=p.jts;if(now-p.jts<3000){const v=n.querySelector('.bob svg,.bob img');if(v){v.classList.remove('jmp');void v.getBoundingClientRect();v.classList.add('jmp')}}}
  }
  box.querySelectorAll('.pl').forEach(n=>{if(!seen.has(n.dataset.id))n.remove()});
  $('#cnt').textContent=`👥 這裡 ${here}${other?` · 他處 ${other}`:''}`;
@@ -280,7 +347,7 @@ function renderPlayers(){
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function peerSheet(){
  const all=Object.assign({},players);all[uid]=me;const now=Date.now();
- sheet.innerHTML=`<h3 style="margin:0 0 6px">旅伴們（${Object.keys(all).length}/4）</h3>`+Object.entries(all).map(([id,p])=>`<div class="pe"><div class="a">${avatar(p.av)}</div><div><b>${esc(p.name||'旅伴')}</b>${id===uid?'（你）':''}<br><small>${SC[p.loc]?SC[p.loc].e+' '+SC[p.loc].n:''}</small></div><span class="dot ${now-(p.ts||0)<200000?'on':''}"></span>${id===uid?`<button class="opt" data-rm="${id}" style="margin-left:6px">🗑 移除我的角色</button>`:''}</div>`).join('')+
+ sheet.innerHTML=`<h3 style="margin:0 0 6px">旅伴們（${Object.keys(all).length}/4）</h3>`+Object.entries(all).map(([id,p])=>`<div class="pe"><div class="a">${avHtml(p,{resize:1})}</div><div><b>${esc(p.name||'旅伴')}</b>${id===uid?'（你）':''}<br><small>${SC[p.loc]?SC[p.loc].e+' '+SC[p.loc].n:''}</small></div><span class="dot ${now-(p.ts||0)<200000?'on':''}"></span>${id===uid?`<button class="opt" data-rm="${id}" style="margin-left:6px">🗑 移除我的角色</button>`:''}</div>`).join('')+
  `<div style="font-size:12px;opacity:.6;margin-top:8px">只能移除自己建立的角色。移除後會回到建立角色畫面，可以重捏。</div><button class="big ghost" onclick="sheet.style.display='none'">關閉</button>`;sheet.style.display='block';
  sheet.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{
   if(b.dataset.arm!=='1'){b.dataset.arm='1';b.textContent='再按一次確定';b.style.background='var(--ac)';b.style.color='#fff';setTimeout(()=>{if(b.isConnected){b.dataset.arm='';b.textContent='🗑 移除我的角色';b.style.background='';b.style.color=''}},4000);return}
@@ -372,12 +439,118 @@ function flyView(){
  $('#view').innerHTML=h;$('#fe').onclick=flySheet;
  $('#view').querySelectorAll('[data-cp]').forEach(b=>b.onclick=()=>{try{navigator.clipboard.writeText(b.dataset.cp);b.textContent='已複製 ✓'}catch(e){}});
 }
+/* ---- 航班截圖辨識（全部在瀏覽器內完成，圖片不會上傳） ---- */
+/*PARSE_START*/
+const FA_TW=['TPE','TSA','KHH','RMQ'],FA_JP=['NRT','HND'];
+const FA_ALL=['TPE','TSA','KHH','RMQ','NRT','HND','KIX','ITM','NGO','FUK','CTS','OKA','UKB','KMQ','SDJ','HIJ'];
+const FA_AIRLINES=['BR','CI','JX','IT','MM','TR','JL','NH','CX','GK','BC','AE','B7','UA','SQ','KE','HX','UO','OZ','LJ','7C','TW','ZG','NQ','JW','MJ','TG','VN','PR','CZ','MU','CA','KA','AK','FD','D7','QF','DL','AA','HA','BX','GA','NZ','AC','EK','QR','TK','LH','AF','KL','BA'];
+const FA_MON={JAN:1,FEB:2,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,OCT:10,NOV:11,DEC:12};
+/* OCR 常把 I 讀成 1、O 讀成 0 等：航空公司代碼容錯 */
+const FA_CONF={'1':['I','L'],'I':['1'],'L':['I','1'],'0':['O'],'O':['0'],'5':['S'],'S':['5'],'8':['B'],'B':['8'],'2':['Z'],'Z':['2']};
+function faCode(c){if(FA_AIRLINES.includes(c))return c;const a=[c[0]].concat(FA_CONF[c[0]]||[]),b=[c[1]].concat(FA_CONF[c[1]]||[]);for(const x of a)for(const y of b){if(FA_AIRLINES.includes(x+y))return x+y}return null}
+function faDate(y,m,d,today){y=y?+y:null;m=+m;d=+d;if(!(m>=1&&m<=12&&d>=1&&d<=31))return null;
+ if(!y){y=today.getFullYear();if(new Date(y,m-1,d)<new Date(today.getTime()-30*864e5))y++}
+ const t=new Date(y,m-1,d);if(t.getMonth()!==m-1||t.getDate()!==d)return null;
+ return y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0')}
+function faDates(s,today){const out=[],MN='JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC';let r;
+ const push=(i,y,m,d,pri)=>{const v=faDate(y,m,d,today);if(v)out.push({i,v,pri})};
+ const a=/(?<!\d)(20\d{2})\s?[.\/\-]\s?(\d{1,2})\s?[.\/\-]\s?(\d{1,2})(?!\d)/g;while(r=a.exec(s))push(r.index,r[1],r[2],r[3],0);
+ const b=new RegExp('(?<!\\d)(\\d{1,2})\\s?('+MN+')[A-Z]*\\.?,?\\s?(20\\d{2})?(?!\\d)','g');while(r=b.exec(s))push(r.index,r[3],FA_MON[r[2]],r[1],0);
+ const c=new RegExp('(?<![A-Z])('+MN+')[A-Z]*\\.?\\s?(\\d{1,2})(?!\\d)(?:ST|ND|RD|TH)?,?\\s?(20\\d{2})?','g');while(r=c.exec(s))push(r.index,r[3],FA_MON[r[1]],r[2],0);
+ const d=/(?:(20\d{2})\s?年\s?)?(\d{1,2})\s?月\s?(\d{1,2})\s?[日號号]?/g;while(r=d.exec(s))push(r.index,r[1],r[2],r[3],0);
+ const e=/(?<![\d\/:.])(\d{1,2})\/(\d{1,2})(?![\d\/:.])/g;while(r=e.exec(s))push(r.index,null,r[1],r[2],1);
+ const g=/(?<!\d)(20\d{2})(\d{1,2})[^\d\s]{1,2}(\d{1,3})(?!\d)/g;while(r=g.exec(s)){const dd=[r[3].slice(0,2),r[3].slice(0,1)];for(const x of dd){if(faDate(r[1],r[2],x,today)){push(r.index,r[1],r[2],x,2);break}}}
+ return out}
+function faTimes(s){const out=[],t=/(?<![\d:])([01]?\d|2[0-3])\s?[:：]\s?([0-5]\d)(?!\d)\s?(AM|PM)?/g;let r;
+ while(r=t.exec(s)){let h=+r[1];const ap=r[3]||'',pre=s.slice(Math.max(0,r.index-3),r.index);
+  if(ap==='PM'&&h<12)h+=12;if(ap==='AM'&&h===12)h=0;if(/下午|晚上/.test(pre)&&h<12)h+=12;
+  out.push({i:r.index,e:r.index+r[0].length,v:String(h).padStart(2,'0')+':'+r[2]})}return out}
+function parseFlightText(text,today){
+ today=today||new Date();
+ const u=String(text||'').normalize('NFKC').toUpperCase();
+ let n=u;for(let k=0;k<2;k++)n=n.replace(/(?<=\d)O|O(?=\d)/g,'0');
+ /* 航班號碼：航空公司代碼必須是常見代碼（容許 OCR 把 I 讀成 1 之類） */
+ const occ=[],fr=/(?<![A-Z0-9])([A-Z][A-Z0-9]|[0-9][A-Z])\s?(\d{2,4})(?![\d:\/.])/g;let r;
+ while(r=fr.exec(n)){const cd=faCode(r[1]);if(cd)occ.push({i:r.index,e:r.index+r[0].length,no:cd+String(+r[2])})}
+ if(!occ.length)return [];
+ const runs=[];occ.forEach(o=>{const l=runs[runs.length-1];if(l&&l.no===o.no)l.occ.push(o);else runs.push({no:o.no,occ:[o]})});
+ const K=runs.length,first=k=>runs[k].occ[0].i,last=k=>runs[k].occ[runs[k].occ.length-1].e;
+ const dist=(i,k)=>Math.min(...runs[k].occ.map(o=>i>=o.e?i-o.e:(i<o.i?o.i-i:0)));
+ const near=i=>{let b=0,bd=Infinity;for(let k=0;k<K;k++){const d=dist(i,k);if(d<bd){bd=d;b=k}}return b};
+ const modeA=i=>{let k=0;for(let j=0;j<K;j++)if(first(j)<=i)k=j;return k};      /* 資料寫在航班號碼後面 */
+ const modeB=i=>{for(let j=0;j<K;j++)if(last(j)>=i)return j;return K-1};          /* 資料寫在航班號碼前面 */
+ const ds=faDates(n,today),bp=ds.length?Math.min(...ds.map(x=>x.pri)):0;
+ const dl=ds.filter(x=>x.pri===bp).sort((a,b)=>a.i-b.i),tm=faTimes(n);
+ const aps=[];const ar=/(?<![A-Z])([A-Z]{3})(?![A-Z])/g;while(r=ar.exec(n)){if(FA_ALL.includes(r[1]))aps.push({i:r.index,e:r.index+3,v:r[1]})}
+ const trs=[];const tr=/(?:(?<![A-Z])T(?:ERM(?:INAL)?\.?)?\s?([1-3])(?![\dA-Z]))|(?:第?\s?([1-3])\s?航[廈站厦])/g;while(r=tr.exec(n))trs.push({i:r.index,v:'T'+(r[1]||r[2])});
+ const gts=[];const gr=/(?:GATE|登機門|登机口)\s*[:：]?\s*([A-Z]?\d{1,3}[A-Z]?)(?![A-Z0-9])/g;while(r=gr.exec(u))gts.push({i:r.index,v:r[1]});
+ /* 時間與機場配對：「TPE 06:35」或「06:35 TPE」 */
+ const pairs=tm.map(t=>{let b=null,bd=15;aps.forEach(a=>{const d=a.e<=t.i?t.i-a.e:(t.e<=a.i?a.i-t.e:0);if(d<bd){bd=d;b=a}});return Object.assign({},t,{a:b?b.v:''})});
+ /* 試幾種分配方式，挑「每趟都有日期、有兩個時間」最完整的 */
+ const build=(fd,ft,fo)=>{const R=runs.map(()=>({dates:[],pairs:[],terms:[],gates:[],aps:[]}));
+  dl.forEach((x,j)=>R[fd(x,j)].dates.push(x));pairs.forEach((x,j)=>R[ft(x,j)].pairs.push(x));
+  trs.forEach(x=>R[fo(x.i)].terms.push(x));gts.forEach(x=>R[fo(x.i)].gates.push(x));aps.forEach(x=>R[fo(x.i)].aps.push(x));return R};
+ const score=R=>R.reduce((s,x)=>s+(x.dates.length?1:0)+(x.pairs.length>=2?1:0)-(x.pairs.length>2?.4:0)-(x.dates.length>1?.2:0),0);
+ const cands=[];
+ if(K>1&&dl.length===K&&pairs.length===2*K)cands.push(build((x,j)=>j,(x,j)=>Math.floor(j/2),near));
+ cands.push(build(x=>modeA(x.i),x=>modeA(x.i),modeA),build(x=>modeB(x.i),x=>modeB(x.i),modeB),build(x=>near(x.i),x=>near(x.i),near));
+ let R=cands[0],bs=-1;cands.forEach(c=>{const s=score(c);if(s>bs+1e-9){bs=s;R=c}});
+ /* 訂位代碼：只認有標籤的 6 碼 */
+ let pnr='';const pr=/(?:BOOKING\s?(?:REF(?:ERENCE)?|CODE|NO\.?|NUMBER)|CONFIRMATION\s?(?:CODE|NO\.?|NUMBER)|RESERVATION\s?(?:CODE|NO\.?|NUMBER)|RECORD\s?LOCATOR|PNR|訂位代[碼號码]|訂位編號|預訂代[碼號]|訂位紀錄|確認碼|確認編號)\s*[:：#\-]?\s*([A-Z0-9]{6})(?![A-Z0-9])/g;
+ while(!pnr&&(r=pr.exec(u))){if(/[A-Z]/.test(r[1]))pnr=r[1]}
+ const pick=(arr,k)=>{if(!arr.length)return null;let b=arr[0],bd=Infinity;arr.forEach(x=>{const d=dist(x.i,k);if(d<bd){bd=d;b=x}});return b};
+ const legs=runs.map((ru,k)=>{const c=R[k],L={no:ru.no,date:'',dep:'',arr:'',from:'',to:'',term:'',gate:'',pnr:pnr,dir:null};
+  const d=pick(c.dates,k);if(d)L.date=d.v;const t=pick(c.terms,k);if(t)L.term=t.v;const g=pick(c.gates,k);if(g)L.gate=g.v;
+  const ps=c.pairs.slice().sort((a,b)=>a.i-b.i);
+  if(ps.length>=2&&ps[0].a&&ps[1].a&&ps[0].a!==ps[1].a){L.dep=ps[0].v;L.from=ps[0].a;L.arr=ps[1].v;L.to=ps[1].a}
+  else{if(ps[0])L.dep=ps[0].v;if(ps[1])L.arr=ps[1].v;const ua=[];c.aps.slice().sort((a,b)=>a.i-b.i).forEach(a=>{if(!ua.length||ua[ua.length-1]!==a.v)ua.push(a.v)});if(ua[0])L.from=ua[0];if(ua[1])L.to=ua[1]}
+  if(L.from&&L.to){if(FA_TW.includes(L.from)&&FA_JP.includes(L.to))L.dir='out';else if(FA_JP.includes(L.from)&&FA_TW.includes(L.to))L.dir='back'}
+  return L});
+ /* 同一航班多次出現就合併，缺的欄位互補 */
+ const out=[];legs.forEach(L=>{const o=out.find(x=>x.no===L.no);if(!o)out.push(L);else Object.keys(L).forEach(k=>{if(!o[k]&&L[k])o[k]=L[k]})});
+ return out}
+/*PARSE_END*/
+function mergeLegs(A,B){const out=A.map(x=>Object.assign({},x));B.forEach(L=>{const o=out.find(x=>x.no===L.no);if(!o)out.push(Object.assign({},L));else Object.keys(L).forEach(k=>{if(!o[k]&&L[k])o[k]=L[k]})});return out}
+function loadTess(){if(window.Tesseract)return Promise.resolve();return new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';s.onload=()=>res();s.onerror=()=>rej(new Error('辨識元件載入失敗，請確認網路'));document.head.appendChild(s)})}
+async function prepImage(file){try{
+ const url=URL.createObjectURL(file),img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url});
+ const sc=Math.min(1,1800/Math.max(img.naturalWidth,1)),w=Math.max(1,Math.round(img.naturalWidth*sc)),h=Math.max(1,Math.round(img.naturalHeight*sc));
+ const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(img,0,0,w,h);URL.revokeObjectURL(url);
+ const d=x.getImageData(0,0,w,h),p=d.data;let sum=0;for(let i=0;i<p.length;i+=16)sum+=.299*p[i]+.587*p[i+1]+.114*p[i+2];
+ const dark=sum/(p.length/16)<110;
+ for(let i=0;i<p.length;i+=4){let g=.299*p[i]+.587*p[i+1]+.114*p[i+2];if(dark)g=255-g;p[i]=p[i+1]=p[i+2]=g}
+ x.putImageData(d,0,0);return await new Promise(res=>c.toBlob(b=>res(b||file),'image/png'))}catch(e){return file}}
+async function ocrRecog(blob,lang,cb){const r=await window.Tesseract.recognize(blob,lang,{logger:m=>{if(m&&m.status==='recognizing text')cb(Math.round(m.progress*100))}});return r.data.text}
+function fillLeg(k,l){const set=(f,v)=>{if(!v)return;const el=$('#'+k+'_'+f);if(!el)return;el.value=v;el.classList.add('okf')};
+ ['no','date','dep','arr','pnr','term','gate'].forEach(f=>set(f,l[f]));
+ ['from','to'].forEach(f=>{const el=$('#'+k+'_'+f);if(el&&l[f]&&[...el.options].some(o=>o.value===l[f])){el.value=l[f];el.classList.add('okf')}})}
+function assignLegs(legs){const slot={o:null,b:null};
+ const want=l=>l.dir==='out'?'o':l.dir==='back'?'b':(l.date?(l.date<='2027-01-16'?'o':'b'):null);
+ legs.forEach(l=>{let k=want(l);if(k&&slot[k]){k=k==='o'?'b':'o'}if(!k||slot[k])k=!slot.o?'o':(!slot.b?'b':null);if(k&&!slot[k])slot[k]=l});return slot}
+function applyOcr(legs,text){const st=$('#ocrst');if(!st)return;
+ if(!legs.length){st.innerHTML=`<div style="margin-top:8px">沒有辨識到航班號碼。請換一張字更清楚、包含航班號碼的截圖，或直接手動填寫。</div><details><summary style="opacity:.7;font-size:12px">看辨識原文</summary><pre style="white-space:pre-wrap;font-size:11px">${esc(text)}</pre></details>`;return}
+ const s=assignLegs(legs);if(s.o)fillLeg('o',s.o);if(s.b)fillLeg('b',s.b);
+ const names=[s.o&&('去程 '+s.o.no),s.b&&('回程 '+s.b.no)].filter(Boolean).join('、');
+ const extra=legs.length>2?`（另外辨識到 ${legs.length-2} 個航班未填入）`:'';
+ st.innerHTML=`<div style="margin-top:8px;color:#2ecc71">✅ 已帶入 ${esc(names)}${extra}。綠框是辨識出來的欄位，<b>請逐項核對</b>；沒帶到的請手動補上。</div><details><summary style="opacity:.7;font-size:12px">看辨識原文</summary><pre style="white-space:pre-wrap;font-size:11px">${esc(text)}</pre></details>`}
+let ocrBusy=false;
+async function runOcr(file){if(ocrBusy||!file)return;ocrBusy=true;const st=$('#ocrst'),say=h=>{const e=$('#ocrst');if(e)e.innerHTML=`<div style="margin-top:8px">${h}</div>`};
+ try{say('準備中…第一次使用要下載辨識元件，請稍候');const blob=await prepImage(file);await loadTess();
+  let t1=await ocrRecog(blob,'eng',p=>say(`辨識中… ${p}%`)),legs=parseFlightText(t1),text=t1;
+  if(!legs.length||legs.some(l=>!l.date||!l.dep||!l.arr)){
+   try{say('補強辨識中文內容…第一次需下載較大的中文資料，請稍候');const t2=await ocrRecog(blob,'chi_tra+eng',p=>say(`中文辨識中… ${p}%`));legs=mergeLegs(legs,parseFlightText(t2));text=t1+'\n----\n'+t2}catch(e){}}
+  applyOcr(legs,text)}
+ catch(e){say('辨識失敗：'+esc(e.message||String(e))+'。可以改用手動填寫。')}
+ finally{ocrBusy=false}}
+document.addEventListener('paste',e=>{if(sheet.style.display!=='block'||!$('#ocrf'))return;const f=[...(e.clipboardData&&e.clipboardData.files||[])].find(x=>x.type&&x.type.startsWith('image/'));if(f){e.preventDefault();runOcr(f)}});
+
 const LF=[['no','航班號碼','text','例：IT200'],['date','日期','date',''],['dep','起飛時間（當地）','time',''],['arr','抵達時間（當地）','time',''],['pnr','訂位代碼','text','確認信上的 6 碼'],['term','航廈','text','例：T2'],['gate','登機門','text','當天公布後再填']];
 function legForm(k,L,fr,to){return `<div style="font-weight:700;margin-top:12px">${k=='o'?'🛫 去程（台灣 → 東京）':'🛬 回程（東京 → 台灣）'}</div>`+LF.map(([f,n,t,ph])=>`<div class="lab">${n}</div><input type="${t}" id="${k}_${f}" value="${esc(L[f]||'')}" placeholder="${ph}">`).join('')+`<div class="lab">起降機場</div><div style="display:flex;gap:6px"><select id="${k}_from">${fr.map(x=>`<option ${L.from==x?'selected':''}>${x}</option>`).join('')}</select><select id="${k}_to">${to.map(x=>`<option ${L.to==x?'selected':''}>${x}</option>`).join('')}</select></div>`}
 function flySheet(){
  const f=D.flights[uid]||{},T=['TPE','TSA','KHH','RMQ'],J=['NRT','HND'];
- openSheet(`<h3 style="margin:0">我的航班</h3>${legForm('o',f.out||{},T,J)}${legForm('b',f.back||{},J,T)}<button class="big" id="fs">儲存</button><button class="big ghost" id="fx">取消</button>`);
+ openSheet(`<h3 style="margin:0">我的航班</h3><div class="card" style="margin:8px 0"><b>📷 從截圖帶入</b><div style="font-size:12px;opacity:.7;margin:4px 0 8px">選一張有航班號碼、日期和時間的截圖（確認信、航空公司 App 都可以）。辨識在你的手機上完成，圖片不會上傳；辨識結果可能有錯，請逐項核對。</div><input type="file" id="ocrf" accept="image/*" style="display:none"><button class="opt" id="ocrb">選擇截圖</button><div id="ocrst"></div></div><div style="font-size:12px;opacity:.6">或在下方手動填寫：</div>${legForm('o',f.out||{},T,J)}${legForm('b',f.back||{},J,T)}<button class="big" id="fs">儲存</button><button class="big ghost" id="fx">取消</button>`);
  $('#fx').onclick=closeSheet;
+ $('#ocrb').onclick=()=>$('#ocrf').click();$('#ocrf').onchange=e=>{const f=e.target.files&&e.target.files[0];if(f)runOcr(f);e.target.value=''};
  const rd=k=>{const o={};LF.forEach(([x])=>{const v=$('#'+k+'_'+x).value.trim();o[x]=(x=='no'||x=='pnr'||x=='term'||x=='gate')?v.toUpperCase():v});o.from=$('#'+k+'_from').value;o.to=$('#'+k+'_to').value;return o};
  $('#fs').onclick=()=>{const v={out:rd('o'),back:rd('b')};closeSheet();put('flights',uid,v)};
 }
