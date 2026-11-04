@@ -215,6 +215,27 @@ input,input[type=text],input[type=url],select,textarea{border-radius:4px;border:
 .nbs{display:inline-block;padding-right:48px}
 .nbi.mq{animation:nbm var(--d,12s) linear infinite;will-change:transform}
 @keyframes nbm{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ===== 楓之谷式傳送門：一道直立的柔光柱 ===== */
+.ptl{background:none!important;border:0!important;border-radius:0!important;animation:none!important;overflow:visible;width:12%!important;aspect-ratio:1/2!important;-webkit-tap-highlight-color:transparent}
+.ptl::before{content:'';position:absolute;left:6%;right:6%;top:0;bottom:3%;pointer-events:none;
+ background:
+  linear-gradient(90deg,rgba(255,255,255,0) 0,rgba(255,255,255,.55) 14%,rgba(255,255,255,.55) 86%,rgba(255,255,255,0) 100%),
+  repeating-linear-gradient(90deg,rgba(255,176,206,.85) 0 14%,rgba(255,255,255,.95) 14% 30%,rgba(168,226,255,.85) 30% 44%,rgba(255,255,255,.95) 44% 58%,rgba(255,190,214,.85) 58% 72%);
+ background-size:100% 100%,200% 100%;animation:pstr 3.2s linear infinite,pbr 2.4s ease-in-out infinite;
+ -webkit-mask-image:linear-gradient(to top,#000 0,#000 55%,rgba(0,0,0,.6) 86%,transparent 100%);mask-image:linear-gradient(to top,#000 0,#000 55%,rgba(0,0,0,.6) 86%,transparent 100%);
+ filter:blur(.6px) drop-shadow(0 0 5px rgba(255,150,215,.75))}
+.ptl::after{content:'';position:absolute;left:-18%;right:-18%;bottom:-3%;height:22%;pointer-events:none;border-radius:50%;
+ background:radial-gradient(ellipse at center,#fff 0,rgba(255,255,255,.95) 18%,rgba(150,230,255,.7) 45%,rgba(255,170,220,.35) 70%,transparent 78%);animation:pgl 2.4s ease-in-out infinite}
+@keyframes pstr{to{background-position:0 0,-100% 0}}
+@keyframes pbr{50%{filter:blur(.6px) drop-shadow(0 0 7px rgba(150,225,255,.9)) brightness(1.15)}}
+@keyframes pgl{50%{transform:scale(1.12);opacity:.85}}
+.ptl .pt{position:absolute;left:50%;top:-4px;transform:translate(-50%,-100%);white-space:nowrap;background:rgba(10,6,14,.78);border:2px solid var(--ink);border-radius:3px;padding:2px 7px;font-size:11px;font-weight:800;color:#fff;text-shadow:none;z-index:2}
+.ptl .pr{position:absolute;inset:0;pointer-events:none}
+.ptl .pr s{position:absolute;bottom:6%;width:3px;height:3px;background:#fff;box-shadow:0 0 4px #fff;animation:prs 2.4s linear infinite;opacity:0}
+.ptl .pr s:nth-child(1){left:28%}.ptl .pr s:nth-child(2){left:48%;animation-delay:-.7s}.ptl .pr s:nth-child(3){left:66%;animation-delay:-1.4s}.ptl .pr s:nth-child(4){left:38%;animation-delay:-1.9s}
+@keyframes prs{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(-62px);opacity:0}}
+.ptl:active::before{filter:blur(.6px) brightness(1.4)}
 </style></head>
 <body><div id="app"></div><div id="sheet"></div>
 <script>
@@ -535,7 +556,7 @@ function drawScene(){
  $('#chips').querySelectorAll('.chip').forEach(c=>c.onclick=async()=>{if(c.dataset.s==='auto'){const s=await geoScene();setScene(s||me.loc,true)}else{picked=true;setScene(c.dataset.s,false)}});
 }
 function drawPortals(){const o=Object.keys(SC).filter(k=>k!==me.loc);
- $('#ptl').innerHTML=o.map((k,i)=>`<button class="ptl" data-k="${k}" data-x="${i?86:14}" style="left:${i?86:14}%;top:67%"><i>${SC[k].e}</i><span>${SC[k].n.replace('大廳','').replace('滑雪場','')}</span></button>`).join('');
+ $('#ptl').innerHTML=o.map((k,i)=>`<button class="ptl" data-k="${k}" data-x="${i?86:14}" style="left:${i?86:14}%;top:67%"><u class="pr"><s></s><s></s><s></s><s></s></u><span class="pt">${SC[k].e} ${SC[k].n.replace('大廳','').replace('滑雪場','')}</span></button>`).join('');
  $('#ptl').querySelectorAll('.ptl').forEach(b=>b.onclick=e=>{e.stopPropagation();picked=true;save({x:+b.dataset.x,y:72});setTimeout(()=>{setScene(b.dataset.k,false);const st=$('#stage');if(st){st.classList.add('flash');setTimeout(()=>st.classList.remove('flash'),800)}},1100)})}
 function setScene(s,auto){me.auto=auto;const ch=me.loc!==s;me.loc=s;if(ch){me.x=20+Math.random()*60;me.y=68+Math.random()*20}save({});drawScene();renderPlayers()}
 let tmr=null,picked=false;
