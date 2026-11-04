@@ -270,7 +270,9 @@ const SK=['#ffe0c8','#f5c9a0','#d9a273','#a8734a'],
 HC=['#2b2230','#6b4226','#c9894a','#e8c36a','#d96a8a','#5b7fd6','#e8e8ee'],
 OC=['#e5484d','#3b82f6','#10b981','#f59e0b','#8b5cf6','#f472b6','#1f2937','#f8fafc'];
 const FACE=['圓臉','方臉','尖臉'],BODY=['纖細','標準','壯碩'],HAIR=['短髮','長髮','丸子頭','雙馬尾'],EYE=['圓眼','閃亮','笑眼'],FIT=['連帽衫','滑雪服','長大衣'],ACC=['無','眼鏡','毛帽','圍巾','雪鏡'];
-const SC={tw:{n:'台灣大廳',e:'🇹🇼'},tk:{n:'東京大廳',e:'🗼'},ys:{n:'湯澤滑雪場',e:'⛷️'}};
+const SC={tw:{n:'台灣大廳',e:'🇹🇼'},tk:{n:'東京大廳',e:'🗼'},ys:{n:'野澤雪場',e:'⛷️'},ueno:{n:'上野',e:'🐼'},asakusa:{n:'淺草',e:'⛩️'},shibuya:{n:'澀谷',e:'🐕'},shinjuku:{n:'新宿',e:'🌃'}};
+const LINKS={tw:['tk','ys'],tk:['ueno','asakusa','shibuya','shinjuku'],ys:['tk','tw'],ueno:['tk','asakusa'],asakusa:['tk','ueno'],shibuya:['tk','shinjuku'],shinjuku:['tk','shibuya']};
+const WARDS=[['ueno',35.7141,139.7774],['asakusa',35.7148,139.7967],['shibuya',35.6580,139.7016],['shinjuku',35.6938,139.7034]];
 const R=a=>a[Math.floor(Math.random()*a.length)];
 const rndAv=()=>({skin:R([0,1,2,3]),hair:R([0,1,2,3]),hc:R([0,1,2,3,4,5,6]),eye:R([0,1,2]),fit:R([0,1,2]),face:R([0,1,2]),body:R([0,1,2]),oc:R([0,1,2,3,4,5,6,7]),acc:R([0,1,2,3,4])});
 
@@ -379,7 +381,7 @@ function celestial(loc){
  if(CUR.nocel)return '';
  if(CUR.k==='day'){const p=SUNP[loc];return pxDisc(p[0],p[1],26,'#fff6c0',4,.3)+pxDisc(p[0],p[1],17,'#fff0a0')}
  if(CUR.k==='night'){const p=MOONP[loc];GL.push(pxDisc(p[0],p[1],18,'#fff4d0')+pxDisc(p[0]+6,p[1]-3,14,'#ffffff',4,.25));return ''}
- return loc==='tw'?pxDisc(92,226,40,'#ffe7b0'):loc==='tk'?pxDisc(60,212,26,'#ffd9a0'):pxDisc(318,58,22,'#f6f2d8')}
+ const d=DUSKP[loc];return d?pxDisc(d[0],d[1],d[2],d[3]):pxDisc(318,58,22,'#f6f2d8')}
 function hills(col,base,amp,ph,cap){col=tone(col);let s='';for(let x=0;x<400;x+=8){const h=Math.round((base+amp*Math.sin(x/58+ph)+amp*.5*Math.sin(x/23+ph*2))/4)*4;s+=`<rect x="${x}" y="${300-h}" width="8" height="${h}" fill="${col}"/>`;if(cap)s+=`<rect x="${x}" y="${300-h}" width="8" height="${cap[1]}" fill="${tone(cap[0])}"/>`}return s}
 function farRow(seed,col,win,a,b){const r=mkr(seed);let x=-6,s='';col=tone(col);while(x<400){const w=24+((r()*3)|0)*8,h=a+(((r()*(b-a))/8)|0)*8;s+=`<rect x="${x}" y="${300-h}" width="${w}" height="${h}" fill="${col}"/>`;for(let y=300-h+8;y<292;y+=12)for(let k=x+4;k<x+w-6;k+=8)if(r()>.62&&CUR.lit>.2)s+=`<rect x="${k}" y="${y}" width="3" height="4" fill="${win}" opacity=".9"/>`;x+=w}return s}
 function bld(x,w,top,pid,win,seed,lit){const rnd=mkr(seed);let s=`<rect x="${x}" y="${top}" width="${w}" height="${300-top}" fill="url(#${pid})" stroke="${OL}" stroke-width="2"/><rect x="${x-3}" y="${top-5}" width="${w+6}" height="8" fill="#2a1d3d" stroke="${OL}" stroke-width="2"/><rect x="${x+w-7}" y="${top}" width="7" height="${300-top}" fill="#000" opacity=".22"/>`;
@@ -464,11 +466,84 @@ ys:()=>DEFS()+sk('ys',31)+celestial('ys')+
  `<rect x="118" y="214" width="164" height="84" fill="url(#pk)" stroke="${OL}" stroke-width="2.5"/><polygon points="106,216 200,164 294,216" fill="#f2f7ff" stroke="${OL}" stroke-width="2.5" stroke-linejoin="round"/><polygon points="106,216 294,216 288,224 112,224" fill="#cfe0f4" stroke="${OL}" stroke-width="2"/>`+
  [136,168,230,252].map(x=>{const on=CUR.k!=='day';if(on)GL.push(`<circle cx="${x+9}" cy="248" r="22" fill="url(#lg)" opacity=".5"/><rect x="${x}" y="236" width="18" height="22" fill="#ffd479" stroke="${OL}" stroke-width="2"/><path d="M${x+9} 236V258M${x} 247H${x+18}" stroke="${OL}" stroke-width="1.5"/>`);return on?'':`<rect x="${x}" y="236" width="18" height="22" fill="#9fc4e0" stroke="${OL}" stroke-width="2"/><path d="M${x+9} 236V258M${x} 247H${x+18}" stroke="${OL}" stroke-width="1.5"/>`}).join('')+
  `<rect x="188" y="248" width="24" height="50" fill="#4e2f19" stroke="${OL}" stroke-width="2"/><rect x="205" y="272" width="3" height="3" fill="#ffd479"/><rect x="154" y="199" width="92" height="17" fill="#5b3b25" stroke="${OL}" stroke-width="2"/>`+
- `<text x="200" y="212" text-anchor="middle" font-size="10" font-weight="900" fill="#fff6e8">湯澤 ♨ 滑雪場</text>`+
+ `<text x="200" y="212" text-anchor="middle" font-size="10" font-weight="900" fill="#fff6e8">野澤 ♨ 雪場</text>`+
  [18,64,120,300,352,388].map((x,i)=>pine(x,300+(i%2)*6,.8+(i%3)*.15)).join('')+
  `<rect x="322" y="262" width="22" height="34" rx="2" fill="#fff" stroke="${OL}" stroke-width="2"/><rect x="326" y="244" width="14" height="18" fill="#fff" stroke="${OL}" stroke-width="2"/><rect x="329" y="249" width="3" height="3" fill="${OL}"/><rect x="335" y="249" width="3" height="3" fill="${OL}"/><rect x="331" y="254" width="6" height="3" fill="#ff9f43"/>`+
- pxFloor('#dbe8f8','#8fa6c9','#7a93bd','#f4f9ff','')+`<text x="200" y="330" text-anchor="middle" font-size="16" font-weight="900" fill="#5a78a8" letter-spacing="8" opacity=".35">YUZAWA</text>`
+ pxFloor('#dbe8f8','#8fa6c9','#7a93bd','#f4f9ff','')+`<text x="200" y="330" text-anchor="middle" font-size="16" font-weight="900" fill="#5a78a8" letter-spacing="8" opacity=".35">NOZAWA</text>`
 };
+/* ---------- 東京四區：上野／淺草／澀谷／新宿 ---------- */
+const lantern=(x,y,w,h,c,t)=>{if(CUR.glow>.5)GL.push(`<ellipse cx="${x}" cy="${y+h/2}" rx="${w*.9}" ry="${h*.7}" fill="${c}" opacity=".3" filter="url(#glow)"/>`);
+ return `<rect x="${x-1}" y="${y-8}" width="2" height="8" fill="${OL}"/><rect x="${x-w/2}" y="${y}" width="${w}" height="${h}" rx="${(w/3).toFixed(1)}" fill="${c}" stroke="${OL}" stroke-width="2"/><rect x="${x-w/2+3}" y="${y+4}" width="3" height="${h-8}" fill="#fff" opacity=".25"/><rect x="${x-w/2}" y="${y+3}" width="${w}" height="2" fill="${OL}" opacity=".5"/><rect x="${x-w/2}" y="${y+h-5}" width="${w}" height="2" fill="${OL}" opacity=".5"/>${t?`<text x="${x}" y="${y+h/2+5}" text-anchor="middle" font-size="${Math.min(w*.42,17)}" font-weight="900" fill="#fff6e8">${t}</text>`:''}`};
+const awning=(x,y,w,c1,c2)=>{let s='';for(let k=0;k<w;k+=8)s+=`<rect x="${x+k}" y="${y}" width="${Math.min(8,w-k)}" height="10" fill="${(k/8|0)%2?c1:c2}"/>`;return s+`<rect x="${x}" y="${y}" width="${w}" height="10" fill="none" stroke="${OL}" stroke-width="2"/>`};
+const shop=(x,y,w,c1,c2,seed)=>{const r=mkr(seed),lit=CUR.lit>.3,h=300-y-28;let s=`<rect x="${x}" y="${y}" width="${w}" height="${300-y}" fill="#3a2a2a" stroke="${OL}" stroke-width="2"/><rect x="${x+4}" y="${y+16}" width="${w-8}" height="${h}" fill="${lit?'#ffcf6b':'#8c7a66'}"/>`;
+ if(lit)GL.push(`<rect x="${x+4}" y="${y+16}" width="${w-8}" height="${h}" fill="#ffd98a" opacity=".4"/>`);
+ for(let k=x+6;k<x+w-10;k+=10){const hh=6+((r()*8)|0);s+=`<rect x="${k}" y="${292-hh}" width="7" height="${hh}" fill="${['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ffffff'][(r()*5)|0]}" stroke="${OL}" stroke-width="1"/>`}
+ return s+awning(x-3,y+2,w+6,c1,c2)};
+const tree=(x,y,z,c1,c2)=>`<rect x="${x-3*z}" y="${y-30*z}" width="${6*z}" height="${34*z}" fill="#5b3b25" stroke="${OL}" stroke-width="2"/>`+[[-22,-56,44,16],[-30,-42,60,16],[-24,-28,48,14]].map(([dx,dy,w,h],i)=>`<rect x="${x+dx*z}" y="${y+dy*z}" width="${w*z}" height="${h*z}" fill="${tone(i%2?c1:c2)}" stroke="${OL}" stroke-width="2"/>`).join('');
+const DUSKP={tw:[92,226,40,'#ffe7b0'],tk:[60,212,26,'#ffd9a0'],ueno:[338,214,28,'#ffd9a0'],asakusa:[236,218,30,'#ffd9a0'],shibuya:[62,214,30,'#ffd9a0'],shinjuku:[352,214,26,'#ffd9a0']};
+Object.assign(SUNP,{ueno:[62,60],asakusa:[336,54],shibuya:[336,58],shinjuku:[340,56]});Object.assign(MOONP,{ueno:[64,62],asakusa:[336,54],shibuya:[336,58],shinjuku:[340,56]});
+['ueno','asakusa','shibuya','shinjuku'].forEach(k=>SKY[k]=SKY.tk);
+/* 淺草：雷門＋大紅燈籠、仲見世、五重塔、晴空塔 */
+function skytree(cx){const top=34;if(CUR.glow>.5)GL.push(`<rect x="${cx-2}" y="${top}" width="4" height="262" fill="#7fe8ff" opacity=".3" filter="url(#glow)"/>`);
+ let s=`<path d="M${cx-1.5} ${top}L${cx-9} 300H${cx+9}L${cx+1.5} ${top}Z" fill="${tone('#dfe8f6')}" stroke="${OL}" stroke-width="2" stroke-linejoin="round"/><rect x="${cx-12}" y="108" width="24" height="8" fill="${tone('#c7d6ec')}" stroke="${OL}" stroke-width="2"/><rect x="${cx-8}" y="90" width="16" height="7" fill="${tone('#c7d6ec')}" stroke="${OL}" stroke-width="2"/><path d="M${cx} ${top}V${top-12}" stroke="${OL}" stroke-width="3"/><rect x="${cx-5}" y="150" width="10" height="150" fill="#000" opacity=".1"/>`;
+ if(CUR.glow>.5)GL.push(`<rect x="${cx-10}" y="110" width="20" height="3" fill="#6fe6ff"/><rect x="${cx-6}" y="92" width="12" height="2" fill="#ff8ad8"/>`);return s}
+function pagoda(cx){let s='';for(let i=0;i<5;i++){const y=300-i*30,w=46-i*6;s+=`<rect x="${(cx-w*.32).toFixed(1)}" y="${y-30}" width="${(w*.64).toFixed(1)}" height="30" fill="${tone('#b8352b')}" stroke="${OL}" stroke-width="2"/><rect x="${(cx-w*.32+3).toFixed(1)}" y="${y-22}" width="${(w*.64-6).toFixed(1)}" height="10" fill="${tone('#e8d6a0')}" opacity=".85"/><polygon points="${cx-w/2-5},${y-26} ${cx-w/2+4},${y-36} ${cx+w/2-4},${y-36} ${cx+w/2+5},${y-26} ${cx+w/2},${y-22} ${cx-w/2},${y-22}" fill="${tone('#4a5a66')}" stroke="${OL}" stroke-width="2" stroke-linejoin="round"/>`}
+ return s+`<path d="M${cx} 144V116" stroke="${OL}" stroke-width="3"/><rect x="${cx-3}" y="124" width="6" height="3" fill="#f2c230"/>`}
+function kaminari(){let s=`<rect x="130" y="226" width="140" height="74" fill="${tone('#6a4a40')}"/><rect x="146" y="262" width="26" height="38" fill="${tone('#4a3430')}"/><rect x="228" y="262" width="26" height="38" fill="${tone('#4a3430')}"/>`;
+ if(CUR.glow>.5)GL.push(`<rect x="146" y="270" width="26" height="4" fill="#ffd98a" opacity=".7"/><rect x="228" y="270" width="26" height="4" fill="#ffd98a" opacity=".7"/>`);
+ s+=`<rect x="108" y="196" width="22" height="104" fill="#c8392e" stroke="${OL}" stroke-width="2.5"/><rect x="270" y="196" width="22" height="104" fill="#c8392e" stroke="${OL}" stroke-width="2.5"/><rect x="112" y="196" width="4" height="104" fill="#fff" opacity=".18"/><rect x="274" y="196" width="4" height="104" fill="#fff" opacity=".18"/>`+
+  `<rect x="108" y="196" width="184" height="30" fill="#a62d24" stroke="${OL}" stroke-width="2.5"/><rect x="100" y="180" width="200" height="16" fill="#8a2a22" stroke="${OL}" stroke-width="2.5"/>`+
+  `<polygon points="84,184 104,150 296,150 316,184 300,178 100,178" fill="#4a5a66" stroke="${OL}" stroke-width="2.5" stroke-linejoin="round"/>`;
+ for(let x=110;x<292;x+=10)s+=`<rect x="${x}" y="152" width="2" height="24" fill="#000" opacity=".25"/>`;
+ s+=`<rect x="168" y="199" width="64" height="20" fill="#1b1230" stroke="#f2c230" stroke-width="2"/><text x="200" y="214" text-anchor="middle" font-size="12" font-weight="900" fill="#f2c230">浅草寺</text>`;
+ return s+lantern(200,226,46,66,'#e5352b','雷門')}
+SCENE.asakusa=()=>DEFS()+tileP('a1','#8c7e70','#5a4e42')+sk('asakusa',71)+celestial('asakusa')+
+ farRow(8,'#3d2a5c','#ffd479',46,100)+skytree(62)+pagoda(336)+farRow(23,'#2a1c40','#ffb86b',18,48)+
+ kaminari()+
+ shop(-4,240,52,'#d8392e','#ffffff',3)+shop(50,252,56,'#2f6ad8','#ffffff',4)+shop(294,252,56,'#f2b630','#ffffff',5)+shop(352,240,56,'#d8392e','#ffffff',6)+
+ lights(-4,226,404,226,12,['#ff3d3d','#ffd93d','#ff3d3d','#fff1c9'])+
+ lantern(24,252,16,24,'#e5352b')+lantern(78,262,16,24,'#e5352b')+lantern(322,262,16,24,'#e5352b')+lantern(380,252,16,24,'#e5352b')+lamp(100)+lamp(300)+
+ pxFloor('#8c7e70','#3a3028','#b8a890','#c0b098','')+`<text x="200" y="330" text-anchor="middle" font-size="16" font-weight="900" fill="#ffd0a0" letter-spacing="8" opacity=".3">ASAKUSA</text>`;
+/* 上野：阿美橫町拱門、公園樹、西鄉隆盛像、貓熊招牌 */
+const panda=(x,y)=>`<rect x="${x-2}" y="${y+14}" width="4" height="${298-y-14}" fill="#4a4660" stroke="${OL}" stroke-width="1.5"/><circle cx="${x-10}" cy="${y-8}" r="6" fill="#222" stroke="${OL}" stroke-width="1.5"/><circle cx="${x+10}" cy="${y-8}" r="6" fill="#222" stroke="${OL}" stroke-width="1.5"/><circle cx="${x}" cy="${y+2}" r="15" fill="#fff" stroke="${OL}" stroke-width="2"/><ellipse cx="${x-6}" cy="${y}" rx="3.5" ry="5" fill="#222"/><ellipse cx="${x+6}" cy="${y}" rx="3.5" ry="5" fill="#222"/><rect x="${x-2}" y="${y+6}" width="4" height="3" fill="#222"/>`;
+const saigo=x=>`<rect x="${x-17}" y="284" width="34" height="14" fill="#a8a29a" stroke="${OL}" stroke-width="2"/><rect x="${x-12}" y="262" width="24" height="22" fill="#b8b2aa" stroke="${OL}" stroke-width="2"/><rect x="${x-5}" y="236" width="10" height="26" fill="#4f7a68" stroke="${OL}" stroke-width="2"/><rect x="${x-4}" y="226" width="8" height="10" fill="#4f7a68" stroke="${OL}" stroke-width="2"/><rect x="${x+6}" y="252" width="12" height="8" fill="#4f7a68" stroke="${OL}" stroke-width="1.5"/><rect x="${x+16}" y="249" width="6" height="6" fill="#4f7a68" stroke="${OL}" stroke-width="1.5"/>`;
+SCENE.ueno=()=>DEFS()+brickP('u1','#a8553a','#6a3020')+brickP('u2','#8a8790','#5c5964')+sk('ueno',81)+celestial('ueno')+
+ farRow(10,'#3d2a5c','#ffd479',46,104)+farRow(27,'#2a1c40','#ffb86b',18,52)+
+ bld(296,108,150,'u2','#ffcf6b',8,.55)+sign(304,164,92,20,'上野','#ffd93d',13)+
+ tree(34,300,1.1,'#2f7a52','#3e9a68')+tree(92,300,.95,'#27664a','#37895e')+
+ `<rect x="-4" y="278" width="118" height="20" fill="#9a948c" stroke="${OL}" stroke-width="2"/>`+
+ shop(132,240,60,'#d8392e','#ffffff',11)+shop(208,240,60,'#2f6ad8','#ffffff',12)+
+ `<rect x="116" y="170" width="18" height="130" fill="#b8352b" stroke="${OL}" stroke-width="2.5"/><rect x="266" y="170" width="18" height="130" fill="#b8352b" stroke="${OL}" stroke-width="2.5"/><rect x="112" y="164" width="176" height="46" fill="#8a2a22" stroke="${OL}" stroke-width="2.5"/>`+
+ sign(120,170,160,34,'アメ横','#ff5a4d',24)+
+ lights(134,214,266,214,8,['#ff5a4d','#ffd93d','#fff1c9'])+lantern(150,232,14,20,'#e5352b')+lantern(250,232,14,20,'#e5352b')+
+ crate(140,298,14)+crate(156,298,12)+crate(238,298,14)+barrel(254,298,'#3d7fd9')+
+ saigo(300)+panda(378,232)+lamp(100)+
+ pxFloor('#6a6460','#26221e','#b0a090','#b8a898','hz')+`<text x="200" y="330" text-anchor="middle" font-size="16" font-weight="900" fill="#ffd0a0" letter-spacing="8" opacity=".28">UENO</text>`;
+/* 澀谷：Scramble Square、109、巨型螢幕、忠犬八公像、十字路口 */
+const hachi=x=>`<rect x="${x-18}" y="284" width="36" height="14" fill="#a8a29a" stroke="${OL}" stroke-width="2"/><rect x="${x-9}" y="266" width="16" height="18" fill="#8a6a40" stroke="${OL}" stroke-width="1.5"/><rect x="${x+2}" y="256" width="12" height="12" fill="#8a6a40" stroke="${OL}" stroke-width="1.5"/><rect x="${x+3}" y="250" width="4" height="7" fill="#6b5030" stroke="${OL}" stroke-width="1.2"/><rect x="${x+9}" y="250" width="4" height="7" fill="#6b5030" stroke="${OL}" stroke-width="1.2"/><rect x="${x+12}" y="261" width="7" height="5" fill="#6b5030" stroke="${OL}" stroke-width="1.2"/><rect x="${x-14}" y="276" width="6" height="4" fill="#8a6a40" stroke="${OL}" stroke-width="1.2"/><rect x="${x-7}" y="270" width="3" height="10" fill="#fff" opacity=".22"/>`;
+function tower109(cx){let s=`<rect x="${cx-36}" y="120" width="72" height="180" rx="4" fill="${tone('#d9b898')}" stroke="${OL}" stroke-width="2"/><rect x="${cx-40}" y="112" width="80" height="12" rx="3" fill="${tone('#c0956f')}" stroke="${OL}" stroke-width="2"/><rect x="${cx+22}" y="120" width="14" height="180" fill="#000" opacity=".2"/>`;
+ for(let y=150;y<290;y+=16)s+=`<rect x="${cx-32}" y="${y}" width="56" height="6" fill="${CUR.lit>.3?'#ffe9a0':CUR.k==='day'?'#7fb2d8':'#2a3050'}" stroke="${OL}" stroke-width="1.2"/>`;
+ return s+sign(cx-28,128,56,20,'109','#ff4f60',16)}
+SCENE.shibuya=()=>DEFS()+brickP('s2','#8a8790','#5c5964')+brickP('s1','#a8869a','#6a4a62')+sk('shibuya',91)+celestial('shibuya')+
+ farRow(12,'#3d2a5c','#ffd479',46,100)+
+ `<rect x="126" y="60" width="84" height="240" fill="url(#gl)" stroke="${OL}" stroke-width="2"/><rect x="136" y="48" width="64" height="14" fill="#2a1d3d" stroke="${OL}" stroke-width="2"/><rect x="200" y="60" width="10" height="240" fill="#000" opacity=".22"/>`+(CUR.k==='night'?`<rect x="166" y="40" width="3" height="8" fill="#ff5f5f"/>`:'')+
+ farRow(29,'#2a1c40','#ffb86b',18,50)+tower109(326)+
+ bld(-4,112,126,'s2','#ffcf6b',14,.55)+sign(6,150,44,26,'SHIBUYA','#4fe3ff',9)+sign(56,172,46,26,'NEW!','#ff4fa0',13)+sign(6,196,44,26,'SALE','#ffd93d',13)+
+ bld(214,84,152,'s1','#ffcf6b',17,.55)+sign(220,164,72,46,'LIVE','#ff4fa0',17)+
+ `<rect x="-4" y="252" width="408" height="46" fill="#000" opacity=".18"/>`+
+ trafficLight(170)+trafficLight(254)+lamp(372)+hachi(106)+
+ pxFloor('#4a4954','#1d1c26','#9a98b8','#9a98a6','tk')+zebra()+`<text x="200" y="330" text-anchor="middle" font-size="16" font-weight="900" fill="#ffd0a0" letter-spacing="8" opacity=".25">SHIBUYA</text>`;
+/* 新宿：都廳雙塔、歌舞伎町拱門、霓虹街、思い出横丁的紅燈籠 */
+function govTower(x,w,seed){let s=bld(x,w,64,'s2','#ffcf6b',seed,.7);s+=`<rect x="${x+3}" y="46" width="${w/2-5}" height="16" fill="#2a1d3d" stroke="${OL}" stroke-width="2"/><rect x="${x+w/2+2}" y="46" width="${w/2-5}" height="16" fill="#2a1d3d" stroke="${OL}" stroke-width="2"/>`;if(CUR.k==='night')GL.push(`<rect x="${x+w/4}" y="40" width="2" height="2" fill="#ff5f5f"/>`);return s}
+SCENE.shinjuku=()=>DEFS()+brickP('s2','#8a8790','#5c5964')+brickP('s1','#6a5a8a','#40345a')+sk('shinjuku',101)+celestial('shinjuku')+
+ farRow(14,'#3d2a5c','#ffd479',46,100)+govTower(22,58,3)+govTower(88,58,5)+`<rect x="70" y="150" width="26" height="150" fill="#2a2438" stroke="${OL}" stroke-width="2"/>`+farRow(31,'#2a1c40','#ffb86b',18,50)+
+ bld(150,92,138,'s1','#ffcf6b',22,.6)+vsign(153,152,'居酒屋','#ff4fa0')+bld(318,90,126,'s2','#ffcf6b',26,.6)+sign(326,150,74,20,'ゲーム','#52e0a0',12)+sign(326,178,74,20,'カラオケ','#ffd93d',11)+
+ shop(-4,250,48,'#d8392e','#ffffff',7)+shop(46,250,48,'#d8392e','#ffffff',8)+lantern(20,248,14,20,'#e5352b','酒')+lantern(70,248,14,20,'#e5352b','酒')+
+ `<rect x="176" y="172" width="16" height="128" fill="#2a2438" stroke="${OL}" stroke-width="2.5"/><rect x="312" y="172" width="16" height="128" fill="#2a2438" stroke="${OL}" stroke-width="2.5"/><rect x="170" y="166" width="164" height="46" fill="#1b1230" stroke="${OL}" stroke-width="2.5"/>`+
+ sign(174,170,156,38,'歌舞伎町','#ff3d5a',22)+lights(176,164,328,164,6,['#ff3d5a','#ffd93d','#ff3d5a'])+
+ `<rect x="-4" y="252" width="408" height="46" fill="#000" opacity=".15"/>`+trafficLight(130)+lamp(110)+lamp(350)+
+ pxFloor('#3e3c48','#17161e','#8a88a8','#8a8898','tk')+zebra()+`<text x="200" y="330" text-anchor="middle" font-size="16" font-weight="900" fill="#ffd0a0" letter-spacing="8" opacity=".25">SHINJUKU</text>`;
+
 function buildScene(loc,ph){CUR=wxPhase(PHASES[ph]||PHASES.dusk,WXN);GL=[];const base=SCENE[loc]();const ov=CUR.ov?`<rect width="400" height="560" fill="${CUR.ov[0]}" opacity="${CUR.ov[1]}"/>`:'';const dk=CUR.dark?`<rect width="400" height="560" fill="#0c1430" opacity="${CUR.dark.toFixed(2)}"/>`:'';const pd=(CUR.wk==='rain'||CUR.wk==='storm')?puddles():'';return base+pd+ov+dk+GL.join('')}
 
 function flakes(){return [...Array(26)].map(()=>{const s=2+Math.random()*4;return `<i class="flake" style="left:${Math.random()*105}%;width:${s}px;height:${s}px;animation-duration:${5+Math.random()*7}s;animation-delay:-${Math.random()*10}s"></i>`}).join('')}
@@ -480,13 +555,13 @@ const pRef=()=>db&&db.collection('players').doc(uid);
 function save(patch){Object.assign(me,patch,{ts:Date.now()});players[uid]=me;lsSet('me',me);renderPlayers();if(db)pRef().set(me).catch(()=>{})}
 function geoScene(){return new Promise(res=>{if(!navigator.geolocation)return res(null);
  navigator.geolocation.getCurrentPosition(p=>{const la=p.coords.latitude,lo=p.coords.longitude;
-  if(la>21.5&&la<25.6&&lo>119&&lo<122.5)res('tw');else if(Math.hypot((la-36.93)*111,(lo-138.81)*90)<45)res('ys');else if(la>30&&la<46&&lo>128&&lo<146)res('tk');else res(null)},()=>res(null),{timeout:8000,maximumAge:600000})})}
+  if(la>21.5&&la<25.6&&lo>119&&lo<122.5)res('tw');else if(Math.hypot((la-36.93)*111,(lo-138.81)*90)<45||Math.hypot((la-36.92)*111,(lo-138.44)*90)<45)res('ys');else if(la>30&&la<46&&lo>128&&lo<146)res((()=>{const w=WARDS.map(x=>[x[0],Math.hypot((la-x[1])*111,(lo-x[2])*90)]).sort((a,b)=>a[1]-b[1])[0];return w[1]<2.5?w[0]:'tk'})());else res(null)},()=>res(null),{timeout:8000,maximumAge:600000})})}
 
 /* ---------- onboarding ---------- */
 function splash(){
  app.innerHTML=`${mode==='solo'?'<div class="banner">單機預覽：目前未連上同步，開啟已發布的連結即可多人同步。</div>':''}
- <div class="card" style="text-align:center;margin-top:30px"><div style="font-size:54px">🗼⛷️</div><h1 style="margin:6px 0">東京旅伴大廳</h1><div style="opacity:.7">1/13 – 1/21 · 前幾天湯澤滑雪<br>四個人的專屬小空間</div>
- <p style="font-size:13px;opacity:.75">允許定位後，大廳會跟著你們的位置自動切換：<br>台灣 → 東京 → 湯澤滑雪場</p>
+ <div class="card" style="text-align:center;margin-top:30px"><div style="font-size:54px">🗼⛷️</div><h1 style="margin:6px 0">東京旅伴大廳</h1><div style="opacity:.7">1/13 – 1/21 · 前幾天野澤滑雪<br>四個人的專屬小空間</div>
+ <p style="font-size:13px;opacity:.75">允許定位後，大廳會跟著你們的位置自動切換：<br>台灣 → 東京（上野／淺草／澀谷／新宿）→ 野澤雪場</p>
  <button class="big" id="g1">📍 允許定位並開始</button><button class="big ghost" id="g2">先跳過</button><div id="gm" style="font-size:12px;opacity:.7;margin-top:8px"></div></div>`;
  $('#g1').onclick=async()=>{$('#gm').textContent='定位中…';const s=await geoScene();me.loc=s||'tw';me.auto=true;$('#gm').textContent=s?'':'沒有取得定位，先放你在台灣大廳，可隨時手動切換';creator(true)};
  $('#g2').onclick=()=>{me.loc='tw';me.auto=false;creator(true)};
@@ -555,8 +630,8 @@ function drawScene(){
  $('#chips').innerHTML=`<button class="chip ${me.auto?'on':''}" data-s="auto">📍 自動</button>`+Object.keys(SC).map(k=>`<button class="chip ${!me.auto&&me.loc==k?'on':''}" data-s="${k}">${SC[k].e} ${SC[k].n.replace('大廳','').replace('滑雪場','')}</button>`).join('');
  $('#chips').querySelectorAll('.chip').forEach(c=>c.onclick=async()=>{if(c.dataset.s==='auto'){const s=await geoScene();setScene(s||me.loc,true)}else{picked=true;setScene(c.dataset.s,false)}});
 }
-function drawPortals(){const o=Object.keys(SC).filter(k=>k!==me.loc);
- $('#ptl').innerHTML=o.map((k,i)=>`<button class="ptl" data-k="${k}" data-x="${i?86:14}" style="left:${i?86:14}%;top:67%"><u class="pr"><s></s><s></s><s></s><s></s></u><span class="pt">${SC[k].e} ${SC[k].n.replace('大廳','').replace('滑雪場','')}</span></button>`).join('');
+function drawPortals(){const o=LINKS[me.loc]||Object.keys(SC).filter(k=>k!==me.loc),XS=o.length<2?[50]:o.length===2?[14,86]:o.length===3?[14,50,86]:[11,37,63,89];
+ $('#ptl').innerHTML=o.map((k,i)=>`<button class="ptl" data-k="${k}" data-x="${XS[i]}" style="left:${XS[i]}%;top:67%"><u class="pr"><s></s><s></s><s></s><s></s></u><span class="pt">${SC[k].e} ${SC[k].n.replace('大廳','').replace('滑雪場','')}</span></button>`).join('');
  $('#ptl').querySelectorAll('.ptl').forEach(b=>b.onclick=e=>{e.stopPropagation();picked=true;save({x:+b.dataset.x,y:72});setTimeout(()=>{setScene(b.dataset.k,false);const st=$('#stage');if(st){st.classList.add('flash');setTimeout(()=>st.classList.remove('flash'),800)}},1100)})}
 function setScene(s,auto){me.auto=auto;const ch=me.loc!==s;me.loc=s;if(ch){me.x=20+Math.random()*60;me.y=68+Math.random()*20}save({});drawScene();renderPlayers()}
 let tmr=null,picked=false;
@@ -800,7 +875,8 @@ function watchConn(){if(window.__connW||!window.__conn)return;window.__connW=1;w
  else if(window.__offShown){window.__offShown=0;showToast('已重新連線，離線時的修改已自動補傳。',5000)}})}
 
 /* ===== 天氣（Open-Meteo，免金鑰）＋ 大廳天氣效果 ===== */
-const WXL={tw:{n:'台北',lat:25.033,lon:121.565},tk:{n:'東京',lat:35.689,lon:139.692},ys:{n:'湯澤滑雪場',lat:36.93,lon:138.81}};
+const WXL={tw:{n:'台北',lat:25.033,lon:121.565},tk:{n:'東京',lat:35.689,lon:139.692},ys:{n:'野澤雪場',lat:36.923,lon:138.441}};
+const wxk=l=>WXL[l]?l:(l==='tw'||l==='ys'?l:'tk');
 const WXI={sun:['☀️','晴'],cloud:['⛅','多雲'],overcast:['☁️','陰天'],rain:['🌧️','下雨'],storm:['⛈️','雷雨'],snow:['❄️','下雪'],fog:['🌫️','起霧'],none:['⏳','載入中']};
 const WMO={0:'晴朗',1:'大致晴朗',2:'多雲',3:'陰天',45:'霧',48:'霧凇',51:'毛毛雨',53:'毛毛雨',55:'較強毛毛雨',56:'凍毛毛雨',57:'凍毛毛雨',61:'小雨',63:'中雨',65:'大雨',66:'凍雨',67:'強凍雨',71:'小雪',73:'中雪',75:'大雪',77:'冰粒',80:'陣雨',81:'較強陣雨',82:'強陣雨',85:'陣雪',86:'強陣雪',95:'雷雨',96:'雷雨伴冰雹',99:'強雷雨伴冰雹'};
 const WXTTL=30*60*1000;
@@ -810,14 +886,14 @@ function wxClass(c){const code=c.weather_code;let k;
  if(code>=95)k='storm';else if([71,72,73,74,75,76,77,85,86].includes(code))k='snow';else if((code>=51&&code<=67)||(code>=80&&code<=82))k='rain';else if(code===45||code===48)k='fog';else if(code===3)k='overcast';else if(code===2)k='cloud';else k='sun';
  return {k,w:(c.wind_speed_10m>=28||c.wind_gusts_10m>=45)?1:0}}
 const WXPRE=[null,{k:'sun',w:0,l:'晴'},{k:'cloud',w:0,l:'多雲'},{k:'overcast',w:0,l:'陰天'},{k:'rain',w:0,l:'下雨'},{k:'storm',w:0,l:'雷雨'},{k:'snow',w:0,l:'下雪'},{k:'sun',w:1,l:'風大'},{k:'rain',w:1,l:'風雨'}];
-function lobbyWx(){if(WXO)return WXO;const d=me&&WX[me.loc];if(d&&d.cur)return wxClass(d.cur);return {k:'none',w:0}}
+function lobbyWx(){if(WXO)return WXO;const d=me&&WX[wxk(me.loc)];if(d&&d.cur)return wxClass(d.cur);return {k:'none',w:0}}
 function wxLabel(w){return w.l||((WXI[w.k]||WXI.none)[1]+(w.w?'・風大':''))}
-function wxBtn(){const b=$('#wxb');if(!b)return;const w=lobbyWx(),d=me&&WX[me.loc];const t=(!WXO&&d&&d.cur)?' '+Math.round(d.cur.temperature_2m)+'°':'';
+function wxBtn(){const b=$('#wxb');if(!b)return;const w=lobbyWx(),d=me&&WX[wxk(me.loc)];const t=(!WXO&&d&&d.cur)?' '+Math.round(d.cur.temperature_2m)+'°':'';
  b.textContent=(WXI[w.k]||WXI.none)[0]+(w.w&&w.k!=='sun'?'💨':'')+' '+wxLabel(w)+t+(WXO?'・手動':'・即時')}
 function cycleWx(){const i=WXO?WXPRE.findIndex(x=>x===WXO):0;WXO=WXPRE[(i+1)%WXPRE.length];drawBg()}
 function wxUrl(l){return 'https://api.open-meteo.com/v1/forecast?latitude='+l.lat+'&longitude='+l.lon+'&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,cloud_cover,wind_speed_10m,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,snowfall_sum,wind_speed_10m_max,sunrise,sunset&timezone=auto&forecast_days=16'}
 function fetchWx(loc,force){
- const c=WX[loc];if(!force&&c&&c.cur&&Date.now()-c.ts<WXTTL)return Promise.resolve(c);
+ loc=wxk(loc);const c=WX[loc];if(!force&&c&&c.cur&&Date.now()-c.ts<WXTTL)return Promise.resolve(c);
  if(!force&&c&&c.fail&&Date.now()-c.fail<2*60*1000)return Promise.resolve(c);
  if(WXP[loc])return WXP[loc];
  WXP[loc]=(async()=>{try{const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),9000);const r=await fetch(wxUrl(WXL[loc]),{signal:ctl.signal});clearTimeout(tm);if(!r.ok)throw new Error('http');const j=await r.json();if(!j.current||!j.daily)throw new Error('bad');
@@ -825,7 +901,7 @@ function fetchWx(loc,force){
   catch(e){WX[loc]=Object.assign({},WX[loc]||{},{fail:Date.now()})}
   delete WXP[loc];wxChanged(loc);return WX[loc]})();return WXP[loc]}
 function wxChanged(loc){try{
- if(me&&loc===me.loc&&$('#bg')&&!WXO){const w=lobbyWx();if(w.k+w.w!==lastWxSig)drawBg();else wxBtn()}
+ if(me&&loc===wxk(me.loc)&&$('#bg')&&!WXO){const w=lobbyWx();if(w.k+w.w!==lastWxSig)drawBg();else wxBtn()}
  if(tab==='wx'&&$('#view')&&$('#wxbody')&&loc===wxSel)wxView()}catch(e){}}
 setInterval(()=>{if(me&&me.loc&&$('#bg'))fetchWx(me.loc)},10*60*1000);
 
@@ -854,7 +930,7 @@ function wxTips(rows){const t=[];if(!rows.length)return '';const mn=Math.min(...
  if(rows.some(r=>r.w>=28))t.push('有風大的日子，注意體感會更冷');
  return t.length?`<div class="wxtip">💡 ${t.join('；')}</div>`:''}
 function wxView(){
- if(!wxSel||!WXL[wxSel])wxSel=(me&&WXL[me.loc]?me.loc:'tk');
+ if(!wxSel||!WXL[wxSel])wxSel=(me?wxk(me.loc):'tk');
  const L=WXL[wxSel],d=WX[wxSel];
  let h=`<div class="card wxc" id="wxbody"><div class="chips">${Object.keys(WXL).map(k=>`<button class="chip ${k===wxSel?'on':''}" data-w="${k}">${SC[k].e} ${WXL[k].n}</button>`).join('')}</div>`;
  if(!d||!d.cur){h+=d&&d.fail?`<div class="wxnote">目前抓不到天氣資料（可能是網路或來源暫時有問題）。</div><button class="big" id="wxr">再試一次</button>`:`<div class="wxnote">天氣載入中…</div>`;if(!d||!d.fail)fetchWx(wxSel)}
