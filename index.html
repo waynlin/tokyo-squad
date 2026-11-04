@@ -208,6 +208,13 @@ input,input[type=text],input[type=url],select,textarea{border-radius:4px;border:
 .wxnote{font-size:12px;color:#a89fb8;padding:8px 4px}
 .wxtip{margin:8px 0 2px;padding:8px 10px;background:#2a2433;border:2px solid var(--ink);border-radius:3px;font-size:12.5px;line-height:1.5}
 .wxsrc{margin-top:16px;font-size:10.5px;color:#8a8099;text-align:center}.wxsrc a{color:#a89fb8}
+
+/* 公告：太長時跑馬燈 */
+.nbt{text-overflow:clip}
+.nbi{display:inline-block;white-space:nowrap}
+.nbs{display:inline-block;padding-right:48px}
+.nbi.mq{animation:nbm var(--d,12s) linear infinite;will-change:transform}
+@keyframes nbm{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 </style></head>
 <body><div id="app"></div><div id="sheet"></div>
 <script>
@@ -742,9 +749,15 @@ function renderLog(stick){const box=$('#clog');if(!box)return;
 function tripDayIdx(){const n=new Date();for(let i=0;i<DAYS.length;i++){const d=DAYS[i];if(d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()&&d.getDate()===n.getDate())return i}return -2}
 const noticeLabel=d=>d>=0?`第 ${d+1} 天 · ${dl(d)}`:'一般公告';
 function pickNotice(){const A=Object.entries(D.notice||{}).map(([id,s])=>({id,...s}));if(!A.length)return null;const ti=tripDayIdx(),c=A.filter(s=>s.d===ti||s.d===-1),pool=c.length?c:A;return pool.sort((a,b)=>b.ts-a.ts)[0]}
+let NBH='';
+/* 公告太長放不下時，自動變成跑馬燈；放得下就維持靜止 */
+function nbFit(){const t=$('.nbt'),i=$('#nbi');if(!t||!i)return;i.className='nbi';i.style.removeProperty('--d');i.innerHTML=NBH;
+ if(i.scrollWidth<=t.clientWidth+1)return;
+ i.innerHTML=`<span class="nbs">${NBH}</span><span class="nbs">${NBH}</span>`;const w=i.scrollWidth/2;i.style.setProperty('--d',Math.max(8,w/38).toFixed(1)+'s');i.classList.add('mq')}
+window.addEventListener('resize',()=>nbFit());
 function renderNotice(){const el=$('#nbar');if(!el)return;const n=pickNotice(),tot=Object.keys(D.notice||{}).length;
- el.innerHTML=`<button class="nbr" id="nbtn"><span class="nbl">公告</span><span class="nbt">${n?`<small>${esc(noticeLabel(n.d))}</small> ${esc(n.t)}`:'還沒有公告，點這裡新增重要訊息'}</span><span class="nbm">${tot?tot+' 則 ›':'新增 ›'}</span></button>`;
- $('#nbtn').onclick=noticeSheet;if(sheet.dataset.nt==='1'&&sheet.style.display==='block')fillNotice()}
+ el.innerHTML=`<button class="nbr" id="nbtn"><span class="nbl">公告</span><span class="nbt"><span class="nbi" id="nbi"></span></span><span class="nbm">${tot?tot+' 則 ›':'新增 ›'}</span></button>`;
+ NBH=n?`<small>${esc(noticeLabel(n.d))}</small> ${esc(n.t)}`:'還沒有公告，點這裡新增重要訊息';nbFit();setTimeout(nbFit,500);$('#nbtn').onclick=noticeSheet;if(sheet.dataset.nt==='1'&&sheet.style.display==='block')fillNotice()}
 function noticeSheet(){const ti=tripDayIdx();openSheet(`<h3 style="margin:0 0 6px">公告欄</h3><div class="lab">新增公告（所有人都看得到）</div><select id="nd"><option value="-1">一般公告（每天都顯示）</option>${DAYS.map((d,i)=>`<option value="${i}" ${i===ti?'selected':''}>第 ${i+1} 天 · ${dl(i)}</option>`).join('')}</select><input type="text" id="nt" maxlength="100" placeholder="例：1/14 早上 8:30 大廳集合，帶護照" style="margin-top:6px"><button class="big" id="np">發布公告</button><div id="nl"></div><button class="big ghost" id="nx">關閉</button>`);
  sheet.dataset.nt='1';$('#nx').onclick=()=>{sheet.dataset.nt='';closeSheet()};
  $('#np').onclick=()=>{const t=$('#nt').value.trim();if(!t)return $('#nt').focus();const ts=Date.now(),id=ts.toString(36)+uid.slice(0,3),o={d:+$('#nd').value,t,by:uid,n:me.name||'旅伴',ts};D.notice[id]=o;if(db)db.collection('notice').doc(id).set(o).catch(()=>{});$('#nt').value='';renderNotice();fillNotice()};
