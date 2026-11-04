@@ -151,6 +151,26 @@ input,input[type=text],input[type=url],select,textarea{border-radius:4px;border:
 .qp button:active{transform:translateY(2px);box-shadow:0 1px 0 #0a060e}
 .qp #jp{background:var(--ac);color:var(--ink);font-size:13px}
 .say{white-space:normal;width:max-content;max-width:150px;text-align:center;line-height:1.3;padding:3px 8px;overflow:visible;text-overflow:clip;word-break:break-all}
+/* ===== 匯率跑馬燈 ===== */
+.tkr{position:sticky;top:0;z-index:80;margin:-10px -10px 8px;background:#120c18;border-bottom:3px solid #000;box-shadow:0 3px 0 #5a4a2a;overflow:hidden;white-space:nowrap;color:#ffd98a;font-size:13px;font-weight:700;height:30px;line-height:30px}
+.tkt{display:inline-flex;animation:tkm 60s linear infinite;will-change:transform}.tkr:hover .tkt{animation-play-state:paused}
+.tkh{display:inline-flex;align-items:center}.tkh span{padding:0 10px}.tkh i{font-style:normal;color:#f0a02c;font-size:9px}.tkh b{color:#fff}
+@keyframes tkm{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+/* ===== 公告欄 ===== */
+#nbar{margin:0 0 8px}
+.nbr{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:#2a2430;border:3px solid var(--ink);border-radius:4px;box-shadow:inset 0 0 0 2px #5a5266,0 3px 0 #0a060e;padding:7px 10px;color:var(--fg)}
+.nbl{background:var(--ac);color:var(--ink);font-weight:900;font-size:12px;padding:2px 7px;border:2px solid var(--ink);border-radius:3px;flex:none}
+.nbt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}.nbt small{opacity:.65;margin-right:4px}
+.nbm{flex:none;font-size:12px;opacity:.75}
+.ntx{position:relative;background:#322b3a;border:2px solid var(--ink);border-radius:4px;padding:8px 10px;margin-top:6px}.ntx small{opacity:.6;display:block;margin-top:2px}.ntx .x{position:absolute;right:6px;top:6px;opacity:.85;font-size:12px;color:#ff8a6b}
+/* ===== 留言紀錄 ===== */
+.clog{height:150px;overflow-y:auto;overscroll-behavior:contain;background:#15101a;border:3px solid var(--ink);border-radius:4px;box-shadow:inset 0 2px 0 rgba(0,0,0,.45);padding:6px 8px;margin:0 0 8px;font-size:13px;scrollbar-width:auto;scrollbar-color:var(--ac) #2a2430}
+.clog::-webkit-scrollbar{width:12px}.clog::-webkit-scrollbar-track{background:#2a2430}.clog::-webkit-scrollbar-thumb{background:var(--ac);border:2px solid var(--ink);border-radius:2px}
+.cl{padding:2px 0;line-height:1.45;word-break:break-all}.cl .ct{color:#ffd98a;font-variant-numeric:tabular-nums;margin-right:6px;opacity:.9}.cl .cn{margin-right:6px;color:#9ad8ff}.cl.me .cn{color:var(--ac)}
+.cd{text-align:center;font-size:11px;opacity:.55;margin:6px 0 2px}.ce{opacity:.55;text-align:center;padding:50px 0}
+/* ===== 時段切換鈕 ===== */
+.todb{position:absolute;right:8px;top:8px;z-index:6;background:rgba(10,6,14,.72);color:#fff;border:2px solid var(--ink);border-radius:3px;font-size:12px;font-weight:800;padding:3px 8px}
+#stage{isolation:isolate;z-index:0}
 </style></head>
 <body><div id="app"></div><div id="sheet"></div>
 <script>
@@ -259,79 +279,122 @@ async function msPicker(slot,after){
  $('#mmore').onclick=()=>{shown+=PAGE;draw()}}
 
 /* ---------- scenes ---------- */
-/* ---------- 楓之谷風場景（墮落城市氛圍：暗夜磚牆、霓虹、鐵絲網） ---------- */
+/* ---------- 楓之谷風場景（墮落城市氛圍）＋ 白天／傍晚／夜晚 ---------- */
 const OL='#120c24';
 const hx=c=>[1,3,5].map(i=>parseInt(c.slice(i,i+2),16));
 const smix=(a,b,t)=>{const A=hx(a),B=hx(b);return '#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('')};
 const mkr=seed=>{let r=seed;return()=>(r=(r*9301+49297)%233280)/233280};
-const DEFS=`<defs><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.5"/></filter><radialGradient id="lg"><stop offset="0" stop-color="#ffd98a" stop-opacity=".85"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></radialGradient><pattern id="cl" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M0 0L8 8M8 0L0 8" stroke="#9a94b8" stroke-width="1"/></pattern><pattern id="pk" width="8" height="12" patternUnits="userSpaceOnUse"><rect width="8" height="12" fill="#8a5a33"/><rect x="7" width="1" height="12" fill="#4e2f19"/><rect y="11" width="8" height="1" fill="#5a3820" opacity=".7"/></pattern></defs>`;
+const PHASES={
+ day:{k:'day',name:'白天',lit:.08,unlit:'#8fb8da',stars:0,glow:.15,cu:'#c9d9f2',cop:.9,fog:['#a9c4e4',.45],ov:['#ffffff',.08]},
+ dusk:{k:'dusk',name:'傍晚',lit:.5,unlit:'#1b1630',stars:16,glow:1,cu:'#ff9a4a',cop:.55,fog:null,ov:['#ff7a3a',.07]},
+ night:{k:'night',name:'夜晚',lit:.8,unlit:'#14102a',stars:64,glow:1.5,cu:'#5a5aa0',cop:.25,fog:['#050620',.3],ov:['#0a1240',.5]}};
+let CUR=PHASES.dusk,GL=[];
+const tone=c=>CUR.fog?smix(c,CUR.fog[0],CUR.fog[1]):c;
+const DEFS=()=>`<defs><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.5"/></filter><radialGradient id="lg"><stop offset="0" stop-color="#ffd98a" stop-opacity=".85"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></radialGradient><pattern id="cl" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M0 0L8 8M8 0L0 8" stroke="#9a94b8" stroke-width="1"/></pattern><pattern id="pk" width="8" height="12" patternUnits="userSpaceOnUse"><rect width="8" height="12" fill="#8a5a33"/><rect x="7" width="1" height="12" fill="#4e2f19"/><rect y="11" width="8" height="1" fill="#5a3820" opacity=".7"/></pattern><pattern id="gl" width="10" height="12" patternUnits="userSpaceOnUse"><rect width="10" height="12" fill="#7fb2d8"/><rect width="10" height="1" fill="#e8f4ff" opacity=".7"/><rect width="1" height="12" fill="#e8f4ff" opacity=".5"/></pattern></defs>`;
 const brickP=(id,base,line)=>`<pattern id="${id}" width="16" height="8" patternUnits="userSpaceOnUse"><rect width="16" height="8" fill="${base}"/><rect y="7" width="16" height="1" fill="${line}"/><rect width="1" height="4" fill="${line}"/><rect x="8" y="4" width="1" height="4" fill="${line}"/></pattern>`;
+const tileP=(id,base,line)=>`<pattern id="${id}" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="${base}"/><rect width="8" height="1" fill="${line}" opacity=".55"/><rect width="1" height="8" fill="${line}" opacity=".55"/></pattern>`;
 function pxSky(a,b,c,seed){const rnd=mkr(seed||3);let s='';const N=14,H=300/N;
  for(let i=0;i<N;i++){const t=i/(N-1);s+=`<rect y="${(i*H).toFixed(1)}" width="400" height="${(H+1).toFixed(1)}" fill="${t<.6?smix(a,b,t/.6):smix(b,c,(t-.6)/.4)}"/>`}
- for(let i=0;i<16;i++){const x=Math.floor(rnd()*50)*8,y=Math.floor(rnd()*8)*8,z=i%4?2:4;s+=`<rect x="${x}" y="${y}" width="${z}" height="${z}" fill="#fff" opacity="${(.5+rnd()*.5).toFixed(2)}"/>`}
- for(let i=0;i<7;i++){const cx=Math.floor(rnd()*44)*8,cy=70+Math.floor(rnd()*12)*8,w=40+Math.floor(rnd()*6)*8;s+=`<rect x="${cx+8}" y="${cy-8}" width="${w-16}" height="8" fill="${smix(b,'#ffffff',.18)}" opacity=".55"/><rect x="${cx}" y="${cy}" width="${w}" height="8" fill="${smix(b,'#ffffff',.22)}" opacity=".6"/><rect x="${cx+4}" y="${cy+8}" width="${w-12}" height="6" fill="${smix(c,'#ff9a4a',.5)}" opacity=".55"/>`}
+ for(let i=0;i<CUR.stars;i++){const x=Math.floor(rnd()*50)*8,y=Math.floor(rnd()*(CUR.k==='night'?15:8))*8,z=i%4?2:4;s+=`<rect x="${x}" y="${y}" width="${z}" height="${z}" fill="#fff" opacity="${(.5+rnd()*.5).toFixed(2)}"/>`}
+ const nc=CUR.k==='day'?9:7;
+ for(let i=0;i<nc;i++){const cx=Math.floor(rnd()*44)*8,cy=60+Math.floor(rnd()*14)*8,w=40+Math.floor(rnd()*6)*8;s+=`<g opacity="${CUR.cop}"><rect x="${cx+8}" y="${cy-8}" width="${w-16}" height="8" fill="${smix(b,'#ffffff',.5)}"/><rect x="${cx}" y="${cy}" width="${w}" height="8" fill="${smix(b,'#ffffff',.55)}"/><rect x="${cx+4}" y="${cy+8}" width="${w-12}" height="6" fill="${smix(c,CUR.cu,.6)}" opacity=".7"/></g>`}
  return s}
 function pxDisc(cx,cy,r,col,st,op){st=st||4;let s='';for(let y=-r;y<r;y+=st){const w=Math.sqrt(r*r-(y+st/2)**2);s+=`<rect x="${(cx-w).toFixed(1)}" y="${cy+y}" width="${(2*w).toFixed(1)}" height="${st}" fill="${col}" opacity="${op==null?1:op}"/>`}return s}
-function hills(col,base,amp,ph,cap){let s='';for(let x=0;x<400;x+=8){const h=Math.round((base+amp*Math.sin(x/58+ph)+amp*.5*Math.sin(x/23+ph*2))/4)*4;s+=`<rect x="${x}" y="${300-h}" width="8" height="${h}" fill="${col}"/>`;if(cap)s+=`<rect x="${x}" y="${300-h}" width="8" height="${cap[1]}" fill="${cap[0]}"/>`}return s}
-function farRow(seed,col,win,a,b){const r=mkr(seed);let x=-6,s='';while(x<400){const w=24+((r()*3)|0)*8,h=a+(((r()*(b-a))/8)|0)*8;s+=`<rect x="${x}" y="${300-h}" width="${w}" height="${h}" fill="${col}"/>`;for(let y=300-h+8;y<292;y+=12)for(let k=x+4;k<x+w-6;k+=8)if(r()>.62)s+=`<rect x="${k}" y="${y}" width="3" height="4" fill="${win}" opacity=".9"/>`;x+=w}return s}
+const SUNP={tw:[70,64],tk:[320,56],ys:[318,58]},MOONP={tw:[322,58],tk:[72,60],ys:[318,58]};
+function celestial(loc){
+ if(CUR.k==='day'){const p=SUNP[loc];return pxDisc(p[0],p[1],26,'#fff6c0',4,.3)+pxDisc(p[0],p[1],17,'#fff0a0')}
+ if(CUR.k==='night'){const p=MOONP[loc];GL.push(pxDisc(p[0],p[1],18,'#fff4d0')+pxDisc(p[0]+6,p[1]-3,14,'#ffffff',4,.25));return ''}
+ return loc==='tw'?pxDisc(92,226,40,'#ffe7b0'):loc==='tk'?pxDisc(60,212,26,'#ffd9a0'):pxDisc(318,58,22,'#f6f2d8')}
+function hills(col,base,amp,ph,cap){col=tone(col);let s='';for(let x=0;x<400;x+=8){const h=Math.round((base+amp*Math.sin(x/58+ph)+amp*.5*Math.sin(x/23+ph*2))/4)*4;s+=`<rect x="${x}" y="${300-h}" width="8" height="${h}" fill="${col}"/>`;if(cap)s+=`<rect x="${x}" y="${300-h}" width="8" height="${cap[1]}" fill="${tone(cap[0])}"/>`}return s}
+function farRow(seed,col,win,a,b){const r=mkr(seed);let x=-6,s='';col=tone(col);while(x<400){const w=24+((r()*3)|0)*8,h=a+(((r()*(b-a))/8)|0)*8;s+=`<rect x="${x}" y="${300-h}" width="${w}" height="${h}" fill="${col}"/>`;for(let y=300-h+8;y<292;y+=12)for(let k=x+4;k<x+w-6;k+=8)if(r()>.62&&CUR.lit>.2)s+=`<rect x="${k}" y="${y}" width="3" height="4" fill="${win}" opacity=".9"/>`;x+=w}return s}
 function bld(x,w,top,pid,win,seed,lit){const rnd=mkr(seed);let s=`<rect x="${x}" y="${top}" width="${w}" height="${300-top}" fill="url(#${pid})" stroke="${OL}" stroke-width="2"/><rect x="${x-3}" y="${top-5}" width="${w+6}" height="8" fill="#2a1d3d" stroke="${OL}" stroke-width="2"/><rect x="${x+w-7}" y="${top}" width="7" height="${300-top}" fill="#000" opacity=".22"/>`;
- for(let y=top+12;y<280;y+=22)for(let k=x+7;k<x+w-16;k+=16){const on=rnd()<(lit||.5);s+=`<rect x="${k}" y="${y}" width="9" height="12" fill="${on?win:'#1b1630'}" stroke="${OL}" stroke-width="1.5"/>`+(on?`<rect x="${k+1}" y="${y+1}" width="7" height="3" fill="#fff" opacity=".35"/>`:'')}
+ for(let y=top+12;y<280;y+=22)for(let k=x+7;k<x+w-16;k+=16){const on=rnd()<CUR.lit*((lit||.5)/.5);
+  if(on){GL.push(`<rect x="${k}" y="${y}" width="9" height="12" fill="${win}" stroke="${OL}" stroke-width="1.5"/><rect x="${k+1}" y="${y+1}" width="7" height="3" fill="#fff" opacity=".35"/>`)}
+  else s+=`<rect x="${k}" y="${y}" width="9" height="12" fill="${CUR.unlit}" stroke="${OL}" stroke-width="1.5"/>`+(CUR.k==='day'?`<rect x="${k+1}" y="${y+1}" width="7" height="3" fill="#fff" opacity=".5"/>`:'')}
  return s}
 const pipe=(x,y1,y2)=>`<rect x="${x}" y="${y1}" width="5" height="${y2-y1}" fill="#6d5c82" stroke="${OL}" stroke-width="1.5"/><rect x="${x-2}" y="${y1+((y2-y1)>>1)}" width="9" height="4" fill="#4e4064" stroke="${OL}" stroke-width="1.5"/>`;
-const neon=(t,x,y,c,fs)=>`<text x="${x}" y="${y}" text-anchor="middle" font-size="${fs||13}" font-weight="900" fill="none" stroke="${c}" stroke-width="5" opacity=".4" filter="url(#glow)">${t}</text><text x="${x}" y="${y}" text-anchor="middle" font-size="${fs||13}" font-weight="900" fill="#fff" stroke="${c}" stroke-width="1.1">${t}</text>`;
-const sign=(x,y,w,h,t,c,fs)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#1b1230" stroke="${c}" stroke-width="2"/>`+neon(t,x+w/2,y+h/2+(fs||13)*.35,c,fs);
-const lamp=x=>`<circle cx="${x}" cy="226" r="34" fill="url(#lg)"/><rect x="${x-2}" y="228" width="4" height="70" fill="#3a2f55" stroke="${OL}" stroke-width="1.5"/><rect x="${x-9}" y="222" width="18" height="7" fill="#ffd98a" stroke="${OL}" stroke-width="2"/><rect x="${x-12}" y="217" width="24" height="5" fill="#3a2f55" stroke="${OL}" stroke-width="1.5"/>`;
+const neon=(t,x,y,c,fs)=>{const g=Math.min(1,.4*CUR.glow);GL.push(`<text x="${x}" y="${y}" text-anchor="middle" font-size="${fs||13}" font-weight="900" fill="none" stroke="${c}" stroke-width="5" opacity="${g}" filter="url(#glow)">${t}</text><text x="${x}" y="${y}" text-anchor="middle" font-size="${fs||13}" font-weight="900" fill="#fff" stroke="${c}" stroke-width="1.1">${t}</text>`);return ''};
+const sign=(x,y,w,h,t,c,fs)=>{GL.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#1b1230" stroke="${c}" stroke-width="2"/>`);return neon(t,x+w/2,y+h/2+(fs||13)*.35,c,fs)};
+const vsign=(x,y,chs,c)=>{GL.push(`<rect x="${x}" y="${y}" width="18" height="${chs.length*16+6}" fill="#1b1230" stroke="${c}" stroke-width="2"/><rect x="${x+8}" y="${y-8}" width="2" height="8" fill="${OL}"/>`);[...chs].forEach((ch,i)=>{neon(ch,x+9,y+17+i*16,c,13)});return ''};
+const lamp=x=>{const on=CUR.glow>.5;if(on)GL.push(`<circle cx="${x}" cy="226" r="34" fill="url(#lg)"/><rect x="${x-9}" y="222" width="18" height="7" fill="#ffd98a" stroke="${OL}" stroke-width="2"/>`);
+ return `<rect x="${x-2}" y="228" width="4" height="70" fill="#3a2f55" stroke="${OL}" stroke-width="1.5"/>${on?'':`<rect x="${x-9}" y="222" width="18" height="7" fill="#b8b6c8" stroke="${OL}" stroke-width="2"/>`}<rect x="${x-12}" y="217" width="24" height="5" fill="#3a2f55" stroke="${OL}" stroke-width="1.5"/>`};
 const crate=(x,y,s)=>`<rect x="${x}" y="${y-s}" width="${s}" height="${s}" fill="#9a6a38" stroke="${OL}" stroke-width="2"/><path d="M${x} ${y-s}L${x+s} ${y}M${x+s} ${y-s}L${x} ${y}" stroke="#5a3a1c" stroke-width="2"/>`;
 const barrel=(x,y,c)=>`<rect x="${x}" y="${y-26}" width="20" height="26" rx="3" fill="${c}" stroke="${OL}" stroke-width="2"/><rect x="${x}" y="${y-19}" width="20" height="3" fill="#000" opacity=".3"/><rect x="${x}" y="${y-8}" width="20" height="3" fill="#000" opacity=".3"/><rect x="${x+3}" y="${y-24}" width="3" height="20" fill="#fff" opacity=".22"/>`;
-const vend=(x,y,c)=>`<rect x="${x}" y="${y-44}" width="26" height="44" fill="${c}" stroke="${OL}" stroke-width="2"/><rect x="${x+3}" y="${y-40}" width="16" height="26" fill="#cfe9ff" stroke="${OL}" stroke-width="1.5"/>`+[0,1,2].map(i=>[0,1].map(j=>`<rect x="${x+5+j*7}" y="${y-37+i*8}" width="5" height="6" fill="${['#ff6b6b','#ffd93d','#6bcB77','#4d96ff','#ff9f43','#c77dff'][i*2+j]}"/>`).join('')).join('')+`<rect x="${x+21}" y="${y-38}" width="3" height="6" fill="#ffd98a"/><rect x="${x+5}" y="${y-9}" width="16" height="5" fill="#120c24"/>`;
+const vend=(x,y,c)=>{if(CUR.lit>.3)GL.push(`<rect x="${x+3}" y="${y-40}" width="16" height="26" fill="#cfe9ff" stroke="${OL}" stroke-width="1.5"/>`+[0,1,2].map(i=>[0,1].map(j=>`<rect x="${x+5+j*7}" y="${y-37+i*8}" width="5" height="6" fill="${['#ff6b6b','#ffd93d','#6bcB77','#4d96ff','#ff9f43','#c77dff'][i*2+j]}"/>`).join('')).join(''));
+ return `<rect x="${x}" y="${y-44}" width="26" height="44" fill="${c}" stroke="${OL}" stroke-width="2"/>`+(CUR.lit>.3?'':`<rect x="${x+3}" y="${y-40}" width="16" height="26" fill="#9fc4e0" stroke="${OL}" stroke-width="1.5"/>`+[0,1,2].map(i=>[0,1].map(j=>`<rect x="${x+5+j*7}" y="${y-37+i*8}" width="5" height="6" fill="${['#ff6b6b','#ffd93d','#6bcB77','#4d96ff','#ff9f43','#c77dff'][i*2+j]}"/>`).join('')).join(''))+`<rect x="${x+21}" y="${y-38}" width="3" height="6" fill="#ffd98a"/><rect x="${x+5}" y="${y-9}" width="16" height="5" fill="#120c24"/>`};
 function lights(x1,y1,x2,y2,sag,cols){let s='';const n=11;let d=`M${x1} ${y1}`;for(let i=1;i<=n*2;i++){const t=i/(n*2);d+=`L${(x1+(x2-x1)*t).toFixed(1)} ${(y1+(y2-y1)*t+sag*Math.sin(Math.PI*t)).toFixed(1)}`}
- s+=`<path d="${d}" stroke="${OL}" stroke-width="1.5" fill="none"/>`;for(let i=1;i<n;i++){const t=i/n,x=x1+(x2-x1)*t,y=y1+(y2-y1)*t+sag*Math.sin(Math.PI*t),c=cols[i%cols.length];s+=`<circle cx="${x.toFixed(1)}" cy="${(y+5).toFixed(1)}" r="7" fill="${c}" opacity=".35" filter="url(#glow)"/><rect x="${(x-2.5).toFixed(1)}" y="${(y+1).toFixed(1)}" width="5" height="7" fill="${c}" stroke="${OL}" stroke-width="1"/>`}return s}
-const graf=(x,w,t,c1,c2)=>`<rect x="${x}" y="240" width="${w}" height="56" fill="#8c8992" stroke="${OL}" stroke-width="2"/><rect x="${x}" y="240" width="${w}" height="6" fill="#6c6974"/><rect x="${x+6}" y="262" width="22" height="3" fill="#5c5964" opacity=".5"/><text x="${x+w*.7}" y="266" text-anchor="middle" font-size="26" font-weight="900" font-style="italic" fill="${c1}" stroke="${c2}" stroke-width="3" paint-order="stroke" letter-spacing="2">${t}</text><rect x="${x+w*.62}" y="270" width="3" height="9" fill="${c1}"/><rect x="${x+w*.8}" y="270" width="3" height="6" fill="${c1}"/><rect x="${x+8}" y="250" width="12" height="4" fill="#ff5fa2"/><rect x="${x+w-24}" y="252" width="14" height="4" fill="#4fe3ff"/>`;
-const fence=(x,w)=>`<rect x="${x}" y="262" width="${w}" height="34" fill="url(#cl)" opacity=".55"/><rect x="${x}" y="260" width="${w}" height="4" fill="#4e4064" stroke="${OL}" stroke-width="1.5"/>`+[...Array(Math.floor(w/48)+1)].map((_,i)=>`<rect x="${x+i*48}" y="258" width="4" height="40" fill="#4e4064" stroke="${OL}" stroke-width="1.5"/>`).join('');
-function pxFloor(c1,c2,ln,curb,hz){let s='';const N=13,H=260/N;for(let i=0;i<N;i++)s+=`<rect y="${(300+i*H).toFixed(1)}" width="400" height="${(H+1).toFixed(1)}" fill="${smix(c1,c2,i/(N-1))}"/>`;
+ s+=`<path d="${d}" stroke="${OL}" stroke-width="1.5" fill="none"/>`;for(let i=1;i<n;i++){const t=i/n,x=x1+(x2-x1)*t,y=y1+(y2-y1)*t+sag*Math.sin(Math.PI*t),c=cols[i%cols.length];GL.push((CUR.glow>.5?`<circle cx="${x.toFixed(1)}" cy="${(y+5).toFixed(1)}" r="7" fill="${c}" opacity=".35" filter="url(#glow)"/>`:'')+`<rect x="${(x-2.5).toFixed(1)}" y="${(y+1).toFixed(1)}" width="5" height="7" fill="${c}" stroke="${OL}" stroke-width="1"/>`)}return s}
+const CURBS={hz:'#f2c230',rw:'#e8e0d0',tk:'#c8c6d2'};
+function pxFloor(c1,c2,ln,curb,cs){let s='';const N=13,H=260/N;for(let i=0;i<N;i++)s+=`<rect y="${(300+i*H).toFixed(1)}" width="400" height="${(H+1).toFixed(1)}" fill="${smix(c1,c2,i/(N-1))}"/>`;
  for(let i=-4;i<=12;i++)s+=`<line x1="200" y1="300" x2="${i*50}" y2="560" stroke="${ln}" stroke-width="1.5" opacity=".32"/>`;
  [316,338,368,408,462,530].forEach(y=>s+=`<rect y="${y}" width="400" height="2" fill="${ln}" opacity=".32"/>`);
  const rnd=mkr(9);for(let i=0;i<46;i++){const y=310+rnd()*240,x=rnd()*400,w=4+rnd()*8;s+=`<rect x="${x|0}" y="${y|0}" width="${w|0}" height="3" fill="#000" opacity=".15"/>`}
- s+=`<rect y="294" width="400" height="12" fill="${curb}" stroke="${OL}" stroke-width="2"/>`;if(hz)for(let x=-4;x<404;x+=16)s+=`<polygon points="${x},306 ${x+8},306 ${x+12},294 ${x+4},294" fill="#f2c230"/>`;return s}
-function tokyoTower(cx){const hw=y=>30*(y-62)/238;let s=`<circle cx="${cx}" cy="168" r="40" fill="url(#lg)"/><path d="M${cx} 62L${cx-30} 300H${cx+30}Z" fill="#e0452e" stroke="${OL}" stroke-width="2.5" stroke-linejoin="round"/>`;
- [118,196,246].forEach(y=>{const w=hw(y);s+=`<rect x="${cx-w}" y="${y-6}" width="${2*w}" height="12" fill="#f6efe4" stroke="${OL}" stroke-width="2"/>`});
+ s+=`<rect y="294" width="400" height="12" fill="${curb}" stroke="${OL}" stroke-width="2"/>`;
+ if(cs==='hz')for(let x=-4;x<404;x+=16)s+=`<polygon points="${x},306 ${x+8},306 ${x+12},294 ${x+4},294" fill="#f2c230"/>`;
+ if(cs==='rw')for(let x=-4;x<404;x+=16)s+=`<polygon points="${x},306 ${x+8},306 ${x+12},294 ${x+4},294" fill="#d8392e"/>`;
+ if(cs==='tk')for(let x=2;x<400;x+=10)s+=`<rect x="${x}" y="298" width="6" height="5" fill="#f2c230" stroke="#b98f10" stroke-width="1"/>`;
+ return s}
+function zebra(){let s='';for(let X=-140;X<560;X+=44){const f=y=>(200+(X-200)*(y-300)/260),g=y=>(200+(X+22-200)*(y-300)/260);s+=`<polygon points="${f(342).toFixed(1)},342 ${g(342).toFixed(1)},342 ${g(392).toFixed(1)},392 ${f(392).toFixed(1)},392" fill="#f4f1ea" opacity=".82"/>`}return s}
+function tokyoTower(cx){const hw=y=>30*(y-62)/238;if(CUR.glow>.5)GL.push(`<circle cx="${cx}" cy="168" r="40" fill="url(#lg)"/>`);
+ let s=`<path d="M${cx} 62L${cx-30} 300H${cx+30}Z" fill="${tone('#e0452e')}" stroke="${OL}" stroke-width="2.5" stroke-linejoin="round"/>`;
+ [118,196,246].forEach(y=>{const w=hw(y);s+=`<rect x="${cx-w}" y="${y-6}" width="${2*w}" height="12" fill="${tone('#f6efe4')}" stroke="${OL}" stroke-width="2"/>`});
  s+=`<path d="M${cx-18} 260L${cx+18} 300M${cx+18} 260L${cx-18} 300M${cx-12} 216L${cx+12} 246M${cx+12} 216L${cx-12} 246" stroke="#8a2a1c" stroke-width="2"/>`;
- const w=hw(150)+8;s+=`<rect x="${cx-w}" y="144" width="${2*w}" height="16" fill="#e0452e" stroke="${OL}" stroke-width="2"/><rect x="${cx-w+4}" y="149" width="${2*w-8}" height="5" fill="#ffd98a"/>`;
+ const w=hw(150)+8;s+=`<rect x="${cx-w}" y="144" width="${2*w}" height="16" fill="${tone('#e0452e')}" stroke="${OL}" stroke-width="2"/>`;GL.push(`<rect x="${cx-w+4}" y="149" width="${2*w-8}" height="5" fill="${CUR.lit>.3?'#ffd98a':'#ffe9b8'}"/>`);
  s+=`<path d="M${cx-14} 300Q${cx} 266 ${cx+14} 300Z" fill="${OL}"/><path d="M${cx} 62V28" stroke="${OL}" stroke-width="5"/><path d="M${cx} 62V28" stroke="#f6efe4" stroke-width="2"/><rect x="${cx-2}" y="24" width="4" height="4" fill="#ff5f5f"/>`;return s}
-function t101(cx){let s=`<rect x="${cx-22}" y="282" width="44" height="18" fill="#1f8d7a" stroke="${OL}" stroke-width="2"/>`;
- for(let i=0;i<8;i++){const y=282-i*25;s+=`<path d="M${cx-11} ${y}L${cx-15} ${y-25}H${cx+15}L${cx+11} ${y}Z" fill="${i%2?'#27a58e':'#36c7a8'}" stroke="${OL}" stroke-width="2" stroke-linejoin="round"/><rect x="${cx-11}" y="${y-18}" width="4" height="14" fill="#fff" opacity=".28"/><rect x="${cx-12}" y="${y-12}" width="24" height="2" fill="#000" opacity=".2"/>`}
- const t=282-8*25;s+=`<path d="M${cx-9} ${t}L${cx-6} ${t-14}H${cx+6}L${cx+9} ${t}Z" fill="#36c7a8" stroke="${OL}" stroke-width="2"/><path d="M${cx} ${t-14}V${t-44}" stroke="${OL}" stroke-width="5"/><path d="M${cx} ${t-14}V${t-44}" stroke="#bff3e6" stroke-width="2"/>`;return s}
-function pine(x,y,z){const t=(w,h,yy,c)=>`<polygon points="${x},${yy-h} ${x-w},${yy} ${x+w},${yy}" fill="${c}" stroke="${OL}" stroke-width="2" stroke-linejoin="round"/>`;
+function t101(cx){let s=`<rect x="${cx-22}" y="282" width="44" height="18" fill="${tone('#1f8d7a')}" stroke="${OL}" stroke-width="2"/>`;
+ for(let i=0;i<8;i++){const y=282-i*25;s+=`<path d="M${cx-11} ${y}L${cx-15} ${y-25}H${cx+15}L${cx+11} ${y}Z" fill="${tone(i%2?'#27a58e':'#36c7a8')}" stroke="${OL}" stroke-width="2" stroke-linejoin="round"/><rect x="${cx-11}" y="${y-18}" width="4" height="14" fill="#fff" opacity=".28"/><rect x="${cx-12}" y="${y-12}" width="24" height="2" fill="#000" opacity=".2"/>`}
+ const t=282-8*25;s+=`<path d="M${cx-9} ${t}L${cx-6} ${t-14}H${cx+6}L${cx+9} ${t}Z" fill="${tone('#36c7a8')}" stroke="${OL}" stroke-width="2"/><path d="M${cx} ${t-14}V${t-44}" stroke="${OL}" stroke-width="5"/><path d="M${cx} ${t-14}V${t-44}" stroke="#bff3e6" stroke-width="2"/>`;
+ if(CUR.k==='night')GL.push(`<rect x="${cx-1}" y="${t-46}" width="2" height="2" fill="#ff5f5f"/>`);return s}
+function pine(x,y,z){const t=(w,h,yy,c)=>`<polygon points="${x},${yy-h} ${x-w},${yy} ${x+w},${yy}" fill="${tone(c)}" stroke="${OL}" stroke-width="2" stroke-linejoin="round"/>`;
  return `<rect x="${x-3*z}" y="${y-8*z}" width="${6*z}" height="${10*z}" fill="#5b3b25" stroke="${OL}" stroke-width="2"/>`+t(17*z,26*z,y-6*z,'#1d5a49')+t(13*z,26*z,y-24*z,'#26705a')+t(9*z,24*z,y-42*z,'#2f8368')+`<polygon points="${x},${y-66*z} ${x-5*z},${y-56*z} ${x+5*z},${y-56*z}" fill="#fff"/><polygon points="${x-8*z},${y-44*z} ${x},${y-50*z} ${x+8*z},${y-44*z} ${x+4*z},${y-40*z} ${x-4*z},${y-40*z}" fill="#fff" opacity=".9"/>`}
+/* 台灣：騎樓、直式招牌、機車 */
+function arcade(x,w,seed){const r=mkr(seed);let s=`<rect x="${x}" y="258" width="${w}" height="42" fill="#2a1d3d" stroke="${OL}" stroke-width="2"/>`;
+ for(let k=x+4;k<x+w-4;k+=18){const lit=CUR.lit>.3;s+=`<rect x="${k}" y="268" width="14" height="30" fill="${lit?'#3a2a2a':'#a89c80'}" stroke="${OL}" stroke-width="1.5"/>`;if(lit)GL.push(`<rect x="${k+1}" y="269" width="12" height="28" fill="${['#ffcf6b','#ffb86b','#fff1c9'][(r()*3)|0]}" opacity=".7"/>`)}
+ for(let k=x;k<x+w;k+=8)s+=`<rect x="${k}" y="258" width="4" height="8" fill="${(k/8|0)%2?'#e8e0d0':'#d8392e'}"/>`;
+ s+=`<rect x="${x}" y="258" width="${w}" height="8" fill="none" stroke="${OL}" stroke-width="2"/><rect x="${x-1}" y="266" width="5" height="34" fill="#6d5c82" stroke="${OL}" stroke-width="1.5"/><rect x="${x+w-4}" y="266" width="5" height="34" fill="#6d5c82" stroke="${OL}" stroke-width="1.5"/>`;return s}
+const scooter=(x,y,c)=>`<circle cx="${x+5}" cy="${y-5}" r="5" fill="#222" stroke="${OL}" stroke-width="1.5"/><circle cx="${x+27}" cy="${y-5}" r="5" fill="#222" stroke="${OL}" stroke-width="1.5"/><rect x="${x+6}" y="${y-16}" width="22" height="8" fill="${c}" stroke="${OL}" stroke-width="2"/><rect x="${x+12}" y="${y-20}" width="12" height="5" fill="#2a2030" stroke="${OL}" stroke-width="1.5"/><rect x="${x+25}" y="${y-28}" width="3" height="14" fill="${c}" stroke="${OL}" stroke-width="1.5"/><rect x="${x+22}" y="${y-30}" width="9" height="3" fill="#333" stroke="${OL}" stroke-width="1"/><rect x="${x}" y="${y-16}" width="7" height="6" fill="${c}" stroke="${OL}" stroke-width="1.5"/>`;
+const tank=(x,y)=>`<rect x="${x}" y="${y-18}" width="16" height="14" fill="#c9c6d0" stroke="${OL}" stroke-width="2"/><rect x="${x+2}" y="${y-4}" width="2" height="4" fill="${OL}"/><rect x="${x+12}" y="${y-4}" width="2" height="4" fill="${OL}"/>`;
+/* 東京：高架電車、斑馬線、紅綠燈 */
+function train(x0){let s='';for(let k=0;k<3;k++){const x=x0+k*84;s+=`<rect x="${x}" y="206" width="82" height="30" rx="4" fill="#e8ecef" stroke="${OL}" stroke-width="2"/><rect x="${x}" y="224" width="82" height="6" fill="#3aa86a"/><rect x="${x}" y="206" width="82" height="3" fill="#cfd6dc"/>`;
+  for(let w=x+6;w<x+76;w+=16){if(CUR.lit>.3)GL.push(`<rect x="${w}" y="212" width="11" height="10" fill="#ffe9a0" stroke="${OL}" stroke-width="1.5"/>`);else s+=`<rect x="${w}" y="212" width="11" height="10" fill="${CUR.k==='day'?'#7fb2d8':'#2a3050'}" stroke="${OL}" stroke-width="1.5"/>`}}
+ return s}
+const trafficLight=x=>{GL.push(`<rect x="${x-6}" y="232" width="12" height="12" fill="${CUR.glow>.5?'#ff4040':'#7a2a2a'}" stroke="${OL}" stroke-width="1.5"/>`);return `<rect x="${x-2}" y="240" width="4" height="58" fill="#4a4660" stroke="${OL}" stroke-width="1.5"/><rect x="${x-9}" y="226" width="18" height="30" fill="#2a2638" stroke="${OL}" stroke-width="2"/><rect x="${x-6}" y="244" width="12" height="9" fill="#2f6a44"/><rect x="${x-6}" y="229" width="12" height="9" fill="#5a2020"/>`};
+const SKY={
+ tk:{day:['#4aa3f0','#8ec8f6','#d8eeff'],dusk:['#2c1d58','#9a4a7c','#f0a463'],night:['#050818','#141a4a','#2d2c66']},
+ tw:{day:['#58b0f4','#9ad2f7','#e4f4ff'],dusk:['#3a2470','#c25a7a','#ffb070'],night:['#080a22','#1a1c52','#40306a']},
+ ys:{day:['#69b5ff','#a8d6ff','#eaf6ff'],dusk:['#1a1840','#3f4f94','#c8a4c8'],night:['#04081c','#0f1d4a','#2b3e7c']}};
+const sk=(loc,seed)=>{const c=SKY[loc][CUR.k];return pxSky(c[0],c[1],c[2],seed)};
 const SCENE={
-tk:()=>DEFS+brickP('k1','#ad5a3c','#6e3324')+brickP('k2','#8a8790','#5c5964')+pxSky('#2c1d58','#9a4a7c','#f0a463',11)+pxDisc(76,64,18,'#ffe9b8')+
- farRow(4,'#3d2a5c','#ffd479',50,110)+tokyoTower(268)+farRow(17,'#2a1c40','#ffb86b',20,56)+
- bld(-4,92,150,'k1','#ffcf6b',3,.55)+bld(86,52,206,'k2','#ff9ec4',8,.5)+bld(318,90,170,'k2','#ffcf6b',5,.5)+pipe(94,214,296)+pipe(325,176,296)+
- sign(8,196,64,22,'ラーメン','#ff4fa0',13)+sign(326,208,66,22,'TOKYO','#4fe3ff',14)+
- lights(140,200,318,190,20,['#ff5a4d','#ffd93d','#ff5a4d','#fff1c9'])+graf(146,176,'TOKYO','#ffd93d','#e0452e')+
- vend(160,298,'#d94d4d')+vend(190,298,'#3d7fd9')+crate(238,298,22)+barrel(262,298,'#4a6f8a')+lamp(128)+lamp(300)+
- pxFloor('#8a4a3a','#3a2224','#e0905a','#a5573a',1)+`<text x="200" y="330" text-anchor="middle" font-size="16" font-weight="900" fill="#ffd0a0" letter-spacing="8" opacity=".3">TOKYO</text>`,
-tw:()=>DEFS+brickP('t1','#b05c3a','#6e3324')+brickP('t2','#8a8790','#5c5964')+pxSky('#3a2470','#c25a7a','#ffb070',21)+pxDisc(92,226,40,'#ffe7b0')+
+tk:()=>DEFS()+brickP('k2','#8a8790','#5c5964')+brickP('k1','#ad5a3c','#6e3324')+sk('tk',11)+celestial('tk')+
+ farRow(4,'#3d2a5c','#ffd479',50,110)+tokyoTower(120)+farRow(17,'#2a1c40','#ffb86b',20,56)+
+ /* 左側玻璃大樓 */`<rect x="-4" y="104" width="70" height="196" fill="url(#gl)" stroke="${OL}" stroke-width="2"/><rect x="-4" y="98" width="76" height="8" fill="#2a1d3d" stroke="${OL}" stroke-width="2"/><rect x="58" y="104" width="8" height="196" fill="#000" opacity=".2"/>`+
+ bld(322,86,132,'k2','#ffcf6b',8,.55)+sign(330,142,70,20,'ラーメン','#ff4fa0',12)+sign(330,170,70,20,'カラオケ','#4fe3ff',11)+sign(330,198,70,20,'TOKYO','#ffd93d',13)+
+ /* 高架電車 */`<rect x="-4" y="236" width="408" height="16" fill="#9a98a6" stroke="${OL}" stroke-width="2"/><rect x="-4" y="236" width="408" height="4" fill="#c8c6d2"/>`+train(-30)+
+ [40,150,262,372].map(x=>`<rect x="${x}" y="252" width="12" height="46" fill="#8a8896" stroke="${OL}" stroke-width="2"/>`).join('')+`<rect x="-4" y="252" width="408" height="46" fill="#000" opacity=".22"/>`+
+ lights(70,266,360,266,10,['#ff5a4d','#ffd93d','#ff5a4d'])+vend(190,298,'#d94d4d')+vend(222,298,'#3d7fd9')+trafficLight(100)+lamp(300)+
+ pxFloor('#4a4954','#1d1c26','#9a98b8','#9a98a6','tk')+zebra()+`<text x="200" y="330" text-anchor="middle" font-size="16" font-weight="900" fill="#ffd0a0" letter-spacing="8" opacity=".25">TOKYO</text>`,
+tw:()=>DEFS()+tileP('w1','#7fc4b4','#3a7a6a')+tileP('w2','#eaa7a0','#a85a58')+tileP('w3','#ecd9a2','#a8904a')+tileP('w4','#a7c0e8','#5a78b0')+tileP('w5','#f0b98a','#b0683a')+sk('tw',21)+celestial('tw')+
  hills('#2c4a5e',52,22,0.6)+hills('#235043',34,18,2.1)+t101(262)+
- [[60,80],[150,50],[330,104],[214,126],[372,48],[30,150]].map((l,i)=>`<circle cx="${l[0]+5}" cy="${l[1]+8}" r="20" fill="url(#lg)"/><rect x="${l[0]}" y="${l[1]}" width="10" height="14" fill="#ff9a3d" stroke="${OL}" stroke-width="1.5"/><rect x="${l[0]+2}" y="${l[1]+2}" width="6" height="6" fill="#ffe08a"/>`).join('')+
- bld(-4,96,140,'t1','#ffcf6b',13,.55)+bld(92,48,200,'t2','#ff9ec4',19,.5)+bld(322,86,160,'t1','#ffcf6b',23,.5)+pipe(100,204,296)+pipe(330,166,296)+
- sign(6,188,70,22,'夜市','#ff4fa0',15)+sign(330,196,64,22,'台灣','#4fe3ff',15)+
- `<circle cx="116" cy="168" r="11" fill="#ff3d3d" stroke="${OL}" stroke-width="2"/><rect x="112" y="156" width="8" height="3" fill="${OL}"/><circle cx="352" cy="150" r="11" fill="#ff3d3d" stroke="${OL}" stroke-width="2"/>`+
- lights(150,196,322,186,22,['#ff5a4d','#ffd93d','#52e0a0','#ff9ec4'])+graf(150,170,'台灣','#52e0c0','#1f6a5a')+
- `<rect x="148" y="206" width="8" height="92" fill="#6b4a2c" stroke="${OL}" stroke-width="2"/>`+[-70,-30,10,50,90].map(a=>`<ellipse cx="152" cy="204" rx="28" ry="7" fill="#2f9a58" stroke="${OL}" stroke-width="1.5" transform="rotate(${a} 152 204)"/>`).join('')+
- crate(196,298,22)+crate(220,298,16)+barrel(244,298,'#3e8a72')+barrel(268,298,'#8a4a3d')+lamp(300)+
- pxFloor('#8a5440','#3a2420','#e8a070','#a8603f',1)+`<text x="200" y="330" text-anchor="middle" font-size="16" font-weight="900" fill="#ffd0a0" letter-spacing="8" opacity=".3">TAIWAN</text>`,
-ys:()=>DEFS+pxSky('#1a1840','#3f4f94','#c8a4c8',31)+pxDisc(318,58,22,'#f6f2d8')+
+ [[60,80],[150,50],[330,104],[214,126],[372,48],[30,150]].map(l=>(CUR.k==='night'||CUR.k==='dusk')?`<circle cx="${l[0]+5}" cy="${l[1]+8}" r="20" fill="url(#lg)"/><rect x="${l[0]}" y="${l[1]}" width="10" height="14" fill="#ff9a3d" stroke="${OL}" stroke-width="1.5"/><rect x="${l[0]+2}" y="${l[1]+2}" width="6" height="6" fill="#ffe08a"/>`:'').join('')+
+ bld(-4,86,196,'w1','#ffcf6b',13,.5)+bld(86,82,176,'w2','#ffcf6b',19,.5)+bld(168,78,206,'w3','#ffcf6b',23,.5)+bld(246,80,188,'w4','#ffcf6b',29,.5)+bld(326,82,200,'w5','#ffcf6b',31,.5)+
+ tank(14,196)+tank(112,176)+tank(278,188)+
+ arcade(-4,86,1)+arcade(86,82,2)+arcade(168,78,3)+arcade(246,80,4)+arcade(326,82,5)+
+ vsign(66,200,'牛肉麵','#ff4fa0')+vsign(150,190,'珍奶','#4fe3ff')+vsign(232,214,'滷肉飯','#ffd93d')+vsign(312,200,'夜市','#52e0a0')+
+ lights(-4,246,404,246,16,['#ff3d3d','#ffd93d','#ff3d3d','#fff1c9'])+
+ scooter(38,298,'#d8392e')+scooter(118,298,'#f2efe6')+scooter(196,298,'#2f6ad8')+scooter(300,298,'#f2b630')+lamp(384)+
+ pxFloor('#8a5440','#3a2420','#e8a070','#a8603f','rw')+`<text x="200" y="330" text-anchor="middle" font-size="16" font-weight="900" fill="#ffd0a0" letter-spacing="8" opacity=".3">TAIWAN</text>`,
+ys:()=>DEFS()+sk('ys',31)+celestial('ys')+
  hills('#46618f',96,34,0.4,['#eaf3ff',10])+hills('#6f8fba',64,26,2.6,['#ffffff',8])+hills('#a9c4e4',34,16,1.2,['#ffffff',6])+
  `<path d="M0 214L400 150" stroke="${OL}" stroke-width="2"/><path d="M300 164V186" stroke="${OL}" stroke-width="2"/><rect x="286" y="184" width="30" height="22" fill="#e5484d" stroke="${OL}" stroke-width="2"/><rect x="291" y="189" width="20" height="9" fill="#cfeaff"/>`+
  `<rect x="118" y="214" width="164" height="84" fill="url(#pk)" stroke="${OL}" stroke-width="2.5"/><polygon points="106,216 200,164 294,216" fill="#f2f7ff" stroke="${OL}" stroke-width="2.5" stroke-linejoin="round"/><polygon points="106,216 294,216 288,224 112,224" fill="#cfe0f4" stroke="${OL}" stroke-width="2"/>`+
- [136,168,230,252].map((x,i)=>`<rect x="${x}" y="236" width="18" height="22" fill="#ffd479" stroke="${OL}" stroke-width="2"/><path d="M${x+9} 236V258M${x} 247H${x+18}" stroke="${OL}" stroke-width="1.5"/><circle cx="${x+9}" cy="248" r="22" fill="url(#lg)" opacity=".5"/>`).join('')+
+ [136,168,230,252].map(x=>{const on=CUR.k!=='day';if(on)GL.push(`<circle cx="${x+9}" cy="248" r="22" fill="url(#lg)" opacity=".5"/><rect x="${x}" y="236" width="18" height="22" fill="#ffd479" stroke="${OL}" stroke-width="2"/><path d="M${x+9} 236V258M${x} 247H${x+18}" stroke="${OL}" stroke-width="1.5"/>`);return on?'':`<rect x="${x}" y="236" width="18" height="22" fill="#9fc4e0" stroke="${OL}" stroke-width="2"/><path d="M${x+9} 236V258M${x} 247H${x+18}" stroke="${OL}" stroke-width="1.5"/>`}).join('')+
  `<rect x="188" y="248" width="24" height="50" fill="#4e2f19" stroke="${OL}" stroke-width="2"/><rect x="205" y="272" width="3" height="3" fill="#ffd479"/><rect x="154" y="199" width="92" height="17" fill="#5b3b25" stroke="${OL}" stroke-width="2"/>`+
  `<text x="200" y="212" text-anchor="middle" font-size="10" font-weight="900" fill="#fff6e8">湯澤 ♨ 滑雪場</text>`+
  [18,64,120,300,352,388].map((x,i)=>pine(x,300+(i%2)*6,.8+(i%3)*.15)).join('')+
  `<rect x="322" y="262" width="22" height="34" rx="2" fill="#fff" stroke="${OL}" stroke-width="2"/><rect x="326" y="244" width="14" height="18" fill="#fff" stroke="${OL}" stroke-width="2"/><rect x="329" y="249" width="3" height="3" fill="${OL}"/><rect x="335" y="249" width="3" height="3" fill="${OL}"/><rect x="331" y="254" width="6" height="3" fill="#ff9f43"/>`+
- pxFloor('#dbe8f8','#8fa6c9','#7a93bd','#f4f9ff',0)+`<text x="200" y="330" text-anchor="middle" font-size="16" font-weight="900" fill="#5a78a8" letter-spacing="8" opacity=".35">YUZAWA</text>`
+ pxFloor('#dbe8f8','#8fa6c9','#7a93bd','#f4f9ff','')+`<text x="200" y="330" text-anchor="middle" font-size="16" font-weight="900" fill="#5a78a8" letter-spacing="8" opacity=".35">YUZAWA</text>`
 };
+function buildScene(loc,ph){CUR=PHASES[ph]||PHASES.dusk;GL=[];const base=SCENE[loc]();const ov=CUR.ov?`<rect width="400" height="560" fill="${CUR.ov[0]}" opacity="${CUR.ov[1]}"/>`:'';return base+ov+GL.join('')}
 
 function flakes(){return [...Array(26)].map(()=>{const s=2+Math.random()*4;return `<i class="flake" style="left:${Math.random()*105}%;width:${s}px;height:${s}px;animation-duration:${5+Math.random()*7}s;animation-delay:-${Math.random()*10}s"></i>`}).join('')}
 
@@ -395,24 +458,24 @@ function lobbyView(){
  $('#view').innerHTML=`${mode==='solo'?'<div class="banner">單機預覽：目前只有你自己，尚未同步。</div>':''}
  <div class="top"><div><h1 id="ttl"></h1><small>${daysLeft()}</small></div><div class="pill" id="cnt"></div></div>
  <div class="chips" id="chips"></div>
- <div id="stage"><svg id="bg" viewBox="0 0 400 560" preserveAspectRatio="none" shape-rendering="crispEdges"></svg><div id="fl"></div><div id="ptl"></div><div id="pls"></div><div class="hint">👆 點地板走路 · 走進傳送門換地圖</div></div>
+ <div id="stage"><svg id="bg" viewBox="0 0 400 560" preserveAspectRatio="none" shape-rendering="crispEdges"></svg><div id="fl"></div><div id="ptl"></div><div id="pls"></div><button class="todb" id="tod"></button><div class="hint">👆 點地板走路 · 走進傳送門換地圖</div></div>
  <div class="emo"><div class="qp">${["++ 組我！", "開門，集合！", "上 Buff 出發！", "吸歐氣～", "恭 c！", "掉寶啦！", "去打寶（逛街）", "掛網中，等我", "回村補藥水", "你在幾頻？", "廣：拉麵團 em", "好的，收到", "GG，辛苦了", "機體沒電了"].map(t=>`<button data-q="${esc(t)}">${esc(t)}</button>`).join('')}<button id="jp">跳</button></div></div>
- <div class="chat"><input type="text" id="cm" maxlength="30" placeholder="說點什麼…（頭上顯示 1 分鐘）"><button id="cs">送出</button></div>
+ <div class="clog" id="clog"></div><div class="chat"><input type="text" id="cm" maxlength="30" placeholder="說點什麼…（頭上顯示 1 分鐘）"><button id="cs">送出</button></div>
  <div class="dock"><button id="b1">✏️ 角色</button><button id="b2">📸 相簿</button><button id="b3">👥 旅伴</button><button id="b4">📍 定位</button></div>`;
- drawScene();
+ drawScene();$('#tod').addEventListener('pointerup',e=>e.stopPropagation());$('#tod').addEventListener('click',e=>{e.stopPropagation();cycleTod()});
  const stg=$('#stage');stg.style.cursor='pointer';let lastT=0;
  const walk=e=>{if(e.target.closest&&e.target.closest('.ptl'))return;const now=Date.now();if(now-lastT<250)return;lastT=now;const r=stg.getBoundingClientRect();let x=(e.clientX-r.left)/r.width*100,y=(e.clientY-r.top)/r.height*100;
   x=Math.min(93,Math.max(7,x));y=Math.min(95,Math.max(60,y));save({x,y})};
  stg.addEventListener('pointerup',walk);stg.addEventListener('click',walk);
- app.querySelectorAll('[data-q]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();save({msg:b.dataset.q,mts:Date.now()})});
+ app.querySelectorAll('[data-q]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();sendMsg(b.dataset.q)});
  $('#jp').onclick=()=>save({jts:Date.now()});
- const say=()=>{const v=$('#cm').value.trim();if(!v)return;$('#cm').value='';save({msg:v,mts:Date.now()})};$('#cs').onclick=say;$('#cm').onkeydown=e=>{if(e.key==='Enter')say()};
+ const say=()=>{const v=$('#cm').value.trim();if(!v)return;$('#cm').value='';sendMsg(v)};$('#cs').onclick=say;$('#cm').onkeydown=e=>{if(e.key==='Enter')say()};
  $('#b1').onclick=()=>creator(false);$('#b2').onclick=()=>go('pic');$('#b3').onclick=peerSheet;$('#b4').onclick=async()=>{const s=await geoScene();if(s){setScene(s,true)}else toast('沒有取得定位（可能未授權），請用上方按鈕手動切換')};
  renderPlayers();
 }
 function toast(t){sheet.innerHTML=`<div>${t}</div><button class="big ghost" onclick="sheet.style.display='none'">好</button>`;sheet.style.display='block'}
 function drawScene(){
- $('#bg').innerHTML=SCENE[me.loc]();$('#fl').innerHTML=me.loc==='ys'?flakes():'';
+ drawBg();$('#fl').innerHTML=me.loc==='ys'?flakes():'';
  $('#ttl').textContent=SC[me.loc].e+' '+SC[me.loc].n;drawPortals();
  $('#chips').innerHTML=`<button class="chip ${me.auto?'on':''}" data-s="auto">📍 自動</button>`+Object.keys(SC).map(k=>`<button class="chip ${!me.auto&&me.loc==k?'on':''}" data-s="${k}">${SC[k].e} ${SC[k].n.replace('大廳','').replace('滑雪場','')}</button>`).join('');
  $('#chips').querySelectorAll('.chip').forEach(c=>c.onclick=async()=>{if(c.dataset.s==='auto'){const s=await geoScene();setScene(s||me.loc,true)}else{picked=true;setScene(c.dataset.s,false)}});
@@ -464,14 +527,12 @@ function albumSheet(){
 }
 
 /* ---------- tabs & shared data ---------- */
-let D={flights:{},stops:{},exp:{}},tab='lobby',day=0,routeOn=false,catF=null,MQ={place:'澀谷',cat:'古著',ll:null};
+let D={flights:{},stops:{},exp:{},chat:{},notice:{}},tab='lobby',day=0,routeOn=false,catF=null,MQ={place:'澀谷',cat:'古著',ll:null};
 const TABS=[['lobby','🏙️ 大廳'],['fly','✈️ 航班'],['plan','🗓️ 行程'],['map','🗺️ 周邊'],['exp','💴 記帳'],['pic','📸 相簿']];
 const DAYS=[...Array(9)].map((_,i)=>new Date(2027,0,13+i)),WK=['日','一','二','三','四','五','六'];
 const CAT={景點:'⛩',美食:'🍜',咖啡甜點:'☕',購物:'🛍',住宿:'🏨',交通:'🚆'};
 const rate=()=>+info.rate>0?+info.rate:0.21;
 function saveInfo(o){Object.assign(info,o);if(db)db.collection('trip').doc('info').set(info).catch(()=>{});refresh()}
-function rateSheet(){openSheet(`<h3 style="margin:0 0 6px">更新匯率</h3><div style="font-size:13px;opacity:.75">頁面無法自動抓即時匯率。先點下方連結看 Google 的日圓兌台幣，再把數字填進來，四個人會同步看到。</div><a href="https://www.google.com/search?q=JPY+to+TWD" target="_blank" rel="noopener" style="display:block;margin:8px 0">查 Google 即時匯率 ↗</a><div class="lab">1 日圓 = 幾台幣</div><input type="number" step="0.0001" inputmode="decimal" id="rv" value="${rate()}"><button class="big" id="rs">儲存</button><button class="big ghost" id="rx">取消</button>`);
- $('#rx').onclick=closeSheet;$('#rs').onclick=()=>{const v=parseFloat($('#rv').value);if(!(v>0.05&&v<1))return $('#rv').focus();closeSheet();saveInfo({rate:v,rateAt:new Date().toLocaleDateString('zh-TW')+' · '+(me.name||'')})}}
 const enc=encodeURIComponent,fnum=n=>Math.round(n).toLocaleString();
 const nameOf=id=>id===uid?(me.name||'我'):((players[id]&&players[id].name)||'旅伴');
 const allIds=()=>[...new Set([uid,...Object.keys(players)])].filter(i=>i===uid||(players[i]&&players[i].name));
@@ -480,12 +541,12 @@ function put(c,id,v){D[c][id]=v;if(db)db.collection(c).doc(id).set(v).catch(()=>
 function del(c,id){delete D[c][id];if(db)db.collection(c).doc(id).delete().catch(()=>{});refresh()}
 function refresh(){if(tab!=='lobby'&&$('#view')&&sheet.style.display!=='block')go(null,true)}
 function lobby(){go('lobby')}
-function go(t,keep){if(t)tab=t;if(!$('#view')){app.innerHTML='<header class="hd"></header><div id="view"></div><nav class="bar" id="nav"></nav>';
+function go(t,keep){if(t)tab=t;if(!$('#view')){app.innerHTML='<div id="tkr" class="tkr"></div><header class="hd"></header><div id="nbar"></div><div id="view"></div><nav class="bar" id="nav"></nav>';
   $('.hd').innerHTML=`<h1>TOKYO <b>SQUAD.</b></h1><p>2027.01.13 — 01.21 · 四人冒險基地</p><span class="pill">${mode==='solo'?'🟡 本機試玩（尚未設定資料庫）':'🟢 即時同步中'}</span>`}
  if(!keep)closeSheet();
  $('#nav').innerHTML=TABS.map(([k,n])=>`<button class="chip ${k==tab?'on':''}" data-t="${k}"><span class="ic">${n.split(' ')[0]}</span>${n.split(' ')[1]}</button>`).join('');
  $('#nav').querySelectorAll('.chip').forEach(c=>c.onclick=()=>go(c.dataset.t));
- ({lobby:lobbyView,plan:planView,fly:flyView,map:mapView,exp:expView,pic:picView})[tab]()}
+ ({lobby:lobbyView,plan:planView,fly:flyView,map:mapView,exp:expView,pic:picView})[tab]();renderTicker();renderNotice();renderLog();if(!window.__fx){window.__fx=1;if(!FX||Date.now()-FX.ts>30*60*1000)fetchFx()}}
 const dl=i=>`${DAYS[i].getMonth()+1}/${DAYS[i].getDate()}（${WK[DAYS[i].getDay()]}）`;
 const fdt=s=>s?s.slice(5).replace('T',' ').replace('-','/'):'—';
 
@@ -580,6 +641,69 @@ function stopSheet(id){
   if(!e){obj.by=uid;obj.ts=Date.now();obj.o=nextOrd(nd)}else if(e.day!==nd||e.o==null)obj.o=nextOrd(nd);
   const nid=id||Date.now().toString(36)+uid.slice(0,3);day=nd;planAll=false;if(!e)openStop=nid;closeSheet();put('stops',nid,obj)};
 }
+/* ===== 白天／傍晚／夜晚（依場景當地時間，也可手動切換看看） ===== */
+let TOD=null,lastPh=null;
+function localMin(tz){try{const p=new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:tz}).formatToParts(new Date());return (+p.find(x=>x.type==='hour').value%24)*60+(+p.find(x=>x.type==='minute').value)}catch(e){const d=new Date();return d.getHours()*60+d.getMinutes()}}
+const timeIn=tz=>{try{return new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:tz}).format(new Date())}catch(e){return ''}};
+function autoPhase(loc){const m=localMin(loc==='tw'?'Asia/Taipei':'Asia/Tokyo');const rise=loc==='tw'?390:410,set=loc==='tw'?1050:1020;
+ if(m>=rise+45&&m<set-60)return 'day';if((m>=rise-45&&m<rise+45)||(m>=set-60&&m<set+75))return 'dusk';return 'night'}
+const curPhase=loc=>TOD||autoPhase(loc);
+function drawBg(){const b=$('#bg');if(!b)return;lastPh=curPhase(me.loc);b.innerHTML=buildScene(me.loc,lastPh);const t=$('#tod');if(t)t.textContent=PHASES[lastPh].name+(TOD?'':'・自動')}
+function cycleTod(){const o=[null,'day','dusk','night'];TOD=o[(o.indexOf(TOD)+1)%o.length];drawBg()}
+setInterval(()=>{if(!TOD&&$('#bg')&&me&&me.loc&&autoPhase(me.loc)!==lastPh)drawBg()},30000);
+
+/* ===== 匯率跑馬燈（即時匯率） ===== */
+let FX=(()=>{try{return JSON.parse(localStorage.getItem('fx'))}catch(e){return null}})();
+const fxAt=d=>`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+async function fetchFx(){
+ const tries=[
+  async()=>{const j=await (await fetch('https://open.er-api.com/v6/latest/JPY')).json();if(j&&j.rates&&j.rates.TWD)return{r:+j.rates.TWD,src:'ExchangeRate-API'}},
+  async()=>{const j=await (await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/jpy.json')).json();if(j&&j.jpy&&j.jpy.twd)return{r:+j.jpy.twd,src:'currency-api'}},
+  async()=>{const j=await (await fetch('https://latest.currency-api.pages.dev/v1/currencies/jpy.json')).json();if(j&&j.jpy&&j.jpy.twd)return{r:+j.jpy.twd,src:'currency-api'}}];
+ for(const t of tries){try{const o=await t();if(o&&o.r>0.05&&o.r<1){FX={r:o.r,src:o.src,at:fxAt(new Date()),ts:Date.now()};try{localStorage.setItem('fx',JSON.stringify(FX))}catch(e){}renderTicker(true);return true}}catch(e){}}
+ return false}
+function renderTicker(force){
+ const el=$('#tkr');if(!el)return;const live=!!(FX&&FX.r),r=live?FX.r:rate();
+ const sig=live?FX.r+'|'+FX.at:'x'+r;if(!force&&el.dataset.sig===sig)return;el.dataset.sig=sig;
+ const f=n=>Math.round(n).toLocaleString('en-US');
+ const items=[`${live?'即時匯率':'參考匯率'}　¥1 ＝ NT$${r.toFixed(4)}`,`NT$1 ＝ ¥${(1/r).toFixed(2)}`,`¥1,000 ＝ NT$${f(1000*r)}`,`¥10,000 ＝ NT$${f(10000*r)}`,`NT$1,000 ＝ ¥${f(1000/r)}`,`東京 <b class="tkc" data-tz="Asia/Tokyo">${timeIn('Asia/Tokyo')}</b>　台北 <b class="tkc" data-tz="Asia/Taipei">${timeIn('Asia/Taipei')}</b>`,live?`更新 ${FX.at}　來源 ${FX.src}`:'未取得即時資料，改用記帳頁的匯率'];
+ const one=items.map(t=>`<span>${t}</span>`).join('<i>◆</i>')+'<i>◆</i>';
+ const len=items.join('').replace(/<[^>]*>/g,'').length;
+ el.innerHTML=`<div class="tkt" style="animation-duration:${Math.max(24,Math.round(len*.42))}s"><div class="tkh">${one}</div><div class="tkh" aria-hidden="true">${one}</div></div>`}
+setInterval(()=>{document.querySelectorAll('.tkc').forEach(e=>{e.textContent=timeIn(e.dataset.tz)})},20000);
+setInterval(()=>{if(!FX||Date.now()-FX.ts>30*60*1000)fetchFx()},5*60*1000);
+function rateSheet(){const live=FX&&FX.r;openSheet(`<h3 style="margin:0 0 6px">更新匯率</h3>${live?`<div class="card" style="margin:0 0 8px"><div style="font-size:13px;opacity:.75">即時匯率（${esc(FX.at)}・${esc(FX.src)}）</div><b style="font-size:20px">¥1 ＝ NT$${FX.r.toFixed(4)}</b><button class="big" id="rl" style="margin-top:8px">套用即時匯率給四個人</button></div>`:'<div style="font-size:13px;opacity:.75">目前抓不到即時匯率，可以手動填。</div>'}<div class="lab">或手動輸入：1 日圓 = 幾台幣</div><input type="number" step="0.0001" inputmode="decimal" id="rv" value="${rate()}"><button class="big ghost" id="rs">儲存手動匯率</button><button class="big ghost" id="rx">取消</button>`);
+ $('#rx').onclick=closeSheet;const A=v=>{closeSheet();saveInfo({rate:v,rateAt:new Date().toLocaleDateString('zh-TW')+' · '+(me.name||'')})};
+ if(live)$('#rl').onclick=()=>A(+FX.r.toFixed(4));
+ $('#rs').onclick=()=>{const v=parseFloat($('#rv').value);if(!(v>0.05&&v<1))return $('#rv').focus();A(v)}}
+
+/* ===== 留言紀錄（保存所有訊息，可往上拉瀏覽） ===== */
+const hhmm=ts=>{const d=new Date(ts);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
+const mdOf=ts=>{const d=new Date(ts);return (d.getMonth()+1)+'/'+d.getDate()};
+function sendMsg(t){const ts=Date.now();save({msg:t,mts:ts});const id=ts.toString(36)+uid.slice(0,3),o={u:uid,n:me.name||'旅伴',m:t,ts};D.chat[id]=o;if(db)db.collection('chat').doc(id).set(o).catch(()=>{});renderLog(true)}
+function renderLog(stick){const box=$('#clog');if(!box)return;
+ const A=Object.values(D.chat||{}).sort((a,b)=>a.ts-b.ts).slice(-400);
+ const near=box.scrollHeight-box.scrollTop-box.clientHeight<48;
+ let last='',h='';A.forEach(m=>{const md=mdOf(m.ts);if(md!==last){h+=`<div class="cd">${md}</div>`;last=md}h+=`<div class="cl${m.u===uid?' me':''}"><span class="ct">${hhmm(m.ts)}</span><b class="cn">${esc(m.n||'旅伴')}</b><span class="cx">${esc(m.m)}</span></div>`});
+ box.innerHTML=h||'<div class="ce">還沒有留言，說點什麼吧</div>';
+ if(stick||near||!box.dataset.init){box.scrollTop=box.scrollHeight;box.dataset.init=1}}
+
+/* ===== 公告欄 ===== */
+function tripDayIdx(){const n=new Date();for(let i=0;i<DAYS.length;i++){const d=DAYS[i];if(d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()&&d.getDate()===n.getDate())return i}return -2}
+const noticeLabel=d=>d>=0?`第 ${d+1} 天 · ${dl(d)}`:'一般公告';
+function pickNotice(){const A=Object.entries(D.notice||{}).map(([id,s])=>({id,...s}));if(!A.length)return null;const ti=tripDayIdx(),c=A.filter(s=>s.d===ti||s.d===-1),pool=c.length?c:A;return pool.sort((a,b)=>b.ts-a.ts)[0]}
+function renderNotice(){const el=$('#nbar');if(!el)return;const n=pickNotice(),tot=Object.keys(D.notice||{}).length;
+ el.innerHTML=`<button class="nbr" id="nbtn"><span class="nbl">公告</span><span class="nbt">${n?`<small>${esc(noticeLabel(n.d))}</small> ${esc(n.t)}`:'還沒有公告，點這裡新增重要訊息'}</span><span class="nbm">${tot?tot+' 則 ›':'新增 ›'}</span></button>`;
+ $('#nbtn').onclick=noticeSheet;if(sheet.dataset.nt==='1'&&sheet.style.display==='block')fillNotice()}
+function noticeSheet(){const ti=tripDayIdx();openSheet(`<h3 style="margin:0 0 6px">公告欄</h3><div class="lab">新增公告（所有人都看得到）</div><select id="nd"><option value="-1">一般公告（每天都顯示）</option>${DAYS.map((d,i)=>`<option value="${i}" ${i===ti?'selected':''}>第 ${i+1} 天 · ${dl(i)}</option>`).join('')}</select><input type="text" id="nt" maxlength="100" placeholder="例：1/14 早上 8:30 大廳集合，帶護照" style="margin-top:6px"><button class="big" id="np">發布公告</button><div id="nl"></div><button class="big ghost" id="nx">關閉</button>`);
+ sheet.dataset.nt='1';$('#nx').onclick=()=>{sheet.dataset.nt='';closeSheet()};
+ $('#np').onclick=()=>{const t=$('#nt').value.trim();if(!t)return $('#nt').focus();const ts=Date.now(),id=ts.toString(36)+uid.slice(0,3),o={d:+$('#nd').value,t,by:uid,n:me.name||'旅伴',ts};D.notice[id]=o;if(db)db.collection('notice').doc(id).set(o).catch(()=>{});$('#nt').value='';renderNotice();fillNotice()};
+ fillNotice()}
+function fillNotice(){const box=$('#nl');if(!box)return;const A=Object.entries(D.notice||{}).map(([id,s])=>({id,...s}));if(!A.length){box.innerHTML='<div class="lab" style="margin-top:10px">目前沒有公告</div>';return}
+ const ti=tripDayIdx(),g={};A.forEach(s=>(g[s.d]=g[s.d]||[]).push(s));const ks=Object.keys(g).map(Number).sort((a,b)=>(a===ti?-1:b===ti?1:a-b));
+ box.innerHTML=ks.map(k=>`<div class="lab" style="margin-top:12px">${noticeLabel(k)}${k===ti?'　（今天）':''}</div>`+g[k].sort((a,b)=>b.ts-a.ts).map(s=>`<div class="ntx"><div>${esc(s.t)}</div><small>${esc(s.n||'旅伴')} · ${mdOf(s.ts)} ${hhmm(s.ts)}</small>${s.by===uid?`<button class="x" data-nd="${s.id}" title="刪除">刪除</button>`:''}</div>`).join('')).join('');
+ box.querySelectorAll('[data-nd]').forEach(b=>b.onclick=()=>{if(!b.dataset.c){b.dataset.c=1;b.textContent='確定刪除？';return}const id=b.dataset.nd;delete D.notice[id];if(db)db.collection('notice').doc(id).delete().catch(()=>{});renderNotice();fillNotice()})}
+
 /* ---- flights ---- */
 const AL={BR:['長榮航空','#00704a','https://www.evaair.com'],CI:['中華航空','#c4002f','https://www.china-airlines.com'],JX:['星宇航空','#9a7b3f','https://www.starlux-airlines.com'],IT:['台灣虎航','#f26a21','https://www.tigerairtw.com'],MM:['樂桃航空','#c3007a','https://www.flypeach.com'],TR:['酷航','#c9a000','https://www.flyscoot.com'],JL:['日本航空','#c8102e','https://www.jal.co.jp'],NH:['全日空','#1d3f94','https://www.ana.co.jp'],CX:['國泰航空','#006564','https://www.cathaypacific.com'],GK:['捷星日本','#ff5000','https://www.jetstar.com'],BC:['天馬航空','#0066b3','https://www.skymark.co.jp'],AE:['華信航空','#c4002f','https://www.mandarin-airlines.com'],B7:['立榮航空','#00843d','https://www.uniair.com.tw'],UA:['聯合航空','#0033a0','https://www.united.com'],SQ:['新加坡航空','#c98a00','https://www.singaporeair.com'],KE:['大韓航空','#0083c9','https://www.koreanair.com']};
 const AP={TPE:'桃園',TSA:'松山',KHH:'高雄',RMQ:'台中',NRT:'成田',HND:'羽田'};
@@ -774,7 +898,7 @@ function picView(){
  if(db){
   db.collection('players').onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});delete o[uid];players=o;renderPlayers()},()=>{});
   db.collection('trip').doc('info').onSnapshot(s=>{if(s.exists){info=cl(s.data());refresh()}},()=>{});
-  ['flights','stops','exp'].forEach(c=>db.collection(c).onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});D[c]=o;refresh()},()=>{}));
+  ['flights','stops','exp'].forEach(c=>db.collection(c).onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});D[c]=o;refresh()},()=>{}));db.collection('chat').onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});D.chat=o;renderLog()},()=>{});db.collection('notice').onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});D.notice=o;renderNotice()},()=>{});
   setInterval(()=>{if(document.visibilityState==='visible'&&me.name)save({})},90000);
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&me.name)save({})});
  }
