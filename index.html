@@ -171,6 +171,43 @@ input,input[type=text],input[type=url],select,textarea{border-radius:4px;border:
 /* ===== 時段切換鈕 ===== */
 .todb{position:absolute;right:8px;top:8px;z-index:6;background:rgba(10,6,14,.72);color:#fff;border:2px solid var(--ink);border-radius:3px;font-size:12px;font-weight:800;padding:3px 8px}
 #stage{isolation:isolate;z-index:0}
+#wtoast{display:none;position:fixed;left:10px;right:10px;top:42px;z-index:300;max-width:420px;margin:0 auto;background:#5a1f1f;color:#fff;border:3px solid var(--ink);border-radius:4px;box-shadow:0 4px 0 #0a060e;padding:9px 12px;font-size:13px;font-weight:700}
+/* ===== 天氣 ===== */
+#fl{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.wxb{top:34px}
+.fk{position:absolute;top:-4%;background:#fff;opacity:.9;animation:fallx linear infinite}
+@keyframes fallx{to{transform:translate(var(--dx,-20px),620px)}}
+.rd{position:absolute;top:-30px;width:2px;background:linear-gradient(to bottom,rgba(200,225,255,0),rgba(215,235,255,.9));animation:rainx linear infinite}
+@keyframes rainx{from{transform:rotate(var(--rot,1.5deg))}to{transform:translate(var(--dx,-14px),640px) rotate(var(--rot,1.5deg))}}
+.ws{position:absolute;left:-110px;height:2px;background:linear-gradient(to right,rgba(255,255,255,0),rgba(255,255,255,.6));animation:wsx linear infinite}
+@keyframes wsx{to{transform:translateX(620px)}}
+.lf{position:absolute;left:-20px;width:6px;height:4px;animation:lfx linear infinite}
+@keyframes lfx{to{transform:translate(620px,var(--ly,40px)) rotate(900deg)}}
+.dcl{position:absolute;left:-100px;background:var(--c);opacity:.6;box-shadow:12px -10px 0 var(--c),26px -10px 0 var(--c),38px 0 0 -3px var(--c);animation:dcx linear infinite}
+@keyframes dcx{to{transform:translateX(640px)}}
+.lt{position:absolute;inset:0;background:#dfe8ff;opacity:0;animation:ltx 7s infinite}
+@keyframes ltx{0%,91%,100%{opacity:0}92%{opacity:.7}93.5%{opacity:.08}95%{opacity:.5}97%{opacity:0}}
+.fgv{position:absolute;inset:0;background:linear-gradient(rgba(225,232,240,.35),rgba(225,232,240,.55) 55%,rgba(225,232,240,.4));animation:fgb 9s ease-in-out infinite alternate}
+@keyframes fgb{to{opacity:.72}}
+.bar .chip .ic{font-size:22px}.bar .chip{font-size:10.5px}
+.wxc .chips{padding-bottom:10px}
+.wxnow{display:flex;align-items:center;gap:14px;padding:6px 2px 10px}
+.wxi{font-size:56px;line-height:1}
+.wxtt{font-size:38px;font-weight:900;line-height:1;color:var(--ac)}
+.wxd{font-size:15px;font-weight:800;margin-top:4px}
+.wxg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:#c9c0d8;padding:8px 10px;background:#241d2d;border:2px solid var(--ink);border-radius:3px}
+.wxg b{color:#fff;margin:0 2px 0 4px;font-size:14px}
+.wxup{font-size:11px;color:#a89fb8;margin:6px 2px 0}
+.lnk{background:none;border:0;color:var(--ac);font-weight:800;padding:0;text-decoration:underline;font-size:11px}
+.wxh{margin:16px 0 6px;font-size:14px;font-weight:900;color:var(--ac)}
+.wxr{display:flex;align-items:center;gap:8px;padding:7px 8px;border-bottom:1px dashed #5a5266;font-size:13px}
+.wxr b{flex:1.5;font-size:12.5px}
+.wxr .wi{font-size:20px;width:26px;text-align:center}
+.wxr .wt{width:58px;font-weight:800}.wxr .wt i{font-style:normal;color:#9d93b5;font-weight:600}
+.wxr .wp{width:62px;font-size:12px;color:#8fc3ff}.wxr .ww{width:46px;font-size:12px;color:#d9c9a0}
+.wxnote{font-size:12px;color:#a89fb8;padding:8px 4px}
+.wxtip{margin:8px 0 2px;padding:8px 10px;background:#2a2433;border:2px solid var(--ink);border-radius:3px;font-size:12.5px;line-height:1.5}
+.wxsrc{margin-top:16px;font-size:10.5px;color:#8a8099;text-align:center}.wxsrc a{color:#a89fb8}
 </style></head>
 <body><div id="app"></div><div id="sheet"></div>
 <script>
@@ -189,16 +226,16 @@ function makeDb(M,rtdb,room){
  return{collection:name=>({
   doc:id=>({
    get:async()=>snapDoc(id,await M.get(P(name,id))),
-   set:d=>M.set(P(name,id),cl(d)),
-   update:d=>M.update(P(name,id),cl(d)),
-   delete:()=>M.remove(P(name,id)),
+   set:d=>M.set(P(name,id),cl(d)).catch(e=>{wfail(e);throw e}),
+   update:d=>M.update(P(name,id),cl(d)).catch(e=>{wfail(e);throw e}),
+   delete:()=>M.remove(P(name,id)).catch(e=>{wfail(e);throw e}),
    onSnapshot:(next,err)=>M.onValue(P(name,id),s=>next(snapDoc(id,s)),err)}),
   onSnapshot:(next,err)=>M.onValue(P(name),s=>{const docs=[];s.forEach(c=>{docs.push({id:c.key,exists:true,data:()=>c.val()})});next({docs,size:docs.length,empty:!docs.length,metadata:{}})},err)})}}
 async function connectDb(){
- const F=CONFIG.firebase;if(window.__FB_MOCK)return makeDb(window.__FB_MOCK,null,CONFIG.room);
+ const F=CONFIG.firebase;if(window.__FB_MOCK){const M=window.__FB_MOCK;window.__conn=cb=>M.onValue(M.ref(null,'.info/connected'),s=>cb(s.val()===true));return makeDb(M,null,CONFIG.room)}
  if(!F.databaseURL||!F.apiKey)return null;
  const [A,M]=await Promise.all([import(`https://www.gstatic.com/firebasejs/${FBV}/firebase-app.js`),import(`https://www.gstatic.com/firebasejs/${FBV}/firebase-database.js`)]);
- return makeDb(M,M.getDatabase(A.initializeApp(F)),CONFIG.room)}
+ const rt=M.getDatabase(A.initializeApp(F));window.__conn=cb=>M.onValue(M.ref(rt,'.info/connected'),s=>cb(s.val()===true));return makeDb(M,rt,CONFIG.room)}
 function myId(){let v=null;try{v=localStorage.getItem('uid')}catch(e){}if(!v){v=Math.random().toString(36).slice(2,10);try{localStorage.setItem('uid',v)}catch(e){}}return v}
 const $=s=>document.querySelector(s), app=$('#app'), sheet=$('#sheet');
 const SK=['#ffe0c8','#f5c9a0','#d9a273','#a8734a'],
@@ -288,7 +325,15 @@ const PHASES={
  day:{k:'day',name:'白天',lit:.08,unlit:'#8fb8da',stars:0,glow:.15,cu:'#c9d9f2',cop:.9,fog:['#a9c4e4',.45],ov:['#ffffff',.08]},
  dusk:{k:'dusk',name:'傍晚',lit:.5,unlit:'#1b1630',stars:16,glow:1,cu:'#ff9a4a',cop:.55,fog:null,ov:['#ff7a3a',.07]},
  night:{k:'night',name:'夜晚',lit:.8,unlit:'#14102a',stars:64,glow:1.5,cu:'#5a5aa0',cop:.25,fog:['#050620',.3],ov:['#0a1240',.5]}};
-let CUR=PHASES.dusk,GL=[];
+let CUR=PHASES.dusk,GL=[],WXN={k:'none',w:0};
+const WXG={none:0,sun:0,cloud:.2,overcast:.6,rain:.78,storm:.95,snow:.55,fog:.5},WGC={day:'#8a94a3',dusk:'#5d5870',night:'#141a30'},WNC={cloud:14,overcast:16,rain:17,storm:18,snow:15,fog:12};
+function wxPhase(p,w){const g=WXG[w.k]||0,q=Object.assign({},p,{wk:w.k,gray:g,grayC:WGC[p.k]});
+ if(w.k==='sun')q.nc=p.k==='day'?4:3;
+ else if(g){q.nc=WNC[w.k];q.big=g>=.5?1:0;q.cop=Math.max(p.cop,.55+g*.4);q.stars=g>=.5?0:p.stars>>1}
+ if(g>=.5){q.nocel=1;q.lit=Math.min(1,p.lit+.18);q.glow=Math.max(p.glow,.6)}
+ if(g)q.fog=p.fog?[smix(p.fog[0],q.grayC,g*.6),Math.min(.75,p.fog[1]+g*.25)]:[q.grayC,g*.3];
+ q.dark=g*(p.k==='day'?.3:p.k==='dusk'?.2:.1);return q}
+function puddles(){const r=mkr(77);let s='';const a=CUR.k==='night'?.28:.4;for(let i=0;i<10;i++){const x=Math.floor(r()*44)*8,y=336+Math.floor(r()*24)*8,w=24+Math.floor(r()*4)*8;s+=`<rect x="${x}" y="${y}" width="${w}" height="4" fill="#8fb4dc" opacity="${a}"/><rect x="${x+4}" y="${y}" width="${Math.round(w*.4)}" height="2" fill="#fff" opacity="${a}"/>`}return s}
 const tone=c=>CUR.fog?smix(c,CUR.fog[0],CUR.fog[1]):c;
 const DEFS=()=>`<defs><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.5"/></filter><radialGradient id="lg"><stop offset="0" stop-color="#ffd98a" stop-opacity=".85"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></radialGradient><pattern id="cl" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M0 0L8 8M8 0L0 8" stroke="#9a94b8" stroke-width="1"/></pattern><pattern id="pk" width="8" height="12" patternUnits="userSpaceOnUse"><rect width="8" height="12" fill="#8a5a33"/><rect x="7" width="1" height="12" fill="#4e2f19"/><rect y="11" width="8" height="1" fill="#5a3820" opacity=".7"/></pattern><pattern id="gl" width="10" height="12" patternUnits="userSpaceOnUse"><rect width="10" height="12" fill="#7fb2d8"/><rect width="10" height="1" fill="#e8f4ff" opacity=".7"/><rect width="1" height="12" fill="#e8f4ff" opacity=".5"/></pattern></defs>`;
 const brickP=(id,base,line)=>`<pattern id="${id}" width="16" height="8" patternUnits="userSpaceOnUse"><rect width="16" height="8" fill="${base}"/><rect y="7" width="16" height="1" fill="${line}"/><rect width="1" height="4" fill="${line}"/><rect x="8" y="4" width="1" height="4" fill="${line}"/></pattern>`;
@@ -296,12 +341,14 @@ const tileP=(id,base,line)=>`<pattern id="${id}" width="8" height="8" patternUni
 function pxSky(a,b,c,seed){const rnd=mkr(seed||3);let s='';const N=14,H=300/N;
  for(let i=0;i<N;i++){const t=i/(N-1);s+=`<rect y="${(i*H).toFixed(1)}" width="400" height="${(H+1).toFixed(1)}" fill="${t<.6?smix(a,b,t/.6):smix(b,c,(t-.6)/.4)}"/>`}
  for(let i=0;i<CUR.stars;i++){const x=Math.floor(rnd()*50)*8,y=Math.floor(rnd()*(CUR.k==='night'?15:8))*8,z=i%4?2:4;s+=`<rect x="${x}" y="${y}" width="${z}" height="${z}" fill="#fff" opacity="${(.5+rnd()*.5).toFixed(2)}"/>`}
- const nc=CUR.k==='day'?9:7;
- for(let i=0;i<nc;i++){const cx=Math.floor(rnd()*44)*8,cy=60+Math.floor(rnd()*14)*8,w=40+Math.floor(rnd()*6)*8;s+=`<g opacity="${CUR.cop}"><rect x="${cx+8}" y="${cy-8}" width="${w-16}" height="8" fill="${smix(b,'#ffffff',.5)}"/><rect x="${cx}" y="${cy}" width="${w}" height="8" fill="${smix(b,'#ffffff',.55)}"/><rect x="${cx+4}" y="${cy+8}" width="${w-12}" height="6" fill="${smix(c,CUR.cu,.6)}" opacity=".7"/></g>`}
+ const nc=CUR.nc!=null?CUR.nc:(CUR.k==='day'?9:7),gy=CUR.gray||0,gc=x=>gy?smix(x,CUR.grayC,gy*.75):x;
+ if(gy>=.5)for(let j=0;j<4;j++)s+=`<rect y="${j*22}" width="400" height="22" fill="${CUR.grayC}" opacity="${((.5-j*.1)*gy*1.2).toFixed(2)}"/>`;
+ for(let i=0;i<nc;i++){const cx=Math.floor(rnd()*44)*8,cy=60+Math.floor(rnd()*14)*8,w=40+Math.floor(rnd()*6)*8+(CUR.big?24:0);s+=`<g opacity="${CUR.cop}"><rect x="${cx+8}" y="${cy-8}" width="${w-16}" height="8" fill="${gc(smix(b,'#ffffff',.5))}"/><rect x="${cx}" y="${cy}" width="${w}" height="8" fill="${gc(smix(b,'#ffffff',.55))}"/><rect x="${cx+4}" y="${cy+8}" width="${w-12}" height="6" fill="${gc(smix(c,CUR.cu,.6))}" opacity=".7"/></g>`}
  return s}
 function pxDisc(cx,cy,r,col,st,op){st=st||4;let s='';for(let y=-r;y<r;y+=st){const w=Math.sqrt(r*r-(y+st/2)**2);s+=`<rect x="${(cx-w).toFixed(1)}" y="${cy+y}" width="${(2*w).toFixed(1)}" height="${st}" fill="${col}" opacity="${op==null?1:op}"/>`}return s}
 const SUNP={tw:[70,64],tk:[320,56],ys:[318,58]},MOONP={tw:[322,58],tk:[72,60],ys:[318,58]};
 function celestial(loc){
+ if(CUR.nocel)return '';
  if(CUR.k==='day'){const p=SUNP[loc];return pxDisc(p[0],p[1],26,'#fff6c0',4,.3)+pxDisc(p[0],p[1],17,'#fff0a0')}
  if(CUR.k==='night'){const p=MOONP[loc];GL.push(pxDisc(p[0],p[1],18,'#fff4d0')+pxDisc(p[0]+6,p[1]-3,14,'#ffffff',4,.25));return ''}
  return loc==='tw'?pxDisc(92,226,40,'#ffe7b0'):loc==='tk'?pxDisc(60,212,26,'#ffd9a0'):pxDisc(318,58,22,'#f6f2d8')}
@@ -363,7 +410,7 @@ const SKY={
  tk:{day:['#4aa3f0','#8ec8f6','#d8eeff'],dusk:['#2c1d58','#9a4a7c','#f0a463'],night:['#050818','#141a4a','#2d2c66']},
  tw:{day:['#58b0f4','#9ad2f7','#e4f4ff'],dusk:['#3a2470','#c25a7a','#ffb070'],night:['#080a22','#1a1c52','#40306a']},
  ys:{day:['#69b5ff','#a8d6ff','#eaf6ff'],dusk:['#1a1840','#3f4f94','#c8a4c8'],night:['#04081c','#0f1d4a','#2b3e7c']}};
-const sk=(loc,seed)=>{const c=SKY[loc][CUR.k];return pxSky(c[0],c[1],c[2],seed)};
+const sk=(loc,seed)=>{const c=SKY[loc][CUR.k].map(x=>CUR.gray?smix(x,CUR.grayC,CUR.gray*.75):x);return pxSky(c[0],c[1],c[2],seed)};
 const SCENE={
 tk:()=>DEFS()+brickP('k2','#8a8790','#5c5964')+brickP('k1','#ad5a3c','#6e3324')+sk('tk',11)+celestial('tk')+
  farRow(4,'#3d2a5c','#ffd479',50,110)+tokyoTower(120)+farRow(17,'#2a1c40','#ffb86b',20,56)+
@@ -394,7 +441,7 @@ ys:()=>DEFS()+sk('ys',31)+celestial('ys')+
  `<rect x="322" y="262" width="22" height="34" rx="2" fill="#fff" stroke="${OL}" stroke-width="2"/><rect x="326" y="244" width="14" height="18" fill="#fff" stroke="${OL}" stroke-width="2"/><rect x="329" y="249" width="3" height="3" fill="${OL}"/><rect x="335" y="249" width="3" height="3" fill="${OL}"/><rect x="331" y="254" width="6" height="3" fill="#ff9f43"/>`+
  pxFloor('#dbe8f8','#8fa6c9','#7a93bd','#f4f9ff','')+`<text x="200" y="330" text-anchor="middle" font-size="16" font-weight="900" fill="#5a78a8" letter-spacing="8" opacity=".35">YUZAWA</text>`
 };
-function buildScene(loc,ph){CUR=PHASES[ph]||PHASES.dusk;GL=[];const base=SCENE[loc]();const ov=CUR.ov?`<rect width="400" height="560" fill="${CUR.ov[0]}" opacity="${CUR.ov[1]}"/>`:'';return base+ov+GL.join('')}
+function buildScene(loc,ph){CUR=wxPhase(PHASES[ph]||PHASES.dusk,WXN);GL=[];const base=SCENE[loc]();const ov=CUR.ov?`<rect width="400" height="560" fill="${CUR.ov[0]}" opacity="${CUR.ov[1]}"/>`:'';const dk=CUR.dark?`<rect width="400" height="560" fill="#0c1430" opacity="${CUR.dark.toFixed(2)}"/>`:'';const pd=(CUR.wk==='rain'||CUR.wk==='storm')?puddles():'';return base+pd+ov+dk+GL.join('')}
 
 function flakes(){return [...Array(26)].map(()=>{const s=2+Math.random()*4;return `<i class="flake" style="left:${Math.random()*105}%;width:${s}px;height:${s}px;animation-duration:${5+Math.random()*7}s;animation-delay:-${Math.random()*10}s"></i>`}).join('')}
 
@@ -458,11 +505,11 @@ function lobbyView(){
  $('#view').innerHTML=`${mode==='solo'?'<div class="banner">單機預覽：目前只有你自己，尚未同步。</div>':''}
  <div class="top"><div><h1 id="ttl"></h1><small>${daysLeft()}</small></div><div class="pill" id="cnt"></div></div>
  <div class="chips" id="chips"></div>
- <div id="stage"><svg id="bg" viewBox="0 0 400 560" preserveAspectRatio="none" shape-rendering="crispEdges"></svg><div id="fl"></div><div id="ptl"></div><div id="pls"></div><button class="todb" id="tod"></button><div class="hint">👆 點地板走路 · 走進傳送門換地圖</div></div>
+ <div id="stage"><svg id="bg" viewBox="0 0 400 560" preserveAspectRatio="none" shape-rendering="crispEdges"></svg><div id="fl"></div><div id="ptl"></div><div id="pls"></div><button class="todb" id="tod"></button><button class="todb wxb" id="wxb"></button><div class="hint">👆 點地板走路 · 走進傳送門換地圖</div></div>
  <div class="emo"><div class="qp">${["++ 組我！", "開門，集合！", "上 Buff 出發！", "吸歐氣～", "恭 c！", "掉寶啦！", "去打寶（逛街）", "掛網中，等我", "回村補藥水", "你在幾頻？", "廣：拉麵團 em", "好的，收到", "GG，辛苦了", "機體沒電了"].map(t=>`<button data-q="${esc(t)}">${esc(t)}</button>`).join('')}<button id="jp">跳</button></div></div>
  <div class="clog" id="clog"></div><div class="chat"><input type="text" id="cm" maxlength="30" placeholder="說點什麼…（頭上顯示 1 分鐘）"><button id="cs">送出</button></div>
  <div class="dock"><button id="b1">✏️ 角色</button><button id="b2">📸 相簿</button><button id="b3">👥 旅伴</button><button id="b4">📍 定位</button></div>`;
- drawScene();$('#tod').addEventListener('pointerup',e=>e.stopPropagation());$('#tod').addEventListener('click',e=>{e.stopPropagation();cycleTod()});
+ drawScene();$('#tod').addEventListener('pointerup',e=>e.stopPropagation());$('#tod').addEventListener('click',e=>{e.stopPropagation();cycleTod()});$('#wxb').addEventListener('pointerup',e=>e.stopPropagation());$('#wxb').addEventListener('click',e=>{e.stopPropagation();cycleWx()});
  const stg=$('#stage');stg.style.cursor='pointer';let lastT=0;
  const walk=e=>{if(e.target.closest&&e.target.closest('.ptl'))return;const now=Date.now();if(now-lastT<250)return;lastT=now;const r=stg.getBoundingClientRect();let x=(e.clientX-r.left)/r.width*100,y=(e.clientY-r.top)/r.height*100;
   x=Math.min(93,Math.max(7,x));y=Math.min(95,Math.max(60,y));save({x,y})};
@@ -475,7 +522,7 @@ function lobbyView(){
 }
 function toast(t){sheet.innerHTML=`<div>${t}</div><button class="big ghost" onclick="sheet.style.display='none'">好</button>`;sheet.style.display='block'}
 function drawScene(){
- drawBg();$('#fl').innerHTML=me.loc==='ys'?flakes():'';
+ drawBg();
  $('#ttl').textContent=SC[me.loc].e+' '+SC[me.loc].n;drawPortals();
  $('#chips').innerHTML=`<button class="chip ${me.auto?'on':''}" data-s="auto">📍 自動</button>`+Object.keys(SC).map(k=>`<button class="chip ${!me.auto&&me.loc==k?'on':''}" data-s="${k}">${SC[k].e} ${SC[k].n.replace('大廳','').replace('滑雪場','')}</button>`).join('');
  $('#chips').querySelectorAll('.chip').forEach(c=>c.onclick=async()=>{if(c.dataset.s==='auto'){const s=await geoScene();setScene(s||me.loc,true)}else{picked=true;setScene(c.dataset.s,false)}});
@@ -528,11 +575,11 @@ function albumSheet(){
 
 /* ---------- tabs & shared data ---------- */
 let D={flights:{},stops:{},exp:{},chat:{},notice:{}},tab='lobby',day=0,routeOn=false,catF=null,MQ={place:'澀谷',cat:'古著',ll:null};
-const TABS=[['lobby','🏙️ 大廳'],['fly','✈️ 航班'],['plan','🗓️ 行程'],['map','🗺️ 周邊'],['exp','💴 記帳'],['pic','📸 相簿']];
+const TABS=[['lobby','🏙️ 大廳'],['fly','✈️ 航班'],['plan','🗓️ 行程'],['wx','🌤️ 天氣'],['map','🗺️ 周邊'],['exp','💴 記帳'],['pic','📸 相簿']];
 const DAYS=[...Array(9)].map((_,i)=>new Date(2027,0,13+i)),WK=['日','一','二','三','四','五','六'];
 const CAT={景點:'⛩',美食:'🍜',咖啡甜點:'☕',購物:'🛍',住宿:'🏨',交通:'🚆'};
 const rate=()=>+info.rate>0?+info.rate:0.21;
-function saveInfo(o){Object.assign(info,o);if(db)db.collection('trip').doc('info').set(info).catch(()=>{});refresh()}
+function saveInfo(o){Object.assign(info,o);if(db)db.collection('trip').doc('info').update(o).catch(()=>{});refresh()}
 const enc=encodeURIComponent,fnum=n=>Math.round(n).toLocaleString();
 const nameOf=id=>id===uid?(me.name||'我'):((players[id]&&players[id].name)||'旅伴');
 const allIds=()=>[...new Set([uid,...Object.keys(players)])].filter(i=>i===uid||(players[i]&&players[i].name));
@@ -542,28 +589,30 @@ function del(c,id){delete D[c][id];if(db)db.collection(c).doc(id).delete().catch
 function refresh(){if(tab!=='lobby'&&$('#view')&&sheet.style.display!=='block')go(null,true)}
 function lobby(){go('lobby')}
 function go(t,keep){if(t)tab=t;if(!$('#view')){app.innerHTML='<div id="tkr" class="tkr"></div><header class="hd"></header><div id="nbar"></div><div id="view"></div><nav class="bar" id="nav"></nav>';
-  $('.hd').innerHTML=`<h1>TOKYO <b>SQUAD.</b></h1><p>2027.01.13 — 01.21 · 四人冒險基地</p><span class="pill">${mode==='solo'?'🟡 本機試玩（尚未設定資料庫）':'🟢 即時同步中'}</span>`}
+  $('.hd').innerHTML=`<h1>TOKYO <b>SQUAD.</b></h1><p>2027.01.13 — 01.21 · 四人冒險基地</p><span class="pill" id="syncp">${mode==='solo'?'🟡 本機試玩（尚未設定資料庫）':'🟢 即時同步中'}</span>`}
  if(!keep)closeSheet();
  $('#nav').innerHTML=TABS.map(([k,n])=>`<button class="chip ${k==tab?'on':''}" data-t="${k}"><span class="ic">${n.split(' ')[0]}</span>${n.split(' ')[1]}</button>`).join('');
  $('#nav').querySelectorAll('.chip').forEach(c=>c.onclick=()=>go(c.dataset.t));
- ({lobby:lobbyView,plan:planView,fly:flyView,map:mapView,exp:expView,pic:picView})[tab]();renderTicker();renderNotice();renderLog();if(!window.__fx){window.__fx=1;if(!FX||Date.now()-FX.ts>30*60*1000)fetchFx()}}
+ ({lobby:lobbyView,plan:planView,fly:flyView,wx:wxView,map:mapView,exp:expView,pic:picView})[tab]();renderTicker();renderNotice();renderLog();watchConn();if(!window.__fx){window.__fx=1;if(!FX||Date.now()-FX.ts>30*60*1000)fetchFx()}}
 const dl=i=>`${DAYS[i].getMonth()+1}/${DAYS[i].getDate()}（${WK[DAYS[i].getDay()]}）`;
 const fdt=s=>s?s.slice(5).replace('T',' ').replace('-','/'):'—';
 
 /* ---- itinerary ---- */
 /* ---- itinerary（每天分頁、可拖曳排序、點地點展開 Google 地圖） ---- */
 let openStop=null,openLeg=null,planAll=false;
-const dayList=d=>{const A=Object.entries(D.stops).map(([id,s])=>({id,...s})).filter(s=>s.day===d);
+const dayList=d=>{const A=Object.entries(D.stops).map(([id,s])=>({id,...s})).filter(s=>s.day===d&&s.n);
  const old=A.filter(s=>s.o==null).sort((a,b)=>(a.t||'99').localeCompare(b.t||'99')||(a.ts||0)-(b.ts||0)),nw=A.filter(s=>s.o!=null).sort((a,b)=>a.o-b.o||(a.ts||0)-(b.ts||0));return old.concat(nw)};
 const nextOrd=d=>Math.max(0,...Object.values(D.stops).filter(s=>s.day===d&&s.o!=null).map(s=>s.o))+10;
-function persistOrder(ids){let n=0;ids.forEach((id,i)=>{const s=D.stops[id];if(s&&s.o!==i*10){D.stops[id]=Object.assign({},s,{o:i*10});n++;if(db)db.collection('stops').doc(id).set(D.stops[id]).catch(()=>{})}});if(n)refresh()}
+/* 只更新有變的欄位（不整筆覆蓋），避免兩個人同時改同一筆時互相蓋掉 */
+function updFields(c,id,f){D[c][id]=Object.assign({},D[c][id]||{},f);if(db)db.collection(c).doc(id).update(f).catch(()=>{})}
+function persistOrder(ids){let n=0;ids.forEach((id,i)=>{const s=D.stops[id];if(s&&s.o!==i*10){updFields('stops',id,{o:i*10});n++}});if(n)refresh()}
 function moveStop(id,dir){const ids=dayList(day).map(s=>s.id),i=ids.indexOf(id),j=i+dir;if(i<0||j<0||j>=ids.length)return;[ids[i],ids[j]]=[ids[j],ids[i]];persistOrder(ids)}
 const gq=n=>enc(n+' 日本');
 const gmEmbed=n=>`https://maps.google.com/maps?output=embed&hl=zh-TW&z=16&q=${gq(n)}`;
 const gmOpen=n=>`https://www.google.com/maps/search/?api=1&query=${gq(n)}`;
 const gmDir=(a,b,m)=>`https://www.google.com/maps/dir/?api=1&origin=${gq(a)}&destination=${gq(b)}&travelmode=${m||'transit'}`;
 function planView(){
- const L=dayList(day),cnt=i=>Object.values(D.stops).filter(s=>s.day===i).length;
+ const L=dayList(day),cnt=i=>Object.values(D.stops).filter(s=>s.day===i&&s.n).length;
  let h=`<div class="chips dch"><button class="chip dchip ${planAll?'on':''}" data-all="1">📋<small>全部</small></button>${DAYS.map((d,i)=>`<button class="chip dchip ${!planAll&&i==day?'on':''}" data-d="${i}">D${i+1}<small>${d.getMonth()+1}/${d.getDate()} ${WK[d.getDay()]}</small>${cnt(i)?`<i class="cn">${cnt(i)}</i>`:''}</button>`).join('')}</div>`;
  if(planAll){
   h+=DAYS.map((d,i)=>{const A=dayList(i);return `<div class="card ov"><b>D${i+1} · ${dl(i)}</b><span style="opacity:.6;font-size:12px"> ${A.length?A.length+' 個地點':'還沒安排'}</span>${A.map((s,k)=>`<button class="ovr" data-go="${i}|${s.id}"><span class="nb sm">${k+1}</span><span class="otm">${s.t||''}</span><span>${CAT[s.c]||'📍'} ${esc(s.n)}</span></button>`).join('')}</div>`}).join('');
@@ -637,9 +686,10 @@ function stopSheet(id){
  $('#sv').onclick=()=>{const n=$('#sn').value.trim();if(!n)return $('#sn').focus();$('#svp').innerHTML=`<iframe loading="lazy" src="${gmEmbed(n)}" style="height:200px"></iframe>`};
  if(e)$('#sdel').onclick=()=>{const b=$('#sdel');if(!b.dataset.c){b.dataset.c=1;b.textContent='再按一次確定刪除';return}closeSheet();if(openStop===id)openStop=null;del('stops',id)};
  $('#ss').onclick=()=>{const n=$('#sn').value.trim();if(!n)return $('#sn').focus();const nd=+$('#sdy').value;
-  const obj=Object.assign({},e||{},{day:nd,n,c:$('#sc').value,t:$('#st').value,note:$('#sd').value.trim(),tr:$('#str').value.trim()});
-  if(!e){obj.by=uid;obj.ts=Date.now();obj.o=nextOrd(nd)}else if(e.day!==nd||e.o==null)obj.o=nextOrd(nd);
-  const nid=id||Date.now().toString(36)+uid.slice(0,3);day=nd;planAll=false;if(!e)openStop=nid;closeSheet();put('stops',nid,obj)};
+  const f={day:nd,n,c:$('#sc').value,t:$('#st').value,note:$('#sd').value.trim(),tr:$('#str').value.trim()};
+  day=nd;planAll=false;closeSheet();
+  if(!e){const nid=Date.now().toString(36)+uid.slice(0,3);openStop=nid;put('stops',nid,Object.assign({},f,{by:uid,ts:Date.now(),o:nextOrd(nd)}))}
+  else{const cur=D.stops[id]||e;if(cur.day!==nd||cur.o==null)f.o=nextOrd(nd);const ch={};Object.keys(f).forEach(k=>{if(f[k]!==cur[k])ch[k]=f[k]});if(Object.keys(ch).length){updFields('stops',id,ch);refresh()}else planView()}};
 }
 /* ===== 白天／傍晚／夜晚（依場景當地時間，也可手動切換看看） ===== */
 let TOD=null,lastPh=null;
@@ -648,7 +698,7 @@ const timeIn=tz=>{try{return new Intl.DateTimeFormat('en-GB',{hour:'2-digit',min
 function autoPhase(loc){const m=localMin(loc==='tw'?'Asia/Taipei':'Asia/Tokyo');const rise=loc==='tw'?390:410,set=loc==='tw'?1050:1020;
  if(m>=rise+45&&m<set-60)return 'day';if((m>=rise-45&&m<rise+45)||(m>=set-60&&m<set+75))return 'dusk';return 'night'}
 const curPhase=loc=>TOD||autoPhase(loc);
-function drawBg(){const b=$('#bg');if(!b)return;lastPh=curPhase(me.loc);b.innerHTML=buildScene(me.loc,lastPh);const t=$('#tod');if(t)t.textContent=PHASES[lastPh].name+(TOD?'':'・自動')}
+function drawBg(){const b=$('#bg');if(!b)return;lastPh=curPhase(me.loc);const w=lobbyWx();WXN=w;lastWxSig=w.k+w.w;b.innerHTML=buildScene(me.loc,lastPh);const f=$('#fl');if(f)f.innerHTML=wxFx(w,me.loc,lastPh);const t=$('#tod');if(t)t.textContent=PHASES[lastPh].name+(TOD?'':'・自動');wxBtn();fetchWx(me.loc)}
 function cycleTod(){const o=[null,'day','dusk','night'];TOD=o[(o.indexOf(TOD)+1)%o.length];drawBg()}
 setInterval(()=>{if(!TOD&&$('#bg')&&me&&me.loc&&autoPhase(me.loc)!==lastPh)drawBg()},30000);
 
@@ -703,6 +753,109 @@ function fillNotice(){const box=$('#nl');if(!box)return;const A=Object.entries(D
  const ti=tripDayIdx(),g={};A.forEach(s=>(g[s.d]=g[s.d]||[]).push(s));const ks=Object.keys(g).map(Number).sort((a,b)=>(a===ti?-1:b===ti?1:a-b));
  box.innerHTML=ks.map(k=>`<div class="lab" style="margin-top:12px">${noticeLabel(k)}${k===ti?'　（今天）':''}</div>`+g[k].sort((a,b)=>b.ts-a.ts).map(s=>`<div class="ntx"><div>${esc(s.t)}</div><small>${esc(s.n||'旅伴')} · ${mdOf(s.ts)} ${hhmm(s.ts)}</small>${s.by===uid?`<button class="x" data-nd="${s.id}" title="刪除">刪除</button>`:''}</div>`).join('')).join('');
  box.querySelectorAll('[data-nd]').forEach(b=>b.onclick=()=>{if(!b.dataset.c){b.dataset.c=1;b.textContent='確定刪除？';return}const id=b.dataset.nd;delete D.notice[id];if(db)db.collection('notice').doc(id).delete().catch(()=>{});renderNotice();fillNotice()})}
+
+/* 穩定排序後比較，資料沒變就不重畫（避免打斷正在看的地圖／輸入） */
+const sj=x=>JSON.stringify(x,(k,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.keys(v).sort().reduce((a,q)=>(a[q]=v[q],a),{}):v);
+
+/* 寫入失敗／離線要讓人看得到，不要默默吞掉 */
+function showToast(msg,ms){let t=$('#wtoast');if(!t){t=document.createElement('div');t.id='wtoast';document.body.appendChild(t)}t.textContent=msg;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(()=>{t.style.display='none'},ms||7000)}
+let _wf=0;
+function wfail(e){const n=Date.now();if(n-_wf<4000)return;_wf=n;showToast(window.__online===false?'目前離線：這筆會先暫存在手機，連上網路後自動補傳（請先別關掉頁面）':'這筆資料沒有成功存到雲端（可能是權限或網路問題），請再試一次')}
+function watchConn(){if(window.__connW||!window.__conn)return;window.__connW=1;window.__conn(ok=>{window.__online=ok;const e=$('#syncp');if(e&&mode!=='solo')e.textContent=ok?'🟢 即時同步中':'🔴 離線中，連上網路會自動補傳';clearTimeout(window.__offT);
+ if(!ok)window.__offT=setTimeout(()=>{window.__offShown=1;showToast('目前離線：剛剛的修改會先暫存在手機，連上網路後自動補傳。請先不要關掉頁面。',9000)},4000);
+ else if(window.__offShown){window.__offShown=0;showToast('已重新連線，離線時的修改已自動補傳。',5000)}})}
+
+/* ===== 天氣（Open-Meteo，免金鑰）＋ 大廳天氣效果 ===== */
+const WXL={tw:{n:'台北',lat:25.033,lon:121.565},tk:{n:'東京',lat:35.689,lon:139.692},ys:{n:'湯澤滑雪場',lat:36.93,lon:138.81}};
+const WXI={sun:['☀️','晴'],cloud:['⛅','多雲'],overcast:['☁️','陰天'],rain:['🌧️','下雨'],storm:['⛈️','雷雨'],snow:['❄️','下雪'],fog:['🌫️','起霧'],none:['⏳','載入中']};
+const WMO={0:'晴朗',1:'大致晴朗',2:'多雲',3:'陰天',45:'霧',48:'霧凇',51:'毛毛雨',53:'毛毛雨',55:'較強毛毛雨',56:'凍毛毛雨',57:'凍毛毛雨',61:'小雨',63:'中雨',65:'大雨',66:'凍雨',67:'強凍雨',71:'小雪',73:'中雪',75:'大雪',77:'冰粒',80:'陣雨',81:'較強陣雨',82:'強陣雨',85:'陣雪',86:'強陣雪',95:'雷雨',96:'雷雨伴冰雹',99:'強雷雨伴冰雹'};
+const WXTTL=30*60*1000;
+let WX={},WXP={},WXH={},WXO=null,lastWxSig='',wxSel=null;
+(function(){try{Object.keys(WXL).forEach(k=>{const o=JSON.parse(localStorage.getItem('tk_wx_'+k)||'null');if(o&&o.cur&&Date.now()-o.ts<6*3600*1000)WX[k]=o})}catch(e){}})();
+function wxClass(c){const code=c.weather_code;let k;
+ if(code>=95)k='storm';else if([71,72,73,74,75,76,77,85,86].includes(code))k='snow';else if((code>=51&&code<=67)||(code>=80&&code<=82))k='rain';else if(code===45||code===48)k='fog';else if(code===3)k='overcast';else if(code===2)k='cloud';else k='sun';
+ return {k,w:(c.wind_speed_10m>=28||c.wind_gusts_10m>=45)?1:0}}
+const WXPRE=[null,{k:'sun',w:0,l:'晴'},{k:'cloud',w:0,l:'多雲'},{k:'overcast',w:0,l:'陰天'},{k:'rain',w:0,l:'下雨'},{k:'storm',w:0,l:'雷雨'},{k:'snow',w:0,l:'下雪'},{k:'sun',w:1,l:'風大'},{k:'rain',w:1,l:'風雨'}];
+function lobbyWx(){if(WXO)return WXO;const d=me&&WX[me.loc];if(d&&d.cur)return wxClass(d.cur);return {k:'none',w:0}}
+function wxLabel(w){return w.l||((WXI[w.k]||WXI.none)[1]+(w.w?'・風大':''))}
+function wxBtn(){const b=$('#wxb');if(!b)return;const w=lobbyWx(),d=me&&WX[me.loc];const t=(!WXO&&d&&d.cur)?' '+Math.round(d.cur.temperature_2m)+'°':'';
+ b.textContent=(WXI[w.k]||WXI.none)[0]+(w.w&&w.k!=='sun'?'💨':'')+' '+wxLabel(w)+t+(WXO?'・手動':'・即時')}
+function cycleWx(){const i=WXO?WXPRE.findIndex(x=>x===WXO):0;WXO=WXPRE[(i+1)%WXPRE.length];drawBg()}
+function wxUrl(l){return 'https://api.open-meteo.com/v1/forecast?latitude='+l.lat+'&longitude='+l.lon+'&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,cloud_cover,wind_speed_10m,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,snowfall_sum,wind_speed_10m_max,sunrise,sunset&timezone=auto&forecast_days=16'}
+function fetchWx(loc,force){
+ const c=WX[loc];if(!force&&c&&c.cur&&Date.now()-c.ts<WXTTL)return Promise.resolve(c);
+ if(!force&&c&&c.fail&&Date.now()-c.fail<2*60*1000)return Promise.resolve(c);
+ if(WXP[loc])return WXP[loc];
+ WXP[loc]=(async()=>{try{const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),9000);const r=await fetch(wxUrl(WXL[loc]),{signal:ctl.signal});clearTimeout(tm);if(!r.ok)throw new Error('http');const j=await r.json();if(!j.current||!j.daily)throw new Error('bad');
+   WX[loc]={ts:Date.now(),cur:j.current,daily:j.daily};try{localStorage.setItem('tk_wx_'+loc,JSON.stringify(WX[loc]))}catch(e){}}
+  catch(e){WX[loc]=Object.assign({},WX[loc]||{},{fail:Date.now()})}
+  delete WXP[loc];wxChanged(loc);return WX[loc]})();return WXP[loc]}
+function wxChanged(loc){try{
+ if(me&&loc===me.loc&&$('#bg')&&!WXO){const w=lobbyWx();if(w.k+w.w!==lastWxSig)drawBg();else wxBtn()}
+ if(tab==='wx'&&$('#view')&&$('#wxbody')&&loc===wxSel)wxView()}catch(e){}}
+setInterval(()=>{if(me&&me.loc&&$('#bg'))fetchWx(me.loc)},10*60*1000);
+
+/* ---- 大廳的天氣動畫層（HTML，疊在場景上） ---- */
+function wxFx(w,loc,ph){
+ const R=(a,b)=>a+Math.random()*(b-a),k=w.k,wi=w.w;let h='';
+ if(k==='none')return loc==='ys'?flakes():'';
+ const dx=wi?150:-14,rot=wi?-13:1.5;
+ const cc=ph==='night'?'#4b5075':ph==='dusk'?'#a58f9f':(k==='cloud'||k==='sun')?'#f2f6ff':'#aeb7c6';
+ if(k==='snow'){for(let i=0;i<46;i++){const s=2+((R(0,3))|0)*1.5;h+=`<i class="fk" style="left:${R(-10,105)}%;width:${s}px;height:${s}px;--dx:${wi?170:-24}px;animation-duration:${R(4,8)/(wi?1.6:1)}s;animation-delay:-${R(0,9)}s"></i>`}}
+ if(k==='rain'||k==='storm'){const n=k==='storm'?96:62;for(let i=0;i<n;i++)h+=`<i class="rd" style="left:${R(-12,108)}%;height:${R(14,28)}px;--dx:${dx}px;--rot:${rot}deg;opacity:${R(.4,.85).toFixed(2)};animation-duration:${R(.42,.75).toFixed(2)}s;animation-delay:-${R(0,1).toFixed(2)}s"></i>`}
+ if(k==='storm')h+='<div class="lt"></div>';
+ if(k==='cloud'||k==='overcast'||k==='rain'||k==='storm'||k==='snow'){const n=k==='cloud'?3:5;for(let i=0;i<n;i++)h+=`<i class="dcl" style="--c:${cc};top:${R(3,32).toFixed(1)}%;width:${R(34,70).toFixed(0)}px;height:${R(9,14).toFixed(0)}px;animation-duration:${(wi?R(18,32):R(70,120)).toFixed(0)}s;animation-delay:-${R(0,60).toFixed(0)}s"></i>`}
+ if(k==='fog')h+=`<div class="fgv" style="${ph==='night'?'background:linear-gradient(rgba(60,70,100,.5),rgba(70,80,110,.6))':ph==='dusk'?'background:linear-gradient(rgba(190,170,190,.4),rgba(200,180,195,.55))':''}"></div>`;
+ if(wi){for(let i=0;i<18;i++)h+=`<i class="ws" style="top:${R(4,82).toFixed(1)}%;width:${R(40,100).toFixed(0)}px;animation-duration:${R(.7,1.5).toFixed(2)}s;animation-delay:-${R(0,1.5).toFixed(2)}s"></i>`;
+  if(k!=='snow'&&k!=='rain'&&k!=='storm')for(let i=0;i<9;i++)h+=`<i class="lf" style="top:${R(38,84).toFixed(1)}%;--ly:${R(-50,70).toFixed(0)}px;background:${['#6aa84f','#c9a23d','#8a5a2b','#9bd06a'][i%4]};animation-duration:${R(1.6,3.4).toFixed(2)}s;animation-delay:-${R(0,3).toFixed(2)}s"></i>`}
+ return h}
+
+/* ---- 天氣分頁 ---- */
+const wd=s=>{const [y,m,d]=s.slice(0,10).split('-').map(Number);return {m,d,w:WK[new Date(y,m-1,d).getDay()]}};
+const wxRow=(lab,code,tmax,tmin,pop,wind,extra)=>{const k=wxClass({weather_code:code,wind_speed_10m:wind||0,wind_gusts_10m:0});
+ return `<div class="wxr"><b>${lab}</b><span class="wi">${WXI[k.k][0]}</span><span class="wt">${Math.round(tmax)}°<i>/${Math.round(tmin)}°</i></span><span class="wp">${pop!=null?'💧'+pop+'%':''}</span><span class="ww">${wind>=28?'💨'+Math.round(wind):''}</span>${extra||''}</div>`};
+function wxTips(rows){const t=[];if(!rows.length)return '';const mn=Math.min(...rows.map(r=>r.mn)),mx=Math.max(...rows.map(r=>r.mx));
+ if(rows.some(r=>r.sn))t.push('有降雪機會，雪地鞋與防水手套要帶');else if(rows.some(r=>r.pop>=60))t.push('降雨機率偏高，帶傘或防水外套');
+ if(mn<=2)t.push('最低溫接近或低於冰點，暖暖包、發熱衣、手套別忘了');else if(mn<=10)t.push('早晚偏冷，洋蔥式穿搭最保險');
+ if(rows.some(r=>r.w>=28))t.push('有風大的日子，注意體感會更冷');
+ return t.length?`<div class="wxtip">💡 ${t.join('；')}</div>`:''}
+function wxView(){
+ if(!wxSel||!WXL[wxSel])wxSel=(me&&WXL[me.loc]?me.loc:'tk');
+ const L=WXL[wxSel],d=WX[wxSel];
+ let h=`<div class="card wxc" id="wxbody"><div class="chips">${Object.keys(WXL).map(k=>`<button class="chip ${k===wxSel?'on':''}" data-w="${k}">${SC[k].e} ${WXL[k].n}</button>`).join('')}</div>`;
+ if(!d||!d.cur){h+=d&&d.fail?`<div class="wxnote">目前抓不到天氣資料（可能是網路或來源暫時有問題）。</div><button class="big" id="wxr">再試一次</button>`:`<div class="wxnote">天氣載入中…</div>`;if(!d||!d.fail)fetchWx(wxSel)}
+ else{
+  const c=d.cur,k=wxClass(c),dy=d.daily,t0=(dy.sunrise&&dy.sunrise[0]||'').slice(11),t1=(dy.sunset&&dy.sunset[0]||'').slice(11);
+  const up=new Date(d.ts);const upT=String(up.getHours()).padStart(2,'0')+':'+String(up.getMinutes()).padStart(2,'0');
+  h+=`<div class="wxnow"><div class="wxi">${WXI[k.k][0]}</div><div><div class="wxtt">${Math.round(c.temperature_2m)}°C</div><div class="wxd">${WMO[c.weather_code]||WXI[k.k][1]}${k.w?'・風大':''}</div></div></div>
+  <div class="wxg"><span>體感<b>${Math.round(c.apparent_temperature)}°</b></span><span>濕度<b>${Math.round(c.relative_humidity_2m)}%</b></span><span>風速<b>${Math.round(c.wind_speed_10m)}</b>km/h</span><span>陣風<b>${Math.round(c.wind_gusts_10m)}</b></span><span>降水<b>${c.precipitation}</b>mm</span><span>🌅<b>${t0||'—'}</b></span><span>🌇<b>${t1||'—'}</b></span></div>
+  <div class="wxup">${d.fail?'⚠️ 剛剛更新失敗，顯示的是舊資料 · ':''}更新於 ${upT} · <button class="lnk" id="wxr">重新整理</button></div>`;
+  const idx={};dy.time.forEach((t,i)=>idx[t]=i);
+  const row=i=>({mx:dy.temperature_2m_max[i],mn:dy.temperature_2m_min[i],pop:dy.precipitation_probability_max[i],w:dy.wind_speed_10m_max[i],sn:(dy.snowfall_sum[i]||0)>0.2||[71,73,75,77,85,86].includes(dy.weather_code[i]),code:dy.weather_code[i]});
+  const trip=[];let tr='';
+  DAYS.forEach((dd,i)=>{const key=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0');
+   if(idx[key]!=null){const r=row(idx[key]);trip.push(r);tr+=wxRow(`D${i+1} ${dl(i)}`,r.code,r.mx,r.mn,r.pop,r.w)}});
+  h+=`<h3 class="wxh">🧳 旅程預報（1/13–1/21）</h3>`;
+  if(trip.length){h+=tr+(trip.length<DAYS.length?`<div class="wxnote">其餘 ${DAYS.length-trip.length} 天還沒進入 16 天預報範圍，之後會自動補上。</div>`:'')}
+  else h+=`<div class="wxnote">旅程還沒進入 16 天預報範圍（約 12/28 起能看到第一天），到時候這裡會自動出現每天的預報。</div>`;
+  h+=wxTips(trip);
+  h+=`<h3 class="wxh">📅 未來 7 天</h3>`;
+  for(let i=0;i<7&&i<dy.time.length;i++){const r=row(i),q=wd(dy.time[i]);h+=wxRow(`${q.m}/${q.d}（${q.w}）`,r.code,r.mx,r.mn,r.pop,r.w)}
+  h+=`<h3 class="wxh">🕰️ 去年同期（1/13–1/21）</h3><div id="wxhist">${WXH[wxSel]?wxHistHtml(wxSel):`<button class="big ghost" id="wxhb">看去年這幾天的實際天氣</button>`}</div>`}
+ h+=`<div class="wxsrc">Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a>（CC BY 4.0）</div></div>`;
+ $('#view').innerHTML=h;
+ $('#view').querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{wxSel=b.dataset.w;wxView()});
+ const r=$('#wxr');if(r)r.onclick=()=>{r.textContent='更新中…';fetchWx(wxSel,true)};
+ const hb=$('#wxhb');if(hb)hb.onclick=()=>fetchHist(wxSel);
+}
+function wxHistHtml(loc){const o=WXH[loc];if(o==='err')return `<div class="wxnote">去年的資料目前抓不到，稍後再試。</div><button class="big ghost" id="wxhb">再試一次</button>`;
+ const t=o.daily;let s='';t.time.forEach((x,i)=>{const q=wd(x);s+=wxRow(`${q.m}/${q.d}（${q.w}）`,t.weather_code[i],t.temperature_2m_max[i],t.temperature_2m_min[i],null,0,(t.snowfall_sum[i]>0.2?`<span class="wp">❄️${t.snowfall_sum[i]}cm</span>`:t.precipitation_sum[i]>0.2?`<span class="wp">💧${t.precipitation_sum[i]}mm</span>`:''))});
+ return s+'<div class="wxnote">這是去年同期的實際天氣，只能當作參考，不是今年的預報。</div>'}
+async function fetchHist(loc){const b=$('#wxhb');if(b)b.textContent='載入中…';
+ try{const l=WXL[loc],ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),10000);
+  const r=await fetch('https://archive-api.open-meteo.com/v1/archive?latitude='+l.lat+'&longitude='+l.lon+'&start_date=2026-01-13&end_date=2026-01-21&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,snowfall_sum&timezone=auto',{signal:ctl.signal});clearTimeout(tm);
+  if(!r.ok)throw 0;const j=await r.json();if(!j.daily||!j.daily.time)throw 0;WXH[loc]=j}catch(e){WXH[loc]='err'}
+ if(tab==='wx'&&loc===wxSel&&$('#wxhist'))$('#wxhist').innerHTML=wxHistHtml(loc),(()=>{const hb=$('#wxhb');if(hb)hb.onclick=()=>fetchHist(loc)})()}
 
 /* ---- flights ---- */
 const AL={BR:['長榮航空','#00704a','https://www.evaair.com'],CI:['中華航空','#c4002f','https://www.china-airlines.com'],JX:['星宇航空','#9a7b3f','https://www.starlux-airlines.com'],IT:['台灣虎航','#f26a21','https://www.tigerairtw.com'],MM:['樂桃航空','#c3007a','https://www.flypeach.com'],TR:['酷航','#c9a000','https://www.flyscoot.com'],JL:['日本航空','#c8102e','https://www.jal.co.jp'],NH:['全日空','#1d3f94','https://www.ana.co.jp'],CX:['國泰航空','#006564','https://www.cathaypacific.com'],GK:['捷星日本','#ff5000','https://www.jetstar.com'],BC:['天馬航空','#0066b3','https://www.skymark.co.jp'],AE:['華信航空','#c4002f','https://www.mandarin-airlines.com'],B7:['立榮航空','#00843d','https://www.uniair.com.tw'],UA:['聯合航空','#0033a0','https://www.united.com'],SQ:['新加坡航空','#c98a00','https://www.singaporeair.com'],KE:['大韓航空','#0083c9','https://www.koreanair.com']};
@@ -898,7 +1051,7 @@ function picView(){
  if(db){
   db.collection('players').onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});delete o[uid];players=o;renderPlayers()},()=>{});
   db.collection('trip').doc('info').onSnapshot(s=>{if(s.exists){info=cl(s.data());refresh()}},()=>{});
-  ['flights','stops','exp'].forEach(c=>db.collection(c).onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});D[c]=o;refresh()},()=>{}));db.collection('chat').onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});D.chat=o;renderLog()},()=>{});db.collection('notice').onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});D.notice=o;renderNotice()},()=>{});
+  ['flights','stops','exp'].forEach(c=>db.collection(c).onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});if(sj(o)!==sj(D[c])){D[c]=o;refresh()}},()=>{}));db.collection('chat').onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});D.chat=o;renderLog()},()=>{});db.collection('notice').onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});D.notice=o;renderNotice()},()=>{});
   setInterval(()=>{if(document.visibilityState==='visible'&&me.name)save({})},90000);
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&me.name)save({})});
  }
