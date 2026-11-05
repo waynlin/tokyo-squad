@@ -613,9 +613,10 @@ function splash(){
  app.innerHTML=`${mode==='solo'?'<div class="banner">單機預覽：目前未連上同步，開啟已發布的連結即可多人同步。</div>':''}
  <div class="card" style="text-align:center;margin-top:30px"><div style="font-size:54px">🗼⛷️</div><h1 style="margin:6px 0">東京旅伴大廳</h1><div style="opacity:.7">1/13 – 1/21 · 前幾天野澤滑雪<br>四個人的專屬小空間</div>
  <p style="font-size:13px;opacity:.75">允許定位後，大廳會跟著你們的位置自動切換：<br>台灣 → 東京（上野／淺草／澀谷／新宿）→ 野澤雪場</p>
- <button class="big" id="g1">📍 允許定位並開始</button><button class="big ghost" id="g2">先跳過</button><div id="gm" style="font-size:12px;opacity:.7;margin-top:8px"></div></div>`;
+ <button class="big" id="g1">📍 允許定位並開始</button><button class="big ghost" id="g2">先跳過</button><div id="gm" style="font-size:12px;opacity:.7;margin-top:8px"></div><div id="claim"></div></div>`;
  $('#g1').onclick=async()=>{$('#gm').textContent='定位中…';const s=await geoScene();me.loc=s||'tw';me.auto=true;$('#gm').textContent=s?'':'沒有取得定位，先放你在台灣大廳，可隨時手動切換';creator(true)};
  $('#g2').onclick=()=>{me.loc='tw';me.auto=false;creator(true)};
+ claimWatch();
 }
 function creator(first){
  if(!me.mp)me.mp=MSDEF();
@@ -1281,14 +1282,25 @@ function offlineCard(){const ts=window.__cacheTs,n=window.__pending||0,st=window
  <div class="kv"><span>連線狀態</span><b>${st}${n?'（'+n+' 筆待上傳）':''}</b></div>
  <div class="kv"><span>手機裡的資料備份</span><b>${ts?new Date(ts).getHours().toString().padStart(2,'0')+':'+new Date(ts).getMinutes().toString().padStart(2,'0')+' 更新':'尚未建立'}</b></div>
  <div class="sta" style="opacity:.8;line-height:1.55">沒訊號時，行程、住宿、航班、票券（含已下載的圖片）、記帳都還看得到；離線時改的資料會在連上網路後自動補上，期間請別關掉頁面。</div>
- <div class="stb"><button class="opt" id="bkx">⬇️ 匯出備份檔</button><button class="opt" id="bki">⬆️ 從備份還原</button></div><input type="file" id="bkf" accept=".json,application/json" style="display:none">
+ <div class="stb"><button class="opt" id="bkx">⬇️ 匯出備份檔</button><button class="opt" id="bki">⬆️ 從備份還原</button></div><div class="stb"><button class="opt" id="bks">🔁 換成另一位旅伴</button></div><input type="file" id="bkf" accept=".json,application/json" style="display:none">
  <div class="sta" style="font-size:12px;opacity:.75;line-height:1.55">📲 加到主畫面（開啟更快，也比較能離線）：iPhone 用 Safari 按「分享」→「加入主畫面」；Android 用 Chrome 按右上角 ⋮ →「安裝應用程式」。</div></div>`}
 function offlineBind(){const x=$('#bkx'),i=$('#bki'),f=$('#bkf');if(!x)return;
  x.onclick=()=>{x.textContent='整理中…';exportBackup().finally(()=>{x.textContent='⬇️ 匯出備份檔'})};
- i.onclick=()=>f.click();
+ i.onclick=()=>f.click();const sw=$('#bks');if(sw)sw.onclick=switchSheet;
  f.onchange=()=>{const file=f.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(d.app!=='tokyo-squad'||!d.D)throw 0;restoreBackup(d)}catch(e){showToast('這個檔案不是旅遊備份檔',4000)}f.value=''};r.readAsText(file)}}
 /* 註冊 Service Worker（需要把 sw.js 一起放上 GitHub；沒有也不影響） */
 try{if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')&&(!navigator.webdriver||/[?&]sw=1/.test(location.search)))window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}catch(e){}
+/* ===== 認領身分：iOS「加到主畫面」的 App 和 Safari 資料是分開的，所以要能認回原本的角色 ===== */
+function claimList(box,sw){
+ const arr=Object.keys(players).filter(id=>id!==uid&&players[id]&&players[id].name).sort((a,b)=>(players[a].name||'').localeCompare(players[b].name||''));
+ if(!arr.length){box.innerHTML=sw?'<div class="sta">目前沒有其他旅伴的角色可以換。</div>':'';return}
+ box.innerHTML=`<div class="lab" style="margin-top:14px">${sw?'選一位旅伴，這支手機之後就會變成他：':'已經在別的瀏覽器建過角色了？點自己的名字就能直接認回來：'}</div><div class="row" style="flex-wrap:wrap;justify-content:center">${arr.map(id=>`<button class="opt" data-cl="${id}">${esc(players[id].name)}</button>`).join('')}</div>`;
+ box.querySelectorAll('[data-cl]').forEach(b=>b.onclick=()=>{const id=b.dataset.cl,p=players[id];
+  openSheet(`<h3 style="margin:0 0 6px">你是「${esc(p.name)}」嗎？</h3><div style="font-size:13.5px;line-height:1.6">這支手機會變成「${esc(p.name)}」，會用他原本的角色、記帳和位置。${sw?'<br>目前這個角色不會被刪除；如果它有記過帳，可到「記帳 → 分帳成員 → 管理」合併成同一人。':''}<br>請只認領「你自己」的角色。</div><button class="big" id="clok">是我，認領</button><button class="big ghost" id="clno">取消</button>`);
+  $('#clno').onclick=closeSheet;
+  $('#clok').onclick=()=>{try{localStorage.setItem('uid',id);localStorage.setItem('me',JSON.stringify(Object.assign({},cl(p),{ts:Date.now()})))}catch(e){}location.reload()}})}
+function claimWatch(){const box=$('#claim');if(!box)return;let sig='';const t=setInterval(()=>{const b=$('#claim');if(!b){clearInterval(t);return}const s=Object.keys(players).map(k=>k+(players[k]&&players[k].name)).join('|');if(s!==sig){sig=s;claimList(b,false)}},800)}
+function switchSheet(){openSheet(`<h3 style="margin:0 0 6px">換成另一位旅伴</h3><div id="claimsw"></div><button class="big ghost" id="swx">關閉</button>`);$('#swx').onclick=closeSheet;claimList($('#claimsw'),true)}
 
 /* ---- flights ---- */
 const AL={BR:['長榮航空','#00704a','https://www.evaair.com'],CI:['中華航空','#c4002f','https://www.china-airlines.com'],JX:['星宇航空','#9a7b3f','https://www.starlux-airlines.com'],IT:['台灣虎航','#f26a21','https://www.tigerairtw.com'],MM:['樂桃航空','#c3007a','https://www.flypeach.com'],TR:['酷航','#c9a000','https://www.flyscoot.com'],JL:['日本航空','#c8102e','https://www.jal.co.jp'],NH:['全日空','#1d3f94','https://www.ana.co.jp'],CX:['國泰航空','#006564','https://www.cathaypacific.com'],GK:['捷星日本','#ff5000','https://www.jetstar.com'],BC:['天馬航空','#0066b3','https://www.skymark.co.jp'],AE:['華信航空','#c4002f','https://www.mandarin-airlines.com'],B7:['立榮航空','#00843d','https://www.uniair.com.tw'],UA:['聯合航空','#0033a0','https://www.united.com'],SQ:['新加坡航空','#c98a00','https://www.singaporeair.com'],KE:['大韓航空','#0083c9','https://www.koreanair.com']};
