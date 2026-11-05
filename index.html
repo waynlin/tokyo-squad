@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="zh-Hant"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"><meta name="theme-color" content="#1b1620"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Tokyo Squad">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"><meta name="theme-color" content="#1b1620"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Tokyo Squad"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Tokyo Squad">
 <title>TOKYO SQUAD · 東京 2027</title>
 <style>
 :root{--bg:#f6f1ea;--fg:#2a2230;--card:#fff;--line:#e4dbd0;--ac:#e5484d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -264,6 +264,29 @@ input,input[type=text],input[type=url],select,textarea{border-radius:4px;border:
 /* 分帳成員 */
 .mbr{display:flex;flex-direction:column;gap:6px;padding:8px 0;border-bottom:1px dashed #5a5266}
 .stop.exx{opacity:.5}
+/* 子頁籤 */
+.snv{padding:2px 2px 8px;gap:6px}.snv .chip{flex:1;text-align:center;padding:7px 4px;font-weight:800;font-size:13px}
+#clk{font-variant-numeric:tabular-nums}
+.kv .payb{margin-left:8px;padding:4px 8px;font-size:12px;flex:0 0 auto}
+.kv .x{margin-left:8px}
+/* 票券 */
+.tkc{padding:12px}
+.tth{max-width:100%;max-height:260px;margin-top:8px;background:#fff;border-radius:4px;border:2px solid var(--ink);cursor:zoom-in;display:block}
+.cpb{padding:2px 8px;font-size:12px;margin-left:6px}
+#tov{position:fixed;inset:0;z-index:500;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+#tov img{max-width:100%;max-height:88vh;background:#fff;object-fit:contain}
+#tov .tvh{color:#bbb;font-size:12px}
+.mpt{margin-top:6px;font-size:13px}.mpt .opt{padding:2px 8px;font-size:12px;text-decoration:none;display:inline-block;margin-left:4px}
+.navb{background:var(--ac)!important;color:var(--ink)!important;font-weight:800}
+/* 今天 */
+.tdh{text-align:center;padding:14px}.tdbig{font-size:14px;opacity:.85}.tdbig b{font-size:26px;color:var(--ac)}
+.tdtt{font-size:20px;font-weight:900;margin-top:2px}.tds{font-size:12px;opacity:.75;margin-top:4px}
+.tdw{display:flex;align-items:center;gap:12px}.wi2{font-size:40px;line-height:1}
+.tdm{border-color:#f2c230}.tdmp{font-size:18px;font-weight:800;margin:4px 0}.tdt{color:var(--ac);font-size:20px}
+.tdr{display:flex;align-items:center;gap:8px;padding:8px 6px;border-bottom:1px dashed #5a5266;font-size:14px;cursor:pointer}
+.tdr .otm{width:42px;font-variant-numeric:tabular-nums;opacity:.8;font-size:12.5px}
+.tdr.nx{background:#3d3420;border-radius:3px;border-bottom-color:transparent}.tdr.past{opacity:.45}
+.nxl{background:var(--ac);color:var(--ink);padding:1px 6px;border-radius:3px;font-size:11px;margin-left:4px}
 </style></head>
 <body><div id="app"></div><div id="sheet"></div>
 <script>
@@ -705,7 +728,7 @@ function albumSheet(){
 }
 
 /* ---------- tabs & shared data ---------- */
-let D={flights:{},stops:{},exp:{},stay:{},chat:{},notice:{}},tab='lobby',day=0,routeOn=false,catF=null,MQ={place:'澀谷',cat:'古著',ll:null};
+let D={flights:{},stops:{},exp:{},stay:{},pay:{},tix:{},chat:{},notice:{}},tab='lobby',day=0,routeOn=false,catF=null,MQ={place:'澀谷',cat:'古著',ll:null};
 const TABS=[['lobby','🏙️ 大廳'],['fly','✈️ 航班'],['plan','🗓️ 行程'],['stay','🏨 住宿'],['wx','🌤️ 天氣'],['map','🗺️ 周邊'],['exp','💴 記帳'],['pic','📸 相簿']];
 const DAYS=[...Array(9)].map((_,i)=>new Date(2027,0,13+i)),WK=['日','一','二','三','四','五','六'];
 const CAT={景點:'⛩',美食:'🍜',咖啡甜點:'☕',購物:'🛍',住宿:'🏨',交通:'🚆'};
@@ -720,12 +743,11 @@ function put(c,id,v){D[c][id]=v;if(db)db.collection(c).doc(id).set(v).catch(()=>
 function del(c,id){delete D[c][id];if(db)db.collection(c).doc(id).delete().catch(()=>{});refresh()}
 function refresh(){if(tab!=='lobby'&&$('#view')&&sheet.style.display!=='block')go(null,true)}
 function lobby(){go('lobby')}
-function go(t,keep){if(t)tab=t;if(!$('#view')){app.innerHTML='<div id="tkr" class="tkr"></div><header class="hd"></header><div id="nbar"></div><div id="view"></div><nav class="bar" id="nav"></nav>';
-  $('.hd').innerHTML=`<h1>TOKYO <b>SQUAD.</b></h1><p>2027.01.13 — 01.21 · 四人冒險基地</p><span class="pill" id="syncp">${mode==='solo'?'🟡 本機試玩（尚未設定資料庫）':'🟢 即時同步中'}</span>`}
+function go(t,keep){if(t)tab=t;if(!$('#view')){app.innerHTML='<div id="tkr" class="tkr"></div><header class="hd"></header><div id="nbar"></div><div id="snav"></div><div id="view"></div><nav class="bar" id="nav"></nav>';
+  $('.hd').innerHTML=`<h1>TOKYO <b>SQUAD.</b></h1><p>2027.01.13 — 01.21 · 四人冒險基地</p><span class="pill" id="syncp">${mode==='solo'?'🟡 本機試玩（尚未設定資料庫）':'🟢 即時同步中'}</span><span class="pill" id="clk"></span>`}
  if(!keep)closeSheet();
- $('#nav').innerHTML=TABS.map(([k,n])=>`<button class="chip ${k==tab?'on':''}" data-t="${k}"><span class="ic">${n.split(' ')[0]}</span>${n.split(' ')[1]}</button>`).join('');
- $('#nav').querySelectorAll('.chip').forEach(c=>c.onclick=()=>go(c.dataset.t));
- ({lobby:lobbyView,plan:planView,stay:stayView,fly:flyView,wx:wxView,map:mapView,exp:expView,pic:picView})[tab]();renderTicker();renderNotice();renderLog();watchConn();if(!window.__fx){window.__fx=1;if(!FX||Date.now()-FX.ts>30*60*1000)fetchFx()}}
+  renderNav();
+ ({lobby:lobbyView,today:todayView,tix:tixView,plan:planView,stay:stayView,fly:flyView,wx:wxView,map:mapView,exp:expView,pic:picView})[tab]();renderTicker();renderNotice();renderLog();watchConn();if(!window.__fx){window.__fx=1;if(!FX||Date.now()-FX.ts>30*60*1000)fetchFx()}}
 const dl=i=>`${DAYS[i].getMonth()+1}/${DAYS[i].getDate()}（${WK[DAYS[i].getDay()]}）`;
 const fdt=s=>s?s.slice(5).replace('T',' ').replace('-','/'):'—';
 
@@ -742,6 +764,8 @@ function moveStop(id,dir){const ids=dayList(day).map(s=>s.id),i=ids.indexOf(id),
 const gq=n=>enc(n+' 日本');
 const gmEmbed=n=>`https://maps.google.com/maps?output=embed&hl=zh-TW&z=16&q=${gq(n)}`;
 const gmOpen=n=>`https://www.google.com/maps/search/?api=1&query=${gq(n)}`;
+const gmNav=(n,m)=>`https://www.google.com/maps/dir/?api=1&destination=${gq(n)}&travelmode=${m||'transit'}`;
+const gmDay=(L,m)=>{const A=L.slice(0,11);return `https://www.google.com/maps/dir/?api=1&origin=${gq(A[0].n)}&destination=${gq(A[A.length-1].n)}${A.length>2?'&waypoints='+A.slice(1,-1).map(s=>gq(s.n)).join('%7C'):''}&travelmode=${m||'walking'}`};
 const gmDir=(a,b,m)=>`https://www.google.com/maps/dir/?api=1&origin=${gq(a)}&destination=${gq(b)}&travelmode=${m||'transit'}`;
 function planView(){
  const L=dayList(day),cnt=i=>Object.values(D.stops).filter(s=>s.day===i&&s.n).length;
@@ -761,11 +785,12 @@ function planView(){
   h+='<div id="sl">';
   V.forEach(s=>{const i=L.indexOf(s),prev=L[i-1],nx=catF?null:L[i+1],op=openStop===s.id;
    h+=`<div class="swr" data-id="${s.id}"><div class="stop tl ${op?'open':''}">${catF?'':'<div class="hdl" data-h="1">⠿</div>'}<span class="nb">${i+1}</span><div class="tm">${s.t||'--:--'}</div><div class="sb" data-o="${s.id}"><b>${CAT[s.c]||'📍'} ${esc(s.n)}</b>${s.note?`<div style="font-size:12px;opacity:.8">${esc(s.note)}</div>`:''}<small style="opacity:.5">${esc(nameOf(s.by))} 加入 · 點一下看地圖</small></div><button class="x" data-ed="${s.id}" title="編輯">✏️</button></div>`;
-   if(op)h+=`<div class="pn"><iframe loading="lazy" src="${gmEmbed(s.n)}"></iframe><div class="row" style="margin:8px 0 0"><a class="opt" target="_blank" rel="noopener" href="${gmOpen(s.n)}">在 Google 地圖開啟 ↗</a>${prev?`<a class="opt" target="_blank" rel="noopener" href="${gmDir(prev.n,s.n)}">🧭 從上一站過來 ↗</a>`:''}<button class="opt" data-near="${s.id}">🔎 看周邊</button>${catF?'':`<button class="opt" data-mv="${s.id}|-1" ${i==0?'disabled':''}>▲ 上移</button><button class="opt" data-mv="${s.id}|1" ${i==L.length-1?'disabled':''}>▼ 下移</button>`}</div></div>`;
+   if(op)h+=`<div class="pn"><iframe loading="lazy" src="${gmEmbed(s.n)}"></iframe><div class="row" style="margin:8px 0 0"><a class="opt navb" target="_blank" rel="noopener" href="${gmNav(s.n)}">🧭 導航到這裡</a><a class="opt" target="_blank" rel="noopener" href="${gmOpen(s.n)}">在 Google 地圖開啟 ↗</a>${prev?`<a class="opt" target="_blank" rel="noopener" href="${gmDir(prev.n,s.n)}">🧭 從上一站過來 ↗</a>`:''}<button class="opt" data-near="${s.id}">🔎 看周邊</button>${catF?'':`<button class="opt" data-mv="${s.id}|-1" ${i==0?'disabled':''}>▲ 上移</button><button class="opt" data-mv="${s.id}|1" ${i==L.length-1?'disabled':''}>▼ 下移</button>`}</div></div>`;
    if(nx){const lo=openLeg===s.id;h+=`<div class="leg">${s.tr?`<span>🚇 ${esc(s.tr)}</span>`:'<span style="opacity:.5">交通未填（點 ✏️ 可補）</span>'}<button class="opt" data-lg="${s.id}">🗺 路線 ${lo?'▲':'▼'}</button><a class="opt" target="_blank" rel="noopener" href="${gmDir(s.n,nx.n)}">即時 ↗</a></div>`+(lo?`<iframe class="lgf" loading="lazy" src="https://maps.google.com/maps?output=embed&hl=zh-TW&saddr=${gq(s.n)}&daddr=${gq(nx.n)}&dirflg=r"></iframe>`:'')}
    h+='</div>'});
   h+='</div>';
   h+=`<button class="big" id="ap">＋ 新增地點到第 ${day+1} 天</button>`;
+  if(L.length>1)h+=`<a class="big" target="_blank" rel="noopener" href="${gmDay(L)}" style="display:block;text-align:center;text-decoration:none">🗺 整天路線（開 Google 地圖）</a><div style="font-size:11.5px;opacity:.65;margin:-2px 4px 6px">${L.length>11?'地圖網址最多帶 11 個地點，先帶前 11 個。':''}一次排好所有地點的順序；搭電車的每一段請用下面「即時 ↗」看轉乘。</div>`;
   if(L.length>1)h+=`<button class="big ghost" id="rt">${routeOn?'收起':'🗺 顯示'}今日完整路線地圖</button>`+(routeOn?`<iframe loading="lazy" src="https://maps.google.com/maps?output=embed&hl=zh-TW&saddr=${gq(L[0].n)}&daddr=${L.slice(1).map(s=>gq(s.n)).join('+to:')}&dirflg=r"></iframe>`:'');
   $('#view').innerHTML=h;
  }
@@ -883,14 +908,14 @@ function nbFit(){const t=$('.nbt'),i=$('#nbi');if(!t||!i)return;i.className='nbi
 window.addEventListener('resize',()=>nbFit());
 function renderNotice(){const el=$('#nbar');if(!el)return;const n=pickNotice(),tot=Object.keys(D.notice||{}).length;
  el.innerHTML=`<button class="nbr" id="nbtn"><span class="nbl">公告</span><span class="nbt"><span class="nbi" id="nbi"></span></span><span class="nbm">${tot?tot+' 則 ›':'新增 ›'}</span></button>`;
- NBH=n?`<small>${esc(noticeLabel(n.d))}</small> ${esc(n.t)}`:'還沒有公告，點這裡新增重要訊息';nbFit();setTimeout(nbFit,500);$('#nbtn').onclick=noticeSheet;if(sheet.dataset.nt==='1'&&sheet.style.display==='block')fillNotice()}
-function noticeSheet(){const ti=tripDayIdx();openSheet(`<h3 style="margin:0 0 6px">公告欄</h3><div class="lab">新增公告（所有人都看得到）</div><select id="nd"><option value="-1">一般公告（每天都顯示）</option>${DAYS.map((d,i)=>`<option value="${i}" ${i===ti?'selected':''}>第 ${i+1} 天 · ${dl(i)}</option>`).join('')}</select><input type="text" id="nt" maxlength="100" placeholder="例：1/14 早上 8:30 大廳集合，帶護照" style="margin-top:6px"><button class="big" id="np">發布公告</button><div id="nl"></div><button class="big ghost" id="nx">關閉</button>`);
+ NBH=n?`<small>${esc(noticeLabel(n.d))}</small> ${esc(n.t)}${n.mp?` 📍 ${n.mt?esc(n.mt)+' ':''}${esc(n.mp)}`:''}`:'還沒有公告，點這裡新增重要訊息';nbFit();setTimeout(nbFit,500);$('#nbtn').onclick=noticeSheet;if(sheet.dataset.nt==='1'&&sheet.style.display==='block')fillNotice()}
+function noticeSheet(){const ti=tripDayIdx();openSheet(`<h3 style="margin:0 0 6px">公告欄</h3><div class="lab">新增公告（所有人都看得到）</div><select id="nd"><option value="-1">一般公告（每天都顯示）</option>${DAYS.map((d,i)=>`<option value="${i}" ${i===ti?'selected':''}>第 ${i+1} 天 · ${dl(i)}</option>`).join('')}</select><input type="text" id="nt" maxlength="100" placeholder="例：1/14 早上 8:30 大廳集合，帶護照" style="margin-top:6px"><div class="lab">📍 集合點（可留空，填了會變成可導航的連結）</div><div style="display:flex;gap:6px"><input type="time" id="nmt" style="flex:0 0 118px"><input type="text" id="nmp" maxlength="60" placeholder="例：澀谷八公像前"></div><button class="big" id="np">發布公告</button><div id="nl"></div><button class="big ghost" id="nx">關閉</button>`);
  sheet.dataset.nt='1';$('#nx').onclick=()=>{sheet.dataset.nt='';closeSheet()};
- $('#np').onclick=()=>{const t=$('#nt').value.trim();if(!t)return $('#nt').focus();const ts=Date.now(),id=ts.toString(36)+uid.slice(0,3),o={d:+$('#nd').value,t,by:uid,n:me.name||'旅伴',ts};D.notice[id]=o;if(db)db.collection('notice').doc(id).set(o).catch(()=>{});$('#nt').value='';renderNotice();fillNotice()};
+ $('#np').onclick=()=>{let t=$('#nt').value.trim();const mp=$('#nmp').value.trim(),mt=$('#nmt').value;if(!t&&!mp)return $('#nt').focus();if(!t)t='集合';const ts=Date.now(),id=ts.toString(36)+uid.slice(0,3),o={d:+$('#nd').value,t,by:uid,n:me.name||'旅伴',ts};if(mp){o.mp=mp;if(mt)o.mt=mt}D.notice[id]=o;if(db)db.collection('notice').doc(id).set(o).catch(()=>{});$('#nt').value='';$('#nmp').value='';$('#nmt').value='';renderNotice();fillNotice()};
  fillNotice()}
 function fillNotice(){const box=$('#nl');if(!box)return;const A=Object.entries(D.notice||{}).map(([id,s])=>({id,...s}));if(!A.length){box.innerHTML='<div class="lab" style="margin-top:10px">目前沒有公告</div>';return}
  const ti=tripDayIdx(),g={};A.forEach(s=>(g[s.d]=g[s.d]||[]).push(s));const ks=Object.keys(g).map(Number).sort((a,b)=>(a===ti?-1:b===ti?1:a-b));
- box.innerHTML=ks.map(k=>`<div class="lab" style="margin-top:12px">${noticeLabel(k)}${k===ti?'　（今天）':''}</div>`+g[k].sort((a,b)=>b.ts-a.ts).map(s=>`<div class="ntx"><div>${esc(s.t)}</div><small>${esc(s.n||'旅伴')} · ${mdOf(s.ts)} ${hhmm(s.ts)}</small>${s.by===uid?`<button class="x" data-nd="${s.id}" title="刪除">刪除</button>`:''}</div>`).join('')).join('');
+ box.innerHTML=ks.map(k=>`<div class="lab" style="margin-top:12px">${noticeLabel(k)}${k===ti?'　（今天）':''}</div>`+g[k].sort((a,b)=>b.ts-a.ts).map(s=>`<div class="ntx"><div>${esc(s.t)}</div>${s.mp?`<div class="mpt">📍 <b>${s.mt?esc(s.mt)+' ':''}${esc(s.mp)}</b> <a class="opt" href="${gmNav(s.mp)}" target="_blank" rel="noopener">🧭 導航</a> <a class="opt" href="${gmOpen(s.mp)}" target="_blank" rel="noopener">地圖</a></div>`:''}<small>${esc(s.n||'旅伴')} · ${mdOf(s.ts)} ${hhmm(s.ts)}</small>${s.by===uid?`<button class="x" data-nd="${s.id}" title="刪除">刪除</button>`:''}</div>`).join('')).join('');
  box.querySelectorAll('[data-nd]').forEach(b=>b.onclick=()=>{if(!b.dataset.c){b.dataset.c=1;b.textContent='確定刪除？';return}const id=b.dataset.nd;delete D.notice[id];if(db)db.collection('notice').doc(id).delete().catch(()=>{});renderNotice();fillNotice()})}
 
 /* 穩定排序後比較，資料沒變就不重畫（避免打斷正在看的地圖／輸入） */
@@ -900,12 +925,25 @@ const sj=x=>JSON.stringify(x,(k,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Ob
 function showToast(msg,ms){let t=$('#wtoast');if(!t){t=document.createElement('div');t.id='wtoast';document.body.appendChild(t)}t.textContent=msg;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(()=>{t.style.display='none'},ms||7000)}
 let _wf=0;
 function wfail(e){const n=Date.now();if(n-_wf<4000)return;_wf=n;showToast(window.__online===false?'目前離線：這筆會先暫存在手機，連上網路後自動補傳（請先別關掉頁面）':'這筆資料沒有成功存到雲端（可能是權限或網路問題），請再試一次')}
-function watchConn(){if(window.__connW||!window.__conn)return;window.__connW=1;window.__conn(ok=>{window.__online=ok;const e=$('#syncp');if(e&&mode!=='solo')e.textContent=ok?'🟢 即時同步中':'🔴 離線中，連上網路會自動補傳';clearTimeout(window.__offT);
+function watchConn(){if(window.__connW||!window.__conn)return;window.__connW=1;window.__conn(ok=>{window.__online=ok;pillUpdate();clearTimeout(window.__offT);
  if(!ok)window.__offT=setTimeout(()=>{window.__offShown=1;showToast('目前離線：剛剛的修改會先暫存在手機，連上網路後自動補傳。請先不要關掉頁面。',9000)},4000);
  else if(window.__offShown){window.__offShown=0;showToast('已重新連線，離線時的修改已自動補傳。',5000)}})}
 
+/* ===== 底部分組導覽（5 格）＋子頁籤，頂端台日雙時間 ===== */
+const GROUPS=[['today','🏠','今天',['today']],['lobby','🏙️','大廳',['lobby']],['plan','🗓️','行程',['plan','stay','fly','tix']],['explore','🧭','探索',['wx','map','pic']],['exp','💴','記帳',['exp']]];
+const SUBN={plan:'🗓️ 行程',stay:'🏨 住宿',fly:'✈️ 航班',tix:'🎫 票券',wx:'🌤️ 天氣',map:'🗺️ 周邊',pic:'📸 相簿'};
+const lastIn={};
+const grpOf=t=>GROUPS.find(g=>g[3].includes(t))||GROUPS[0];
+function renderNav(){const g=grpOf(tab);lastIn[g[0]]=tab;
+ $('#nav').innerHTML=GROUPS.map(x=>`<button class="chip ${x===g?'on':''}" data-g="${x[0]}"><span class="ic">${x[1]}</span>${x[2]}</button>`).join('');
+ $('#nav').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{const gg=GROUPS.find(x=>x[0]===c.dataset.g);go(lastIn[gg[0]]||gg[3][0])});
+ const sn=$('#snav');if(sn){if(g[3].length>1){sn.innerHTML=`<div class="chips snv">${g[3].map(k=>`<button class="chip ${k===tab?'on':''}" data-t="${k}">${SUBN[k]}</button>`).join('')}</div>`;sn.querySelectorAll('.chip').forEach(c=>c.onclick=()=>go(c.dataset.t))}else sn.innerHTML=''}
+ tickClk();pillUpdate()}
+function tickClk(){const e=$('#clk');if(e)e.textContent='🇹🇼 '+timeIn('Asia/Taipei')+'　🇯🇵 '+timeIn('Asia/Tokyo')}
+setInterval(tickClk,20000);
+
 /* ===== 天氣（Open-Meteo，免金鑰）＋ 大廳天氣效果 ===== */
-const WXL={tw:{n:'台北',lat:25.033,lon:121.565},tk:{n:'東京',lat:35.689,lon:139.692},ys:{n:'野澤雪場',lat:36.923,lon:138.441}};
+const WXL={tw:{n:'台灣',lat:25.033,lon:121.565},tk:{n:'東京',lat:35.689,lon:139.692},ys:{n:'野澤雪場',lat:36.923,lon:138.441},ueno:{n:'上野',lat:35.714,lon:139.777},asakusa:{n:'淺草',lat:35.715,lon:139.797},shibuya:{n:'澀谷',lat:35.658,lon:139.702},shinjuku:{n:'新宿',lat:35.694,lon:139.703}};
 const wxk=l=>WXL[l]?l:(l==='tw'||l==='ys'?l:'tk');
 const WXI={sun:['☀️','晴'],cloud:['⛅','多雲'],overcast:['☁️','陰天'],rain:['🌧️','下雨'],storm:['⛈️','雷雨'],snow:['❄️','下雪'],fog:['🌫️','起霧'],none:['⏳','載入中']};
 const WMO={0:'晴朗',1:'大致晴朗',2:'多雲',3:'陰天',45:'霧',48:'霧凇',51:'毛毛雨',53:'毛毛雨',55:'較強毛毛雨',56:'凍毛毛雨',57:'凍毛毛雨',61:'小雨',63:'中雨',65:'大雨',66:'凍雨',67:'強凍雨',71:'小雪',73:'中雪',75:'大雪',77:'冰粒',80:'陣雨',81:'較強陣雨',82:'強陣雨',85:'陣雪',86:'強陣雪',95:'雷雨',96:'雷雨伴冰雹',99:'強雷雨伴冰雹'};
@@ -1069,6 +1107,189 @@ function stayView(){
  $('#view').querySelectorAll('[data-map]').forEach(b=>b.onclick=()=>{openStay=openStay===b.dataset.map?null:b.dataset.map;stayView()});
 }
 
+/* ===== 票券與預約（新幹線、纜車、餐廳…，可附截圖／QR，離線也看得到） ===== */
+const TKK={'電車':'🚄','巴士':'🚌','雪場':'🎿','餐廳':'🍽️','景點':'🎟️','其他':'📄'};
+const TKN={'電車':'電車／新幹線','巴士':'巴士','雪場':'雪場（纜車券、雪具、課程）','餐廳':'餐廳預約','景點':'景點門票','其他':'其他'};
+const IDB={db:null,open(){return this.db||(this.db=new Promise((res,rej)=>{try{const r=indexedDB.open('tk_store',1);r.onupgradeneeded=()=>r.result.createObjectStore('img');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}}))},
+ async get(k){try{const d=await this.open();return await new Promise(res=>{const q=d.transaction('img').objectStore('img').get(k);q.onsuccess=()=>res(q.result||null);q.onerror=()=>res(null)})}catch(e){return null}},
+ async set(k,v){try{const d=await this.open();return await new Promise(res=>{const q=d.transaction('img','readwrite').objectStore('img').put(v,k);q.onsuccess=()=>res(1);q.onerror=()=>res(0)})}catch(e){return 0}},
+ async del(k){try{const d=await this.open();return await new Promise(res=>{const q=d.transaction('img','readwrite').objectStore('img').delete(k);q.onsuccess=()=>res(1);q.onerror=()=>res(0)})}catch(e){return 0}}};
+async function loadTixImg(id){const t=D.tix&&D.tix[id];if(!t||!t.img)return null;const c=await IDB.get(id);if(c&&c.v===t.img)return c.d;
+ try{const s=await db.collection('tixImg').doc(id).get();if(s.exists){const d=cl(s.data()).d;if(d){IDB.set(id,{v:t.img,d});return d}}}catch(e){}
+ return c?c.d:null}
+/* 有網路時，把所有票券圖片先抓下來放在手機裡（沒訊號也能秀 QR） */
+let _tpf=0;function prefetchTix(){if(!db||Date.now()-_tpf<20000)return;_tpf=Date.now();Object.keys(D.tix||{}).forEach(id=>{if(D.tix[id]&&D.tix[id].img)loadTixImg(id)})}
+function shrinkImg(file,max){return new Promise((res,rej)=>{const r=new FileReader();r.onerror=rej;r.onload=()=>{const im=new Image();im.onerror=rej;im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),w=Math.round(im.width*k),h=Math.round(im.height*k),c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(im,0,0,w,h);let q=.8,d=c.toDataURL('image/jpeg',q);while(d.length>600000&&q>.4){q-=.1;d=c.toDataURL('image/jpeg',q)}res(d)};im.src=r.result};r.readAsDataURL(file)})}
+const tixList=()=>Object.entries(D.tix||{}).map(([id,t])=>({id,...t})).filter(t=>t.n).sort((a,b)=>((a.day>=0?a.day:99)-(b.day>=0?b.day:99))||(a.t||'99:99').localeCompare(b.t||'99:99')||(a.ts||0)-(b.ts||0));
+function copyTxt(t){const ok=()=>showToast('已複製：'+t,2500);try{navigator.clipboard.writeText(t).then(ok,()=>fb())}catch(e){fb()}function fb(){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(e){}a.remove();ok()}}
+function tixViewer(src){let o=$('#tov');if(o)o.remove();o=document.createElement('div');o.id='tov';o.innerHTML=`<img src="${src}" alt=""><div class="tvh">點一下關閉・可直接拿給閘門／店員掃描</div>`;o.onclick=()=>o.remove();document.body.appendChild(o)}
+function tixCard(t){const kk=TKK[t.k]||'📄',u=stayUrl(t.url),dl2=t.day>=0&&t.day<DAYS.length?stayD(t.day)+(t.t?' '+t.t:''):(t.t||'日期未定');
+ return `<div class="card tkc"><div class="sth"><div style="min-width:0"><b class="stn">${kk} ${esc(t.n)}</b><div class="std">${esc(dl2)}${t.k?' · '+esc(TKN[t.k]||t.k):''}</div></div><button class="x" data-ed="${t.id}" title="編輯">✏️</button></div>
+ ${t.pl?`<div class="sta">📍 ${esc(t.pl)}</div>`:''}${t.conf?`<div class="sta">🔖 預約／票號 <b>${esc(t.conf)}</b> <button class="opt cpb" data-cp="${esc(t.conf)}">複製</button></div>`:''}${t.note?`<div class="sta">📝 ${esc(t.note)}</div>`:''}
+ ${t.img?`<img class="tth" data-ti="${t.id}" alt="" style="display:none"><div class="sta tix0" data-tl="${t.id}" style="opacity:.6">🖼 圖片載入中…</div>`:''}
+ <div class="stb">${t.pl?`<a class="opt" href="${gmNav(t.pl)}" target="_blank" rel="noopener">🧭 導航過去</a><a class="opt" href="${gmOpen(t.pl)}" target="_blank" rel="noopener">↗ 地圖</a>`:''}${u?`<a class="opt" href="${esc(u)}" target="_blank" rel="noopener">🔗 預約頁面</a>`:''}</div><small style="opacity:.5;display:block;margin-top:6px">${esc(nameOf(t.by))} 新增</small></div>`}
+function tixView(){
+ const L=tixList();let h=`<div class="card"><b>🎫 票券與預約</b><span style="float:right;font-size:13px;opacity:.75">${L.length} 張</span><div style="font-size:12.5px;opacity:.75;margin-top:6px;line-height:1.5">新幹線、纜車券、餐廳預約…都放這裡。可以附上截圖或 QR code，有網路時會先存進手機，沒訊號也打得開。</div></div>`;
+ h+='<button class="big" id="tadd">＋ 新增票券／預約</button>';
+ if(!L.length)h+='<div class="card" style="text-align:center;opacity:.85">還沒有票券，把訂好的車票和預約記下來吧 🎫</div>';
+ let last=null;L.forEach(t=>{const g=t.day>=0&&t.day<DAYS.length?t.day:-1;if(g!==last){last=g;h+=`<div class="lab" style="margin:12px 4px 4px;font-weight:800">${g>=0?'第 '+(g+1)+' 天 · '+dl(g):'日期未定'}</div>`}h+=tixCard(t)});
+ $('#view').innerHTML=h;$('#tadd').onclick=()=>tixSheet();
+ $('#view').querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>tixSheet(b.dataset.ed));
+ $('#view').querySelectorAll('[data-cp]').forEach(b=>b.onclick=()=>copyTxt(b.dataset.cp));
+ $('#view').querySelectorAll('img[data-ti]').forEach(im=>{loadTixImg(im.dataset.ti).then(d=>{const w=$(`[data-tl="${im.dataset.ti}"]`);if(d&&im.isConnected){im.src=d;im.style.display='block';im.onclick=()=>tixViewer(d);if(w)w.remove()}else if(w)w.textContent='🖼 圖片還沒下載到手機（需要網路）'})});
+ prefetchTix()}
+function tixSheet(id){
+ const e=id?D.tix[id]:null;if(id&&!e)return;const S=e||{k:'電車',n:'',day:-1,t:'',pl:'',conf:'',url:'',note:''},e0=e?Object.assign({},e):null;let newImg=null,rmImg=false;
+ openSheet(`<h3 style="margin:0 0 6px">${e?'編輯票券／預約':'新增票券／預約'}</h3><div class="lab">種類</div><select id="tk">${Object.keys(TKK).map(k=>`<option value="${k}" ${k===S.k?'selected':''}>${TKK[k]} ${TKN[k]}</option>`).join('')}</select>
+ <div class="lab">名稱</div><input type="text" id="tn" placeholder="例：越後湯澤→東京 新幹線 Max Toki 340" value="${esc(S.n)}">
+ <div class="lab">日期</div><select id="td"><option value="-1" ${!(S.day>=0)?'selected':''}>日期未定</option>${DAYS.map((d,i)=>`<option value="${i}" ${i===S.day?'selected':''}>第 ${i+1} 天 · ${dl(i)}</option>`).join('')}</select>
+ <div class="lab">時間（可留空）</div><input type="time" id="tt" value="${esc(S.t||'')}">
+ <div class="lab">地點／集合處（可導航，可留空）</div><input type="text" id="tp" placeholder="例：越後湯澤站" value="${esc(S.pl||'')}">
+ <div class="lab">預約編號／票號（可留空）</div><input type="text" id="tc" value="${esc(S.conf||'')}">
+ <div class="lab">預約頁面連結（可留空）</div><input type="url" id="tu" placeholder="https://" value="${esc(S.url||'')}">
+ <div class="lab">備註（座位、集合規定、取票方式…）</div><input type="text" id="tnote" value="${esc(S.note||'')}">
+ <div class="lab">附上截圖／QR code（可留空）</div><div id="tiw">${e&&e.img?'<div style="opacity:.7;font-size:13px">已有一張圖片。選新圖片會取代它。</div>':''}</div><input type="file" id="tf" accept="image/*"><button class="opt" id="tfr" style="display:${e&&e.img?'inline-block':'none'};margin-top:6px">移除圖片</button>
+ <button class="big" id="ts">${e?'儲存':'加入'}</button><button class="big ghost" id="tx">取消</button>${e?'<button class="big ghost" id="tdel" style="color:#ff8a6b">🗑 刪除這張</button>':''}`);
+ $('#tx').onclick=closeSheet;
+ $('#tf').onchange=async()=>{const f=$('#tf').files[0];if(!f)return;$('#tiw').innerHTML='<div style="opacity:.7;font-size:13px">處理圖片中…</div>';try{newImg=await shrinkImg(f,1100);rmImg=false;$('#tiw').innerHTML=`<img src="${newImg}" style="max-width:100%;max-height:220px;background:#fff;border-radius:4px"><div style="opacity:.6;font-size:11px;margin-top:4px">約 ${Math.round(newImg.length/1024)} KB</div>`}catch(er){newImg=null;$('#tiw').innerHTML='<div class="ywarn">這張圖片讀取失敗，換一張試試</div>'}};
+ $('#tfr').onclick=()=>{newImg=null;rmImg=true;$('#tiw').innerHTML='<div style="opacity:.7;font-size:13px">儲存後會移除圖片</div>';$('#tfr').style.display='none'};
+ if(e)$('#tdel').onclick=()=>{const b=$('#tdel');if(!b.dataset.c){b.dataset.c=1;b.textContent='再按一次確定刪除';return}closeSheet();IDB.del(id);if(db)db.collection('tixImg').doc(id).delete().catch(()=>{});del('tix',id)};
+ $('#ts').onclick=()=>{const n=$('#tn').value.trim();if(!n)return $('#tn').focus();
+  const f={k:$('#tk').value,n,day:+$('#td').value,t:$('#tt').value,pl:$('#tp').value.trim(),conf:$('#tc').value.trim(),url:$('#tu').value.trim(),note:$('#tnote').value.trim()};
+  const nid=id||Date.now().toString(36)+uid.slice(0,3);let iv=e?e.img:0;
+  if(newImg){iv=Date.now();f.img=iv;IDB.set(nid,{v:iv,d:newImg});if(db)db.collection('tixImg').doc(nid).set({d:newImg}).catch(()=>{})}
+  else if(rmImg&&e&&e.img){f.img=0;IDB.del(nid);if(db)db.collection('tixImg').doc(nid).delete().catch(()=>{})}
+  closeSheet();
+  if(!e)put('tix',nid,Object.assign({},f,{by:uid,ts:Date.now(),img:f.img||0}));
+  else{const ch={};Object.keys(f).forEach(k=>{if(f[k]!==(e0[k]==null?'':e0[k]))ch[k]=f[k]});if(Object.keys(ch).length){updFields('tix',id,ch);refresh()}else tixView()}};
+}
+
+/* ===== 今天（首頁）：今天第幾天、下一站、今晚住哪、天氣、票券、集合點 ===== */
+let tdSel=null;
+const dayISO=i=>DAYS[i].getFullYear()+'-'+String(DAYS[i].getMonth()+1).padStart(2,'0')+'-'+String(DAYS[i].getDate()).padStart(2,'0');
+const jpISO=ts=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(ts||new Date());
+function tripNow(){const t=jpISO(),f=dayISO(0),l=dayISO(DAYS.length-1);
+ if(t<f)return{k:'pre',i:0,n:Math.round((new Date(f)-new Date(t))/864e5)};if(t>l)return{k:'post',i:DAYS.length-1};
+ return{k:'in',i:Math.max(0,DAYS.findIndex((_,i)=>dayISO(i)===t))}}
+function dayWxLoc(i){const L=stayList(),c=nightCover(L);let s=(i<8&&c[i][0])||(i>0&&c[i-1][0])||null;
+ if(s){const t=s.n+' '+(s.addr||'');if(/野澤|湯澤|雪場|滑雪|nozawa|yuzawa/i.test(t))return 'ys';if(/淺草|浅草/.test(t))return 'asakusa';if(/上野/.test(t))return 'ueno';if(/澀谷|涩谷|渋谷/.test(t))return 'shibuya';if(/新宿/.test(t))return 'shinjuku'}
+ return 'tk'}
+function tdWeather(i){const loc=dayWxLoc(i),d=WX[loc],iso=dayISO(i),nowI=tripNow();let h='';
+ if(d&&d.daily){const k=d.daily.time.indexOf(iso);
+  if(k>=0){const w=wxClass({weather_code:d.daily.weather_code[k],wind_speed_10m:d.daily.wind_speed_10m_max[k],wind_gusts_10m:0});
+   h=`<span class="wi2">${WXI[w.k][0]}</span><div><b>${WMO[d.daily.weather_code[k]]||WXI[w.k][1]}　${Math.round(d.daily.temperature_2m_max[k])}° / ${Math.round(d.daily.temperature_2m_min[k])}°</b><div class="tds">${WXL[loc].n} · 降雨機率 ${d.daily.precipitation_probability_max[k]}%${d.daily.wind_speed_10m_max[k]>=28?' · 💨 風大':''}${(d.daily.snowfall_sum[k]||0)>.2?' · ❄️ 會下雪':''}</div></div>`}
+  else if(nowI.k==='in'&&i===nowI.i&&d.cur){const w=wxClass(d.cur);h=`<span class="wi2">${WXI[w.k][0]}</span><div><b>${WMO[d.cur.weather_code]||WXI[w.k][1]}　${Math.round(d.cur.temperature_2m)}°</b><div class="tds">${WXL[loc].n} · 體感 ${Math.round(d.cur.apparent_temperature)}°</div></div>`}
+  else h=`<span class="wi2">🌤️</span><div><b>還沒進入預報範圍</b><div class="tds">${WXL[loc].n} · 預報只看得到未來 16 天，之後會自動出現</div></div>`}
+ else h=`<span class="wi2">⏳</span><div><b>${d&&d.fail?'目前抓不到天氣':'天氣載入中…'}</b><div class="tds">${WXL[loc].n}</div></div>`;
+ return h}
+function dayText(i){const L=dayList(i),T=tixList().filter(t=>t.day===i),lines=[`📅 第 ${i+1} 天 ${dl(i)}`];
+ L.forEach(s=>lines.push(`${s.t?s.t+' ':'・'}${s.n}`));if(!L.length)lines.push('（還沒排行程）');
+ const c=nightCover(stayList());if(i<8&&c[i][0])lines.push('🏨 今晚住：'+c[i][0].n+(c[i][0].addr?'（'+c[i][0].addr+'）':''));
+ stayList().filter(s=>s.co===i).forEach(s=>lines.push('🧳 退房：'+s.n));
+ T.forEach(t=>lines.push(`🎫 ${t.t?t.t+' ':''}${t.n}${t.conf?'（'+t.conf+'）':''}`));
+ Object.values(D.notice||{}).filter(n=>n.mp&&(n.d===i||n.d===-1)).forEach(n=>lines.push(`📍 集合 ${n.mt||''} ${n.mp}`));return lines.join('\n')}
+function todayView(){
+ const now=tripNow(),sel=tdSel==null?now.i:tdSel,isToday=now.k==='in'&&sel===now.i,iso=dayISO(sel),nowHM=timeIn('Asia/Tokyo');
+ const L=dayList(sel),T=tixList().filter(t=>t.day===sel),SL=stayList(),cov=nightCover(SL);
+ let h=`<div class="chips dch" id="tdc">${DAYS.map((d,i)=>`<button class="chip dchip ${i===sel?'on':''}" data-td="${i}">D${i+1}<small>${d.getMonth()+1}/${d.getDate()} ${WK[d.getDay()]}</small></button>`).join('')}</div>`;
+ h+=`<div class="card tdh"><div class="tdbig">${now.k==='pre'&&sel===0?`距離出發還有 <b>${now.n}</b> 天`:now.k==='post'?'旅程結束囉 🎉':isToday?'今天':'預覽'}</div><div class="tdtt">第 ${sel+1} 天 · ${dl(sel)}</div><div class="tds">🇹🇼 台灣 ${timeIn('Asia/Taipei')}　🇯🇵 日本 ${timeIn('Asia/Tokyo')}（日本比台灣快 1 小時）</div></div>`;
+ /* 集合點 */
+ const M=Object.entries(D.notice||{}).map(([id,n])=>({id,...n})).filter(n=>n.mp&&(n.d===sel||n.d===-1)).sort((a,b)=>(a.mt||'99').localeCompare(b.mt||'99'));
+ M.forEach(n=>{h+=`<div class="card tdm"><div style="font-size:12px;opacity:.75">📌 集合點 · ${esc(n.t)}</div><div class="tdmp">${n.mt?`<b class="tdt">${esc(n.mt)}</b> `:''}${esc(n.mp)}</div><div class="stb"><a class="opt navb" href="${gmNav(n.mp)}" target="_blank" rel="noopener">🧭 導航過去</a><a class="opt" href="${gmOpen(n.mp)}" target="_blank" rel="noopener">↗ 地圖</a></div></div>`});
+ /* 航班 */
+ const fl=[];allIds().forEach(i=>{const f=(D.flights||{})[i]||{};[['out','去程'],['back','回程']].forEach(([k,lb])=>{const x=f[k];if(x&&x.date===iso&&x.no)fl.push(`<div class="kv"><span>✈️ ${esc(nameOf(i))} · ${lb} <b>${esc(x.no)}</b>${x.from||x.to?` ${esc(x.from||'')}→${esc(x.to||'')}`:''}</span><b>${esc(x.dep||'--')} → ${esc(x.arr||'--')}</b></div>`)})});
+ if(fl.length)h+=`<div class="card"><b>✈️ 今天的航班</b>${fl.join('')}${sel===0?'':''}<div class="stb"><button class="opt" data-tg="fly">看完整航班</button></div></div>`;
+ /* 天氣 */
+ h+=`<div class="card tdw" id="tdw" data-tg="wx" style="cursor:pointer">${tdWeather(sel)}</div>`;
+ /* 住宿 */
+ const out=SL.filter(s=>s.co===sel),tonight=sel<8?cov[sel][0]:null;
+ if(out.length||tonight||SL.length){h+=`<div class="card"><b>🏨 住宿</b>`;
+  out.forEach(s=>{h+=`<div class="sta">🧳 今天退房：<b>${esc(s.n)}</b></div>`});
+  if(tonight)h+=`<div class="sta">${tonight.ci===sel?'🔑 今天入住':'🌙 今晚住'}：<b>${esc(tonight.n)}</b>${tonight.addr?`<div style="opacity:.8;font-size:12.5px">📍 ${esc(tonight.addr)} <button class="opt cpb" data-cp="${esc(tonight.addr)}">複製地址</button></div>`:''}${tonight.conf?`<div style="opacity:.8;font-size:12.5px">🔖 ${esc(tonight.conf)}</div>`:''}</div><div class="stb"><a class="opt navb" href="${gmNav(tonight.addr||tonight.n)}" target="_blank" rel="noopener">🧭 導航到住宿</a><a class="opt" href="${gmOpen(tonight.addr||tonight.n)}" target="_blank" rel="noopener">↗ 地圖</a></div>`;
+  else if(sel<8)h+=`<div class="sta" style="color:#ffb38a">今晚還沒有住宿紀錄</div><div class="stb"><button class="opt" data-tg="stay">去記錄住宿</button></div>`;
+  h+='</div>'}
+ /* 行程 */
+ let nx=-1;if(L.length){nx=isToday?L.findIndex(s=>s.t&&s.t>=nowHM):0;if(isToday&&nx<0&&!L.some(s=>s.t))nx=0}
+ h+=`<div class="card"><b>🗓️ 今天的行程</b><span style="float:right;font-size:13px;opacity:.75">${L.length} 個地點</span>`;
+ if(!L.length)h+=`<div class="sta" style="opacity:.8">這天還沒有行程</div><div class="stb"><button class="opt" data-tg="plan">去安排行程</button></div>`;
+ else{h+=L.map((s,k)=>`<div class="tdr ${k===nx?'nx':''} ${isToday&&nx>=0&&k<nx?'past':''}" data-st="${s.id}"><span class="nb sm">${k+1}</span><span class="otm">${s.t||''}</span><span style="flex:1;min-width:0">${CAT[s.c]||'📍'} ${esc(s.n)}${k===nx?' <b class="nxl">下一站</b>':''}</span></div>`).join('');
+  const tg=nx>=0?L[nx]:L[0];
+  h+=`<div class="stb"><a class="opt navb" href="${gmNav(tg.n)}" target="_blank" rel="noopener">🧭 導航到${nx>=0&&isToday?'下一站':'第一站'}：${esc(tg.n.length>10?tg.n.slice(0,10)+'…':tg.n)}</a>${L.length>1?`<a class="opt" href="${gmDay(L)}" target="_blank" rel="noopener">🗺 整天路線</a>`:''}<button class="opt" data-tg="plan">看完整行程</button></div>`}
+ h+='</div>';
+ /* 票券 */
+ if(T.length){h+=`<div class="card"><b>🎫 今天的票券／預約</b>${T.map(t=>`<div class="tdr" data-tk="${t.id}"><span class="otm">${esc(t.t||'')}</span><span style="flex:1;min-width:0">${TKK[t.k]||'📄'} ${esc(t.n)}${t.conf?` <small style="opacity:.7">${esc(t.conf)}</small>`:''}</span>${t.img?'<span title="有附圖">🖼</span>':''}</div>`).join('')}<div class="stb"><button class="opt" data-tg="tix">看全部票券</button></div></div>`}
+ /* 今日花費 */
+ const sp=Object.values(D.exp||{}).filter(e=>e&&e.amt>0&&jpISO(e.ts)===iso&&!memX(memOf(e.by))).reduce((x,e)=>x+e.amt,0);
+ if(sp>0)h+=`<div class="card" data-tg="exp" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center"><b>💴 這天已花</b><b>¥${fnum(sp)} <small style="font-weight:400;opacity:.7">≈ NT$${fnum(sp*rate())}</small></b></div>`;
+ h+=`<button class="big ghost" id="tdsh">📤 分享這天行程（貼到 LINE）</button>`;
+ if(typeof offlineCard==='function')h+=offlineCard();
+ $('#view').innerHTML=h;
+ $('#view').querySelectorAll('[data-td]').forEach(b=>b.onclick=()=>{tdSel=+b.dataset.td;todayView()});
+ $('#view').querySelectorAll('[data-tg]').forEach(b=>b.onclick=()=>{const t=b.dataset.tg;if(t==='plan'||t==='stay'||t==='tix'||t==='wx'||t==='fly'||t==='exp'){if(t==='plan')day=sel;go(t)}});
+ $('#view').querySelectorAll('[data-cp]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();copyTxt(b.dataset.cp)});
+ $('#view').querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{day=sel;planAll=false;openStop=b.dataset.st;catF=null;go('plan')});
+ $('#view').querySelectorAll('[data-tk]').forEach(b=>b.onclick=()=>go('tix'));
+ $('#tdsh').onclick=()=>{const t=dayText(sel);if(navigator.share)navigator.share({text:t}).catch(()=>{});else copyTxt(t)};
+ if(typeof offlineBind==='function')offlineBind();
+ /* 天氣沒抓過就先抓，抓到後只更新天氣那張卡 */
+ const wl=dayWxLoc(sel);if(!WX[wl]||!WX[wl].daily)fetchWx(wl).then(()=>{const e=$('#tdw');if(tab==='today'&&e)e.innerHTML=tdWeather(sel)});
+ prefetchTix()}
+
+/* ===== 離線與備份：連線不穩也能用、資料先存手機、可匯出／還原 ===== */
+const CK='tk_cache_v1';
+function connectLoop(){return (async()=>{for(;;){try{const r=await connectDb();if(r)return r}catch(e){}await new Promise(r=>setTimeout(r,8000))}})()}
+/* 還沒連上雲端時，先收下所有讀寫；連上後自動補上（網路慢或沒訊號也不會掉進「單機模式」） */
+function lazyDb(realP){let real=null;const subs=[];let q=lsGet('tk_q')||[];if(!Array.isArray(q))q=[];window.__pending=q.length;
+ const sv=()=>{try{localStorage.setItem('tk_q',JSON.stringify(q.slice(-300)))}catch(e){}};
+ const run=o=>{const r=real.collection(o[1]).doc(o[2]);return o[0]==='set'?r.set(o[3]):o[0]==='update'?r.update(o[3]):r.delete()};
+ const enq=(k,c,id,d)=>{if(real)return run([k,c,id,d]);q.push([k,c,id,d,Date.now()]);sv();window.__pending=q.length;pillUpdate();return Promise.resolve()};
+ const attach=s=>s.id?real.collection(s.c).doc(s.id).onSnapshot(s.n,s.e):real.collection(s.c).onSnapshot(s.n,s.e);
+ const sub=s=>{subs.push(s);if(real)s.un=attach(s);return()=>{s.dead=1;try{s.un&&s.un()}catch(e){}}};
+ realP.then(r=>{real=r;subs.forEach(s=>{if(!s.dead)s.un=attach(s)});const items=q.splice(0);sv();window.__pending=0;items.forEach(o=>{try{run(o)}catch(e){}});watchConn();pillUpdate()});
+ const docApi=(c,id)=>({set:d=>enq('set',c,id,d),update:d=>enq('update',c,id,d),delete:()=>enq('delete',c,id),get:()=>real?real.collection(c).doc(id).get():Promise.reject(new Error('offline')),onSnapshot:(n,e)=>sub({c,id,n,e})});
+ return{collection:c=>({doc:id=>docApi(c,id),onSnapshot:(n,e)=>sub({c,n,e})})}}
+function pillUpdate(){const e=$('#syncp');if(!e||mode==='solo')return;const n=window.__pending||0;let t=window.__online===true?'🟢 即時同步中':window.__online===false?'🔴 離線中，連上網路會自動補傳':'🟠 連線中…';if(n)t+='（'+n+' 筆待上傳）';e.textContent=t}
+const wtimeout=(p,ms)=>Promise.race([p,new Promise((_,j)=>setTimeout(()=>j(new Error('timeout')),ms))]);
+/* 本機快取：打開 App 時先顯示上次的資料，沒訊號也看得到 */
+function loadCache(){try{const c=JSON.parse(localStorage.getItem(CK)||'null');if(!c||c.room!==CONFIG.room)return;
+ ['flights','stops','exp','stay','pay','tix','chat','notice'].forEach(k=>{if(c.D&&c.D[k])D[k]=c.D[k]});if(c.info)info=Object.assign({},c.info,info);if(c.players){players=c.players;delete players[uid]}window.__cacheTs=c.ts}catch(e){}}
+let _csig='';
+function saveCache(){try{const ch=D.chat||{},chat={};Object.keys(ch).sort().slice(-150).forEach(k=>chat[k]=ch[k]);
+ const body=JSON.stringify({D:Object.assign({},D,{chat}),info,players});if(body===_csig||body.length>3.5e6)return;_csig=body;const ts=Date.now();localStorage.setItem(CK,'{"room":'+JSON.stringify(CONFIG.room)+',"ts":'+ts+','+body.slice(1));window.__cacheTs=ts}catch(e){}}
+setInterval(saveCache,4000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveCache()});window.addEventListener('pagehide',saveCache);
+/* 備份：匯出／還原 */
+async function exportBackup(){
+ const imgs={};for(const id of Object.keys(D.tix||{})){if(D.tix[id]&&D.tix[id].img){const d=await loadTixImg(id);if(d)imgs[id]={v:D.tix[id].img,d}}}
+ const data={app:'tokyo-squad',v:1,room:CONFIG.room,ts:Date.now(),info,players:Object.assign({},players,me&&uid?{[uid]:me}:{}),D:{flights:D.flights,stops:D.stops,exp:D.exp,stay:D.stay,pay:D.pay,tix:D.tix,chat:D.chat,notice:D.notice},imgs};
+ const d=new Date(),nm='tokyo-squad-backup-'+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'-'+String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')+'.json';
+ const blob=new Blob([JSON.stringify(data)],{type:'application/json'}),file=new File([blob],nm,{type:'application/json'});
+ try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'旅遊備份'});return}}catch(e){if(e&&e.name==='AbortError')return}
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nm;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);showToast('已匯出：'+nm,4000)}
+function restoreBackup(data){
+ const cols=['flights','stops','exp','stay','pay','tix','chat','notice'];let n=0;cols.forEach(c=>{n+=Object.keys((data.D&&data.D[c])||{}).length});const ni=Object.keys(data.imgs||{}).length;
+ openSheet(`<h3 style="margin:0 0 6px">從備份還原</h3><div style="font-size:14px;line-height:1.6">備份時間：<b>${new Date(data.ts).toLocaleString('zh-TW')}</b><br>內容：<b>${n}</b> 筆資料${ni?`、<b>${ni}</b> 張票券圖片`:''}</div><div class="ywarn" style="font-size:12.5px;margin-top:8px;line-height:1.5">還原只會「寫入」，不會刪除現在的任何資料；編號相同的資料會被備份裡的內容覆蓋。確定要還原嗎？</div><button class="big" id="rbo">確定還原</button><button class="big ghost" id="rbx">取消</button>`);
+ $('#rbx').onclick=closeSheet;
+ $('#rbo').onclick=async()=>{closeSheet();let k=0;
+  cols.forEach(c=>{const m=(data.D&&data.D[c])||{};Object.keys(m).forEach(id=>{const v=m[id];if(v&&typeof v==='object'){D[c][id]=v;if(db)db.collection(c).doc(id).set(v).catch(()=>{});k++}})});
+  Object.keys(data.imgs||{}).forEach(id=>{const o=data.imgs[id];if(o&&o.d){IDB.set(id,o);if(db)db.collection('tixImg').doc(id).set({d:o.d}).catch(()=>{})}});
+  Object.keys(data.players||{}).forEach(id=>{if(id!==uid&&!players[id]&&data.players[id]&&data.players[id].name){players[id]=data.players[id];if(db)db.collection('players').doc(id).set(data.players[id]).catch(()=>{})}});
+  if(data.info){const o={};Object.keys(data.info).forEach(x=>{if(/^mb_/.test(x)||x==='rate'||x==='rateAt'||x==='album')o[x]=data.info[x]});if(Object.keys(o).length)saveInfo(o)}
+  showToast('已還原 '+k+' 筆資料',4000);refresh()}}
+/* 今天頁最下面的「離線與備份」卡片 */
+function offlineCard(){const ts=window.__cacheTs,n=window.__pending||0,st=window.__online===true?'🟢 已連線':window.__online===false?'🔴 離線中':'🟠 連線中';
+ return `<div class="card"><b>📴 離線與備份</b>
+ <div class="kv"><span>連線狀態</span><b>${st}${n?'（'+n+' 筆待上傳）':''}</b></div>
+ <div class="kv"><span>手機裡的資料備份</span><b>${ts?new Date(ts).getHours().toString().padStart(2,'0')+':'+new Date(ts).getMinutes().toString().padStart(2,'0')+' 更新':'尚未建立'}</b></div>
+ <div class="sta" style="opacity:.8;line-height:1.55">沒訊號時，行程、住宿、航班、票券（含已下載的圖片）、記帳都還看得到；離線時改的資料會在連上網路後自動補上，期間請別關掉頁面。</div>
+ <div class="stb"><button class="opt" id="bkx">⬇️ 匯出備份檔</button><button class="opt" id="bki">⬆️ 從備份還原</button></div><input type="file" id="bkf" accept=".json,application/json" style="display:none">
+ <div class="sta" style="font-size:12px;opacity:.75;line-height:1.55">📲 加到主畫面（開啟更快，也比較能離線）：iPhone 用 Safari 按「分享」→「加入主畫面」；Android 用 Chrome 按右上角 ⋮ →「安裝應用程式」。</div></div>`}
+function offlineBind(){const x=$('#bkx'),i=$('#bki'),f=$('#bkf');if(!x)return;
+ x.onclick=()=>{x.textContent='整理中…';exportBackup().finally(()=>{x.textContent='⬇️ 匯出備份檔'})};
+ i.onclick=()=>f.click();
+ f.onchange=()=>{const file=f.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(d.app!=='tokyo-squad'||!d.D)throw 0;restoreBackup(d)}catch(e){showToast('這個檔案不是旅遊備份檔',4000)}f.value=''};r.readAsText(file)}}
+/* 註冊 Service Worker（需要把 sw.js 一起放上 GitHub；沒有也不影響） */
+try{if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')&&(!navigator.webdriver||/[?&]sw=1/.test(location.search)))window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}catch(e){}
+
 /* ---- flights ---- */
 const AL={BR:['長榮航空','#00704a','https://www.evaair.com'],CI:['中華航空','#c4002f','https://www.china-airlines.com'],JX:['星宇航空','#9a7b3f','https://www.starlux-airlines.com'],IT:['台灣虎航','#f26a21','https://www.tigerairtw.com'],MM:['樂桃航空','#c3007a','https://www.flypeach.com'],TR:['酷航','#c9a000','https://www.flyscoot.com'],JL:['日本航空','#c8102e','https://www.jal.co.jp'],NH:['全日空','#1d3f94','https://www.ana.co.jp'],CX:['國泰航空','#006564','https://www.cathaypacific.com'],GK:['捷星日本','#ff5000','https://www.jetstar.com'],BC:['天馬航空','#0066b3','https://www.skymark.co.jp'],AE:['華信航空','#c4002f','https://www.mandarin-airlines.com'],B7:['立榮航空','#00843d','https://www.uniair.com.tw'],UA:['聯合航空','#0033a0','https://www.united.com'],SQ:['新加坡航空','#c98a00','https://www.singaporeair.com'],KE:['大韓航空','#0083c9','https://www.koreanair.com']};
 const AP={TPE:'桃園',TSA:'松山',KHH:'高雄',RMQ:'台中',NRT:'成田',HND:'羽田'};
@@ -1226,23 +1447,28 @@ function mapView(){
 /* ===== 記帳／平帳（可編輯、預設全員平分、成員可排除或合併） ===== */
 function splitIds(e){const ids=allIds();const p=(e.sp&&e.sp.length)?[...new Set(e.sp.map(memOf))].filter(i=>!memX(i)):ids;return p.length?p:ids}
 function settle(){const b={},ids=allIds();Object.values(D.exp).forEach(e=>{if(!e||!(e.amt>0))return;const by=memOf(e.by);if(memX(by))return;const p=splitIds(e);b[by]=(b[by]||0)+e.amt;p.forEach(i=>b[i]=(b[i]||0)-e.amt/p.length)});
+ Object.values(D.pay||{}).forEach(q=>{if(!q||!(q.amt>0))return;const f=memOf(q.f),t=memOf(q.t);if(memX(f)||memX(t))return;b[f]=(b[f]||0)+q.amt;b[t]=(b[t]||0)-q.amt});
  const cr=[],de=[];Object.entries(b).forEach(([i,v])=>{if(v>.5)cr.push([i,v]);else if(v<-.5)de.push([i,-v])});cr.sort((a,c)=>c[1]-a[1]);de.sort((a,c)=>c[1]-a[1]);
  const out=[];let i=0,j=0;while(i<cr.length&&j<de.length){const m=Math.min(cr[i][1],de[j][1]);out.push([de[j][0],cr[i][0],m]);cr[i][1]-=m;de[j][1]-=m;if(cr[i][1]<.5)i++;if(de[j][1]<.5)j++}return{b,out}}
+const payList=()=>Object.entries(D.pay||{}).map(([id,q])=>({id,...q})).filter(q=>q.amt>0&&q.f&&q.t).sort((a,b)=>b.ts-a.ts);
 const expList=()=>Object.entries(D.exp).map(([id,e])=>({id,...e})).filter(e=>e.t&&e.amt>0).sort((a,b)=>b.ts-a.ts);
 const selfOnly=e=>{const by=memOf(e.by);if(memX(by))return false;const p=splitIds(e);return allIds().length>1&&p.length===1&&p[0]===by};
 function expView(){
- const E=expList(),{b,out}=settle(),ids=allIds(),tot=E.filter(e=>!memX(memOf(e.by))).reduce((s,e)=>s+e.amt,0),so=E.filter(selfOnly);
+ const E=expList(),{b,out}=settle(),ids=allIds(),P=payList(),tot=E.filter(e=>!memX(memOf(e.by))).reduce((s,e)=>s+e.amt,0),so=E.filter(selfOnly);
  let h=`<div class="card"><b>💴 即時平帳</b><span style="float:right;opacity:.7;font-size:13px">總共 ¥${fnum(tot)} ≈ NT$${fnum(tot*rate())}</span>`;
- h+=out.length?out.map(([f,t,m])=>`<div class="kv"><span>${esc(nameOf(f))} → ${esc(nameOf(t))}</span><b class="neg">¥${fnum(m)}<small style="font-weight:400"> ≈NT$${fnum(m*rate())}</small></b></div>`).join(''):'<div style="opacity:.7;font-size:13px;margin-top:6px">目前沒有人欠錢 🎉</div>';
+ h+=out.length?out.map(([f,t,m])=>`<div class="kv"><span>${esc(nameOf(f))} → ${esc(nameOf(t))}</span><b class="neg">¥${fnum(m)}<small style="font-weight:400"> ≈NT$${fnum(m*rate())}</small></b><button class="opt payb" data-pay="${esc(f)}|${esc(t)}|${Math.round(m)}">✅ 已還</button></div>`).join(''):`<div style="opacity:.7;font-size:13px;margin-top:6px">${P.length?'🎉 目前都已經還清了':'目前沒有人欠錢 🎉'}</div>`;
  if(so.length)h+=`<div class="ysm warn" style="margin-top:8px">⚠️ 有 ${so.length} 筆花費只分給「付款人自己」，所以不會有人欠錢。點下面那筆花費，改成「全員平分」就會算出來。</div>`;
  h+=`<div class="lab" style="margin-top:10px">每人淨額</div>`+ids.map(i=>`<div class="kv"><span>${esc(nameOf(i))}</span><b class="${(b[i]||0)>=0?'pos':'neg'}">${(b[i]||0)>=0?'+':'−'}¥${fnum(Math.abs(b[i]||0))}</b></div>`).join('')+`</div>`;
  h+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="min-width:0"><b>👥 分帳成員：${ids.length} 人</b><div style="font-size:12px;opacity:.7;word-break:break-all">${ids.map(i=>esc(nameOf(i))).join('、')}</div></div><button class="opt" id="mbm">管理</button></div>`;
  h+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><b>匯率 ¥1 = NT$${rate().toFixed(4)}</b><div style="font-size:12px;opacity:.65">${info.rateAt?'更新於 '+esc(info.rateAt):'預設估計值，出發前請更新'}</div></div><button class="opt" id="rt2">更新</button></div>`;
+ if(P.length)h+=`<div class="card"><b>🧾 還款紀錄</b><span style="float:right;opacity:.7;font-size:13px">共 ¥${fnum(P.reduce((x,q)=>x+q.amt,0))}</span>${P.map(q=>`<div class="kv"><span>${esc(nameOf(memOf(q.f)))} → ${esc(nameOf(memOf(q.t)))}<div style="font-size:11px;opacity:.6">${new Date(q.ts).getMonth()+1}/${new Date(q.ts).getDate()} ${String(new Date(q.ts).getHours()).padStart(2,'0')}:${String(new Date(q.ts).getMinutes()).padStart(2,'0')} · ${esc(nameOf(q.by))} 記錄</div></span><b class="pos">¥${fnum(q.amt)}</b><button class="x" data-up="${q.id}" title="撤銷">↩</button></div>`).join('')}</div>`;
  h+=`<button class="big" id="ae">＋ 新增一筆花費</button>`;
  E.forEach(e=>{const ex=memX(memOf(e.by)),p=splitIds(e),all=!(e.sp&&e.sp.length)||p.length===ids.length,who=all?`全員平分（${p.length} 人）`:p.map(i=>esc(nameOf(i))).join('、')+' 分';
   h+=`<div class="stop ${ex?'exx':''}" data-e="${e.id}" style="cursor:pointer"><div style="flex:1;min-width:0"><b>${esc(e.t)}</b><div style="font-size:12px;opacity:.75">${esc(nameOf(memOf(e.by)))} 付 · ${ex?'付款人已排除，不計入':who}</div>${selfOnly(e)?'<div class="ywarn">⚠️ 只分給付款人自己，不會有人欠錢（點一下修改）</div>':''}</div><b style="text-align:right">¥${fnum(e.amt)}<div style="font-size:11px;opacity:.6;font-weight:400">${e.cur==='TWD'?'輸入 NT$'+fnum(e.orig):'≈NT$'+fnum(e.amt*rate())}</div></b><button class="x" data-x="${e.id}">✕</button></div>`});
  $('#view').innerHTML=h;$('#ae').onclick=()=>expSheet();$('#rt2').onclick=rateSheet;$('#mbm').onclick=memberSheet;
  $('#view').querySelectorAll('[data-e]').forEach(r=>r.onclick=()=>expSheet(r.dataset.e));
+ $('#view').querySelectorAll('[data-pay]').forEach(x=>x.onclick=()=>{const[f,t,m]=x.dataset.pay.split('|');paySheet(f,t,+m)});
+ $('#view').querySelectorAll('[data-up]').forEach(x=>x.onclick=()=>{if(!x.dataset.c){x.dataset.c=1;x.textContent='撤銷？';x.style.width='auto';x.style.padding='0 8px';setTimeout(()=>{if(x.isConnected){x.dataset.c='';x.textContent='↩';x.style.width='';x.style.padding=''}},3000);return}del('pay',x.dataset.up)});
  $('#view').querySelectorAll('[data-x]').forEach(x=>x.onclick=ev=>{ev.stopPropagation();if(!x.dataset.c){x.dataset.c=1;x.textContent='確定刪除？';x.style.width='auto';x.style.padding='0 8px';setTimeout(()=>{if(x.isConnected){x.dataset.c='';x.textContent='✕';x.style.width='';x.style.padding=''}},3000);return}del('exp',x.dataset.x)});
 }
 function expSheet(id){
@@ -1274,6 +1500,11 @@ function memberSheet(){
  $('#mbx').onclick=()=>{closeSheet();expView()};
 }
 
+function paySheet(f,t,m){
+ openSheet(`<h3 style="margin:0 0 6px">記錄已還款</h3><div style="font-size:15px;margin:4px 0 8px"><b>${esc(nameOf(f))}</b> 還給 <b>${esc(nameOf(t))}</b></div><div class="lab">還了多少（日圓，可以只還一部分）</div><input type="number" inputmode="decimal" id="pa" value="${m}"><div id="pp" style="font-size:12px;opacity:.65;margin-top:4px"></div><div style="font-size:12px;opacity:.7;margin-top:6px;line-height:1.5">按下去只是「記錄」，不會真的轉帳。記錄後上面的欠款會自動扣掉，任何人都可以在下方「還款紀錄」撤銷。</div><button class="big" id="ps">✅ 記錄已還款</button><button class="big ghost" id="px">取消</button>`);
+ const pv=()=>{const a=parseFloat($('#pa').value)||0;$('#pp').textContent=a?`≈ NT$${fnum(a*rate())}`:''};$('#pa').oninput=pv;pv();$('#px').onclick=closeSheet;
+ $('#ps').onclick=()=>{const a=Math.round(parseFloat($('#pa').value));if(!(a>0))return $('#pa').focus();closeSheet();put('pay',Date.now().toString(36)+uid.slice(0,3),{f,t,amt:a,by:uid,ts:Date.now()})}}
+
 
 /* ---- album ---- */
 function picView(){
@@ -1284,22 +1515,24 @@ function picView(){
 /* ---------- boot ---------- */
 (async()=>{
  app.innerHTML='<div class="card" style="text-align:center;margin-top:40px">載入中…</div>';
- try{db=await Promise.race([connectDb(),new Promise(r=>setTimeout(()=>r(null),6000))])}catch(e){db=null}
- uid=myId();mode=db?'sync':'solo';
+ const hasCfg=!!(window.__FB_MOCK||(CONFIG.firebase&&CONFIG.firebase.databaseURL&&CONFIG.firebase.apiKey));let realP=null;
+ if(hasCfg){realP=connectLoop();db=lazyDb(realP)}else db=null;
+ if(realP)await Promise.race([realP,new Promise(r=>setTimeout(r,5000))]);
+ uid=myId();mode=db?'sync':'solo';loadCache();
  let mine=lsGet('me');
- if(db){try{const s=await pRef().get();if(s.exists)mine=cl(s.data())}catch(e){}
-  try{const i=await db.collection('trip').doc('info').get();if(i.exists)info=cl(i.data())}catch(e){}}
+ if(db){try{const s=await wtimeout(pRef().get(),4000);if(s.exists)mine=cl(s.data())}catch(e){}
+  try{const i=await wtimeout(db.collection('trip').doc('info').get(),4000);if(i.exists)info=Object.assign({},info,cl(i.data()))}catch(e){}}
  me=mine&&mine.av?mine:{av:rndAv(),loc:'tw',auto:true,x:50,y:78,name:''};
  me.x=me.x??50;me.y=me.y??78;
  if(db){
   db.collection('players').onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});delete o[uid];players=o;renderPlayers()},()=>{});
   db.collection('trip').doc('info').onSnapshot(s=>{if(s.exists){info=cl(s.data());refresh()}},()=>{});
-  ['flights','stops','exp','stay'].forEach(c=>db.collection(c).onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});if(sj(o)!==sj(D[c])){D[c]=o;refresh()}},()=>{}));db.collection('chat').onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});D.chat=o;renderLog()},()=>{});db.collection('notice').onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});D.notice=o;renderNotice()},()=>{});
+  ['flights','stops','exp','stay','pay','tix'].forEach(c=>db.collection(c).onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});if(sj(o)!==sj(D[c])){D[c]=o;refresh()}},()=>{}));db.collection('chat').onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});D.chat=o;renderLog()},()=>{});db.collection('notice').onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});D.notice=o;renderNotice()},()=>{});
   setInterval(()=>{if(document.visibilityState==='visible'&&me.name)save({})},90000);
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&me.name)save({})});
  }
  if(!me.name){splash();return}
- lobby();
- if(me.auto){const s=await geoScene();if(!picked&&me.auto&&s&&s!==me.loc)setScene(s,true);else save({})}else save({});
+ go('today');
+ if(me.auto){const s=await geoScene();if(!picked&&me.auto&&s&&s!==me.loc){if(tab==='lobby')setScene(s,true);else{me.loc=s;me.x=20+Math.random()*60;me.y=68+Math.random()*20;save({})}}else save({})}else save({});
 })();
 </script></body></html>
