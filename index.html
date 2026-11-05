@@ -287,6 +287,9 @@ input,input[type=text],input[type=url],select,textarea{border-radius:4px;border:
 .tdr .otm{width:42px;font-variant-numeric:tabular-nums;opacity:.8;font-size:12.5px}
 .tdr.nx{background:#3d3420;border-radius:3px;border-bottom-color:transparent}.tdr.past{opacity:.45}
 .nxl{background:var(--ac);color:var(--ink);padding:1px 6px;border-radius:3px;font-size:11px;margin-left:4px}
+
+/* 橫向按鈕列不顯示捲軸（選中的會自動捲到中間） */
+.chips{scrollbar-width:none;-ms-overflow-style:none}.chips::-webkit-scrollbar{display:none}
 </style></head>
 <body><div id="app"></div><div id="sheet"></div>
 <script>
@@ -935,13 +938,16 @@ const GROUPS=[['today','🏠','今天',['today']],['lobby','🏙️','大廳',['
 const SUBN={plan:'🗓️ 行程',stay:'🏨 住宿',fly:'✈️ 航班',tix:'🎫 票券',wx:'🌤️ 天氣',map:'🗺️ 周邊',pic:'📸 相簿'};
 const lastIn={};
 const grpOf=t=>GROUPS.find(g=>g[3].includes(t))||GROUPS[0];
-function renderNav(){const g=grpOf(tab);lastIn[g[0]]=tab;
+function renderNav(){const g=grpOf(tab);lastIn[g[0]]=tab;setTimeout(centerOn,60);setTimeout(centerOn,400);
  $('#nav').innerHTML=GROUPS.map(x=>`<button class="chip ${x===g?'on':''}" data-g="${x[0]}"><span class="ic">${x[1]}</span>${x[2]}</button>`).join('');
  $('#nav').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{const gg=GROUPS.find(x=>x[0]===c.dataset.g);go(lastIn[gg[0]]||gg[3][0])});
  const sn=$('#snav');if(sn){if(g[3].length>1){sn.innerHTML=`<div class="chips snv">${g[3].map(k=>`<button class="chip ${k===tab?'on':''}" data-t="${k}">${SUBN[k]}</button>`).join('')}</div>`;sn.querySelectorAll('.chip').forEach(c=>c.onclick=()=>go(c.dataset.t))}else sn.innerHTML=''}
  tickClk();pillUpdate()}
 function tickClk(){const e=$('#clk');if(e)e.textContent='🇹🇼 '+timeIn('Asia/Taipei')+'　🇯🇵 '+timeIn('Asia/Tokyo')}
 setInterval(tickClk,20000);
+/* 橫向的地點／日期按鈕列：重畫之後，自動把「目前選中的那顆」捲到中間，才看得出現在選的是哪個 */
+function centerOn(){try{document.querySelectorAll('.chips').forEach(c=>{const o=c.querySelector('.chip.on');if(!o||c.scrollWidth<=c.clientWidth+2)return;const cr=c.getBoundingClientRect(),or=o.getBoundingClientRect();c.scrollLeft+=or.left-cr.left-(cr.width-or.width)/2})}catch(e){}}
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('.chips')){setTimeout(centerOn,30);setTimeout(centerOn,350)}},true);
 
 /* ===== 天氣（Open-Meteo，免金鑰）＋ 大廳天氣效果 ===== */
 const WXL={tw:{n:'台灣',lat:25.033,lon:121.565},tk:{n:'東京',lat:35.689,lon:139.692},ys:{n:'野澤雪場',lat:36.923,lon:138.441},ueno:{n:'上野',lat:35.714,lon:139.777},asakusa:{n:'淺草',lat:35.715,lon:139.797},shibuya:{n:'澀谷',lat:35.658,lon:139.702},shinjuku:{n:'新宿',lat:35.694,lon:139.703}};
@@ -1036,6 +1042,7 @@ async function fetchHist(loc){const b=$('#wxhb');if(b)b.textContent='載入中�
   if(!r.ok)throw 0;const j=await r.json();if(!j.daily||!j.daily.time)throw 0;WXH[loc]=j}catch(e){WXH[loc]='err'}
  if(tab==='wx'&&loc===wxSel&&$('#wxhist'))$('#wxhist').innerHTML=wxHistHtml(loc),(()=>{const hb=$('#wxhb');if(hb)hb.onclick=()=>fetchHist(loc)})()}
 
+const NN=()=>DAYS.length-1;
 /* ===== 住宿（像訂房網站一樣選入住～退房日，可多晚住同一處，大家共編） ===== */
 const STC=['#ff8a6b','#6bd0ff','#ffd93d','#8de07a','#d79bff','#ff9ec7'];
 let openStay=null;
@@ -1045,19 +1052,19 @@ const stayD=i=>DAYS[i].getMonth()+1+'/'+DAYS[i].getDate();
 const stayDW=i=>stayD(i)+'（'+WK[DAYS[i].getDay()]+'）';
 const stayJPY=s=>+s.amt>0?(s.cur==='TWD'?s.amt/rate():+s.amt):0;
 const stayUrl=u=>/^https?:\/\//i.test(u||'')?u:'';
-function nightCover(L){const c=[...Array(8)].map(()=>[]);L.forEach(s=>{for(let n=s.ci;n<s.co&&n<8;n++)c[n].push(s)});return c}
+function nightCover(L){const c=[...Array(NN())].map(()=>[]);L.forEach(s=>{for(let n=s.ci;n<s.co&&n<NN();n++)c[n].push(s)});return c}
 const fmtList=a=>a.map(n=>stayD(n)).join('、');
 /* 行程頁用：這天的住宿提示 */
 function stayLine(i){const L=stayList();if(!L.length)return '';const cov=nightCover(L),t=[];
  L.filter(s=>s.co===i).forEach(s=>t.push('🧳 退房：'+esc(s.n)));
- if(i<8){const c=cov[i];if(c.length){const s=c[0];t.push(s.ci===i?'🔑 入住：'+esc(s.n):'🏨 今晚住：'+esc(s.n))}else t.push('🏨 今晚還沒訂住宿')}
- return t.length?`<div class="stl ${i<8&&!cov[i].length?'em':''}" onclick="go('stay')">${t.join('　')}<i>›</i></div>`:''}
+ if(i<NN()){const c=cov[i];if(c.length){const s=c[0];t.push(s.ci===i?'🔑 入住：'+esc(s.n):'🏨 今晚住：'+esc(s.n))}else t.push('🏨 今晚還沒訂住宿')}
+ return t.length?`<div class="stl ${i<NN()&&!cov[i].length?'em':''}" onclick="go('stay')">${t.join('　')}<i>›</i></div>`:''}
 function calHtml(ci,co,self){const cov=nightCover(stayList().filter(s=>s.id!==self)),first=DAYS[0].getDate(),start=first-DAYS[0].getDay();
  let h='<div class="calh">'+DAYS[0].getFullYear()+' 年 '+(DAYS[0].getMonth()+1)+' 月</div><div class="cal">'+WK.map(w=>`<div class="cw">${w}</div>`).join('');
  for(let d=start;d<start+14;d++){const i=d-first;
-  if(i<0||i>8){h+=`<div class="cd off">${d>0?d:''}</div>`;continue}
+  if(i<0||i>NN()){h+=`<div class="cd off">${d>0?d:''}</div>`;continue}
   const cls=i===ci?'sel s1':i===co?'sel s2':(ci!=null&&co!=null&&i>ci&&i<co)?'mid':'';
-  const dots=i<8?cov[i].slice(0,3).map(s=>`<u style="background:${STC[Math.max(0,stayList().findIndex(x=>x.id===s.id))%STC.length]}"></u>`).join(''):'';
+  const dots=i<NN()?cov[i].slice(0,3).map(s=>`<u style="background:${STC[Math.max(0,stayList().findIndex(x=>x.id===s.id))%STC.length]}"></u>`).join(''):'';
   h+=`<button class="cd ${cls}" data-i="${i}"><b>${d}</b><span class="cl2">${i===ci?'入住':i===co?'退房':''}</span><span class="dts">${dots}</span></button>`}
  return h+'</div>'}
 function staySheet(id){
@@ -1073,8 +1080,8 @@ function staySheet(id){
   const ov=(ci!=null&&co!=null)?stayList().filter(s=>s.id!==id&&s.ci<co&&s.co>ci):[];
   $('#ysum').innerHTML=ci==null?'請點入住日':co==null?`入住 <b>${stayDW(ci)}</b> → 請點退房日`:`入住 <b>${stayDW(ci)}</b> → 退房 <b>${stayDW(co)}</b>　<b class="ynt">${co-ci} 晚</b>`+(ov.length?`<div class="ywarn">⚠️ 跟「${ov.map(s=>esc(s.n)).join('、')}」有重疊的晚上（還是可以儲存）</div>`:'');
   $('#ycal').querySelectorAll('.cd[data-i]').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;
-   if(ci==null||co!=null){if(i===8)return;ci=i;co=null}
-   else if(i>ci)co=i;else{if(i===8)return;ci=i}
+   if(ci==null||co!=null){if(i===NN())return;ci=i;co=null}
+   else if(i>ci)co=i;else{if(i===NN())return;ci=i}
    draw()})};
  draw();
  $('#yx').onclick=closeSheet;
@@ -1088,7 +1095,7 @@ function staySheet(id){
 }
 function stayView(){
  const L=stayList(),cov=nightCover(L),miss=[],dup=[];cov.forEach((c,n)=>{if(!c.length)miss.push(n);else if(c.length>1)dup.push(n)});
- let h=`<div class="card"><b>🏨 住宿安排</b><span style="float:right;font-size:13px;opacity:.75">${8-miss.length} / 8 晚有著落</span><div class="lab" style="margin:8px 0 4px">每一格＝那天晚上住哪（${stayD(0)} 晚上 ～ ${stayD(7)} 晚上；${stayD(8)} 是回程日）</div><div class="nts">${cov.map((c,n)=>`<div class="nt ${c.length===0?'em':c.length>1?'dp':''}" ${c.length===1?`style="background:${stayColor(L,c[0].id)}"`:''}><b>${DAYS[n].getDate()}</b><small>${WK[DAYS[n].getDay()]}</small></div>`).join('')}</div>`;
+ let h=`<div class="card"><b>🏨 住宿安排</b><span style="float:right;font-size:13px;opacity:.75">${NN()-miss.length} / ${NN()} 晚有著落</span><div class="lab" style="margin:8px 0 4px">每一格＝那天晚上住哪（${stayD(0)} 晚上 ～ ${stayD(NN()-1)} 晚上；${stayD(NN())} 是回程日）</div><div class="nts">${cov.map((c,n)=>`<div class="nt ${c.length===0?'em':c.length>1?'dp':''}" ${c.length===1?`style="background:${stayColor(L,c[0].id)}"`:''}><b>${DAYS[n].getDate()}</b><small>${WK[DAYS[n].getDay()]}</small></div>`).join('')}</div>`;
  if(L.length){h+=miss.length?`<div class="ysm warn">還沒訂：${fmtList(miss)}</div>`:'<div class="ysm ok">✅ 每一晚都有住宿了</div>';if(dup.length)h+=`<div class="ysm warn">⚠️ 重複訂到：${fmtList(dup)}</div>`}
  h+='</div>';
  const tot=L.reduce((s,x)=>s+stayJPY(x),0);
@@ -1172,7 +1179,7 @@ const jpISO=ts=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'num
 function tripNow(){const t=jpISO(),f=dayISO(0),l=dayISO(DAYS.length-1);
  if(t<f)return{k:'pre',i:0,n:Math.round((new Date(f)-new Date(t))/864e5)};if(t>l)return{k:'post',i:DAYS.length-1};
  return{k:'in',i:Math.max(0,DAYS.findIndex((_,i)=>dayISO(i)===t))}}
-function dayWxLoc(i){const L=stayList(),c=nightCover(L);let s=(i<8&&c[i][0])||(i>0&&c[i-1][0])||null;
+function dayWxLoc(i){const L=stayList(),c=nightCover(L);let s=(i<NN()&&c[i][0])||(i>0&&c[i-1][0])||null;
  if(s){const t=s.n+' '+(s.addr||'');if(/野澤|湯澤|雪場|滑雪|nozawa|yuzawa/i.test(t))return 'ys';if(/淺草|浅草/.test(t))return 'asakusa';if(/上野/.test(t))return 'ueno';if(/澀谷|涩谷|渋谷/.test(t))return 'shibuya';if(/新宿/.test(t))return 'shinjuku'}
  return 'tk'}
 function tdWeather(i){const loc=dayWxLoc(i),d=WX[loc],iso=dayISO(i),nowI=tripNow();let h='';
@@ -1185,7 +1192,7 @@ function tdWeather(i){const loc=dayWxLoc(i),d=WX[loc],iso=dayISO(i),nowI=tripNow
  return h}
 function dayText(i){const L=dayList(i),T=tixList().filter(t=>t.day===i),lines=[`📅 第 ${i+1} 天 ${dl(i)}`];
  L.forEach(s=>lines.push(`${s.t?s.t+' ':'・'}${s.n}`));if(!L.length)lines.push('（還沒排行程）');
- const c=nightCover(stayList());if(i<8&&c[i][0])lines.push('🏨 今晚住：'+c[i][0].n+(c[i][0].addr?'（'+c[i][0].addr+'）':''));
+ const c=nightCover(stayList());if(i<NN()&&c[i][0])lines.push('🏨 今晚住：'+c[i][0].n+(c[i][0].addr?'（'+c[i][0].addr+'）':''));
  stayList().filter(s=>s.co===i).forEach(s=>lines.push('🧳 退房：'+s.n));
  T.forEach(t=>lines.push(`🎫 ${t.t?t.t+' ':''}${t.n}${t.conf?'（'+t.conf+'）':''}`));
  Object.values(D.notice||{}).filter(n=>n.mp&&(n.d===i||n.d===-1)).forEach(n=>lines.push(`📍 集合 ${n.mt||''} ${n.mp}`));return lines.join('\n')}
@@ -1203,11 +1210,11 @@ function todayView(){
  /* 天氣 */
  h+=`<div class="card tdw" id="tdw" data-tg="wx" style="cursor:pointer">${tdWeather(sel)}</div>`;
  /* 住宿 */
- const out=SL.filter(s=>s.co===sel),tonight=sel<8?cov[sel][0]:null;
+ const out=SL.filter(s=>s.co===sel),tonight=sel<NN()?cov[sel][0]:null;
  if(out.length||tonight||SL.length){h+=`<div class="card"><b>🏨 住宿</b>`;
   out.forEach(s=>{h+=`<div class="sta">🧳 今天退房：<b>${esc(s.n)}</b></div>`});
   if(tonight)h+=`<div class="sta">${tonight.ci===sel?'🔑 今天入住':'🌙 今晚住'}：<b>${esc(tonight.n)}</b>${tonight.addr?`<div style="opacity:.8;font-size:12.5px">📍 ${esc(tonight.addr)} <button class="opt cpb" data-cp="${esc(tonight.addr)}">複製地址</button></div>`:''}${tonight.conf?`<div style="opacity:.8;font-size:12.5px">🔖 ${esc(tonight.conf)}</div>`:''}</div><div class="stb"><a class="opt navb" href="${gmNav(tonight.addr||tonight.n)}" target="_blank" rel="noopener">🧭 導航到住宿</a><a class="opt" href="${gmOpen(tonight.addr||tonight.n)}" target="_blank" rel="noopener">↗ 地圖</a></div>`;
-  else if(sel<8)h+=`<div class="sta" style="color:#ffb38a">今晚還沒有住宿紀錄</div><div class="stb"><button class="opt" data-tg="stay">去記錄住宿</button></div>`;
+  else if(sel<NN())h+=`<div class="sta" style="color:#ffb38a">今晚還沒有住宿紀錄</div><div class="stb"><button class="opt" data-tg="stay">去記錄住宿</button></div>`;
   h+='</div>'}
  /* 行程 */
  let nx=-1;if(L.length){nx=isToday?L.findIndex(s=>s.t&&s.t>=nowHM):0;if(isToday&&nx<0&&!L.some(s=>s.t))nx=0}
