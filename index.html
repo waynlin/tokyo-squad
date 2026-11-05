@@ -236,6 +236,34 @@ input,input[type=text],input[type=url],select,textarea{border-radius:4px;border:
 .ptl .pr s:nth-child(1){left:28%}.ptl .pr s:nth-child(2){left:48%;animation-delay:-.7s}.ptl .pr s:nth-child(3){left:66%;animation-delay:-1.4s}.ptl .pr s:nth-child(4){left:38%;animation-delay:-1.9s}
 @keyframes prs{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(-62px);opacity:0}}
 .ptl:active::before{filter:blur(.6px) brightness(1.4)}
+/* ===== 住宿 ===== */
+.nts{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}
+.nt{border:2px solid var(--ink);border-radius:3px;background:#3a3342;color:var(--ink);text-align:center;padding:4px 0;line-height:1.1;font-size:15px}
+.nt small{display:block;font-size:10px;font-weight:700;opacity:.7}
+.nt.em{background:none;border:2px dashed #7a6a86;color:#a89fb8}
+.nt.dp{background:repeating-linear-gradient(45deg,#ff5a4d 0 5px,#ffd93d 5px 10px)}
+.ysm{font-size:12.5px;margin-top:8px;font-weight:700}.ysm.warn{color:#ffb38a}.ysm.ok{color:#8de07a}
+.stc{padding:12px}
+.sth{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.stn{font-size:16px}.std{font-size:12.5px;opacity:.85;margin-top:3px}.std b{color:var(--ac)}
+.sta{font-size:13px;margin-top:6px;line-height:1.5;word-break:break-word}
+.stb{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.stb .opt{text-decoration:none;display:inline-block}
+.stl{margin:8px 0 0;padding:8px 10px;background:#2a2433;border:2px solid var(--ink);border-radius:3px;font-size:13px;display:flex;justify-content:space-between;gap:6px;cursor:pointer}
+.stl.em{border-style:dashed;color:#ffb38a}.stl i{font-style:normal;opacity:.6}
+.calh{font-weight:800;margin:4px 0 6px;font-size:14px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cw{text-align:center;font-size:11px;opacity:.6;padding-bottom:2px}
+.cd{position:relative;aspect-ratio:1/1.05;border:2px solid var(--ink);background:#3a3342;color:var(--fg);border-radius:3px;padding:2px 0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;line-height:1.1;font-size:14px}
+.cd.off{background:none;border-color:transparent;opacity:.28}
+.cd .cl2{font-size:9px;font-weight:800;min-height:10px}
+.cd .dts{position:absolute;bottom:2px;left:0;right:0;display:flex;justify-content:center;gap:2px}.cd .dts u{width:6px;height:6px;border:1px solid var(--ink);border-radius:50%}
+.cd.mid{background:#6b5a2a;border-color:#a8903c}
+.cd.sel{background:var(--ac);color:var(--ink);font-weight:900}
+.ysum{margin:8px 0 2px;font-size:13px}.ynt{color:var(--ac)}.ywarn{color:#ffb38a;font-size:12px;margin-top:4px}
+
+/* 分帳成員 */
+.mbr{display:flex;flex-direction:column;gap:6px;padding:8px 0;border-bottom:1px dashed #5a5266}
+.stop.exx{opacity:.5}
 </style></head>
 <body><div id="app"></div><div id="sheet"></div>
 <script>
@@ -677,15 +705,16 @@ function albumSheet(){
 }
 
 /* ---------- tabs & shared data ---------- */
-let D={flights:{},stops:{},exp:{},chat:{},notice:{}},tab='lobby',day=0,routeOn=false,catF=null,MQ={place:'澀谷',cat:'古著',ll:null};
-const TABS=[['lobby','🏙️ 大廳'],['fly','✈️ 航班'],['plan','🗓️ 行程'],['wx','🌤️ 天氣'],['map','🗺️ 周邊'],['exp','💴 記帳'],['pic','📸 相簿']];
+let D={flights:{},stops:{},exp:{},stay:{},chat:{},notice:{}},tab='lobby',day=0,routeOn=false,catF=null,MQ={place:'澀谷',cat:'古著',ll:null};
+const TABS=[['lobby','🏙️ 大廳'],['fly','✈️ 航班'],['plan','🗓️ 行程'],['stay','🏨 住宿'],['wx','🌤️ 天氣'],['map','🗺️ 周邊'],['exp','💴 記帳'],['pic','📸 相簿']];
 const DAYS=[...Array(9)].map((_,i)=>new Date(2027,0,13+i)),WK=['日','一','二','三','四','五','六'];
 const CAT={景點:'⛩',美食:'🍜',咖啡甜點:'☕',購物:'🛍',住宿:'🏨',交通:'🚆'};
 const rate=()=>+info.rate>0?+info.rate:0.21;
 function saveInfo(o){Object.assign(info,o);if(db)db.collection('trip').doc('info').update(o).catch(()=>{});refresh()}
 const enc=encodeURIComponent,fnum=n=>Math.round(n).toLocaleString();
 const nameOf=id=>id===uid?(me.name||'我'):((players[id]&&players[id].name)||'旅伴');
-const allIds=()=>[...new Set([uid,...Object.keys(players)])].filter(i=>i===uid||(players[i]&&players[i].name));
+const memOf=i=>{for(let k=0;k<4;k++){const v=info['mb_'+i];if(typeof v==='string'&&v.indexOf('m:')===0)i=v.slice(2);else break}return i},memX=i=>info['mb_'+i]==='x';
+const allIds=()=>{const base=[...new Set([uid,...Object.keys(players)])].filter(i=>i===uid||(players[i]&&players[i].name));return [...new Set(base.map(memOf))].filter(i=>!memX(i))};
 const openSheet=h=>{sheet.innerHTML=h;sheet.style.display='block'},closeSheet=()=>{sheet.style.display='none'};
 function put(c,id,v){D[c][id]=v;if(db)db.collection(c).doc(id).set(v).catch(()=>{});refresh()}
 function del(c,id){delete D[c][id];if(db)db.collection(c).doc(id).delete().catch(()=>{});refresh()}
@@ -696,7 +725,7 @@ function go(t,keep){if(t)tab=t;if(!$('#view')){app.innerHTML='<div id="tkr" clas
  if(!keep)closeSheet();
  $('#nav').innerHTML=TABS.map(([k,n])=>`<button class="chip ${k==tab?'on':''}" data-t="${k}"><span class="ic">${n.split(' ')[0]}</span>${n.split(' ')[1]}</button>`).join('');
  $('#nav').querySelectorAll('.chip').forEach(c=>c.onclick=()=>go(c.dataset.t));
- ({lobby:lobbyView,plan:planView,fly:flyView,wx:wxView,map:mapView,exp:expView,pic:picView})[tab]();renderTicker();renderNotice();renderLog();watchConn();if(!window.__fx){window.__fx=1;if(!FX||Date.now()-FX.ts>30*60*1000)fetchFx()}}
+ ({lobby:lobbyView,plan:planView,stay:stayView,fly:flyView,wx:wxView,map:mapView,exp:expView,pic:picView})[tab]();renderTicker();renderNotice();renderLog();watchConn();if(!window.__fx){window.__fx=1;if(!FX||Date.now()-FX.ts>30*60*1000)fetchFx()}}
 const dl=i=>`${DAYS[i].getMonth()+1}/${DAYS[i].getDate()}（${WK[DAYS[i].getDay()]}）`;
 const fdt=s=>s?s.slice(5).replace('T',' ').replace('-','/'):'—';
 
@@ -718,11 +747,12 @@ function planView(){
  const L=dayList(day),cnt=i=>Object.values(D.stops).filter(s=>s.day===i&&s.n).length;
  let h=`<div class="chips dch"><button class="chip dchip ${planAll?'on':''}" data-all="1">📋<small>全部</small></button>${DAYS.map((d,i)=>`<button class="chip dchip ${!planAll&&i==day?'on':''}" data-d="${i}">D${i+1}<small>${d.getMonth()+1}/${d.getDate()} ${WK[d.getDay()]}</small>${cnt(i)?`<i class="cn">${cnt(i)}</i>`:''}</button>`).join('')}</div>`;
  if(planAll){
-  h+=DAYS.map((d,i)=>{const A=dayList(i);return `<div class="card ov"><b>D${i+1} · ${dl(i)}</b><span style="opacity:.6;font-size:12px"> ${A.length?A.length+' 個地點':'還沒安排'}</span>${A.map((s,k)=>`<button class="ovr" data-go="${i}|${s.id}"><span class="nb sm">${k+1}</span><span class="otm">${s.t||''}</span><span>${CAT[s.c]||'📍'} ${esc(s.n)}</span></button>`).join('')}</div>`}).join('');
+  h+=DAYS.map((d,i)=>{const A=dayList(i);return `<div class="card ov"><b>D${i+1} · ${dl(i)}</b><span style="opacity:.6;font-size:12px"> ${A.length?A.length+' 個地點':'還沒安排'}</span>${stayLine(i)}${A.map((s,k)=>`<button class="ovr" data-go="${i}|${s.id}"><span class="nb sm">${k+1}</span><span class="otm">${s.t||''}</span><span>${CAT[s.c]||'📍'} ${esc(s.n)}</span></button>`).join('')}</div>`}).join('');
   $('#view').innerHTML=h;
  }else{
   const V=catF?L.filter(s=>s.c===catF):L,nT=L.filter(s=>s.t).length;
   h+=`<div class="dhd"><div><b>第 ${day+1} 天 · ${dl(day)}</b><div style="font-size:12px;opacity:.7">${L.length} 個地點${nT?`，${nT} 個有時間`:''}${L.length>1?'　⠿ 拖曳排順序':''}</div></div>${L.length>1?`<button class="opt" id="bytm">依時間排</button>`:''}</div>`;
+  h+=stayLine(day);
   if(!L.length)h+='<div class="card" style="text-align:center;opacity:.8">這天還沒有行程，大家一起加地點吧 ✨</div>';
   else{
    h+=`<div class="card"><div class="lab" style="margin:0 0 6px">🚏 今天的順序（點一下跳到該地點）</div><div class="flw">${L.map((s,i)=>`${i?'<span class="ar">→</span>':''}<button class="opt" data-fl="${s.id}"><b>${i+1}</b> ${esc(s.n)}</button>`).join('')}</div></div>`;
@@ -778,7 +808,7 @@ function dragInit(){
   hd.addEventListener('pointermove',mv);hd.addEventListener('pointerup',up);hd.addEventListener('pointercancel',up)}));
 }
 function stopSheet(id){
- const e=id?D.stops[id]:null,S=e||{day,n:'',c:Object.keys(CAT)[0],t:'',note:'',tr:''};
+ const e=id?D.stops[id]:null,S=e||{day,n:'',c:Object.keys(CAT)[0],t:'',note:'',tr:''};const e0=e?Object.assign({},e):null;
  openSheet(`<h3 style="margin:0 0 6px">${e?'編輯地點':'新增地點'}</h3><div class="lab">地點名稱（用 Google 地圖搜得到的名字）</div><input type="text" id="sn" placeholder="例：明治神宮" value="${esc(S.n)}"><button class="opt" id="sv" style="margin-top:6px">🔍 預覽 Google 地圖</button><div id="svp"></div>
  <div class="lab">第幾天</div><select id="sdy">${DAYS.map((d,i)=>`<option value="${i}" ${i===S.day?'selected':''}>第 ${i+1} 天 · ${dl(i)}</option>`).join('')}</select>
  <div class="lab">類型</div><select id="sc">${Object.keys(CAT).map(k=>`<option value="${k}" ${k===S.c?'selected':''}>${CAT[k]} ${k}</option>`).join('')}</select>
@@ -792,7 +822,7 @@ function stopSheet(id){
   const f={day:nd,n,c:$('#sc').value,t:$('#st').value,note:$('#sd').value.trim(),tr:$('#str').value.trim()};
   day=nd;planAll=false;closeSheet();
   if(!e){const nid=Date.now().toString(36)+uid.slice(0,3);openStop=nid;put('stops',nid,Object.assign({},f,{by:uid,ts:Date.now(),o:nextOrd(nd)}))}
-  else{const cur=D.stops[id]||e;if(cur.day!==nd||cur.o==null)f.o=nextOrd(nd);const ch={};Object.keys(f).forEach(k=>{if(f[k]!==cur[k])ch[k]=f[k]});if(Object.keys(ch).length){updFields('stops',id,ch);refresh()}else planView()}};
+  else{const cur=D.stops[id]||e;if(cur.day!==nd||cur.o==null)f.o=nextOrd(nd);const ch={};Object.keys(f).forEach(k=>{if(f[k]!==(e0[k]==null?'':e0[k]))ch[k]=f[k]});if(Object.keys(ch).length){updFields('stops',id,ch);refresh()}else planView()}};
 }
 /* ===== 白天／傍晚／夜晚（依場景當地時間，也可手動切換看看） ===== */
 let TOD=null,lastPh=null;
@@ -967,6 +997,78 @@ async function fetchHist(loc){const b=$('#wxhb');if(b)b.textContent='載入中�
   if(!r.ok)throw 0;const j=await r.json();if(!j.daily||!j.daily.time)throw 0;WXH[loc]=j}catch(e){WXH[loc]='err'}
  if(tab==='wx'&&loc===wxSel&&$('#wxhist'))$('#wxhist').innerHTML=wxHistHtml(loc),(()=>{const hb=$('#wxhb');if(hb)hb.onclick=()=>fetchHist(loc)})()}
 
+/* ===== 住宿（像訂房網站一樣選入住～退房日，可多晚住同一處，大家共編） ===== */
+const STC=['#ff8a6b','#6bd0ff','#ffd93d','#8de07a','#d79bff','#ff9ec7'];
+let openStay=null;
+const stayList=()=>Object.entries(D.stay||{}).map(([id,s])=>({id,...s})).filter(s=>s.n&&s.ci!=null&&s.co>s.ci).sort((a,b)=>a.ci-b.ci||a.co-b.co||(a.ts||0)-(b.ts||0));
+const stayColor=(L,id)=>STC[Math.max(0,L.findIndex(s=>s.id===id))%STC.length];
+const stayD=i=>DAYS[i].getMonth()+1+'/'+DAYS[i].getDate();
+const stayDW=i=>stayD(i)+'（'+WK[DAYS[i].getDay()]+'）';
+const stayJPY=s=>+s.amt>0?(s.cur==='TWD'?s.amt/rate():+s.amt):0;
+const stayUrl=u=>/^https?:\/\//i.test(u||'')?u:'';
+function nightCover(L){const c=[...Array(8)].map(()=>[]);L.forEach(s=>{for(let n=s.ci;n<s.co&&n<8;n++)c[n].push(s)});return c}
+const fmtList=a=>a.map(n=>stayD(n)).join('、');
+/* 行程頁用：這天的住宿提示 */
+function stayLine(i){const L=stayList();if(!L.length)return '';const cov=nightCover(L),t=[];
+ L.filter(s=>s.co===i).forEach(s=>t.push('🧳 退房：'+esc(s.n)));
+ if(i<8){const c=cov[i];if(c.length){const s=c[0];t.push(s.ci===i?'🔑 入住：'+esc(s.n):'🏨 今晚住：'+esc(s.n))}else t.push('🏨 今晚還沒訂住宿')}
+ return t.length?`<div class="stl ${i<8&&!cov[i].length?'em':''}" onclick="go('stay')">${t.join('　')}<i>›</i></div>`:''}
+function calHtml(ci,co,self){const cov=nightCover(stayList().filter(s=>s.id!==self)),first=DAYS[0].getDate(),start=first-DAYS[0].getDay();
+ let h='<div class="calh">'+DAYS[0].getFullYear()+' 年 '+(DAYS[0].getMonth()+1)+' 月</div><div class="cal">'+WK.map(w=>`<div class="cw">${w}</div>`).join('');
+ for(let d=start;d<start+14;d++){const i=d-first;
+  if(i<0||i>8){h+=`<div class="cd off">${d>0?d:''}</div>`;continue}
+  const cls=i===ci?'sel s1':i===co?'sel s2':(ci!=null&&co!=null&&i>ci&&i<co)?'mid':'';
+  const dots=i<8?cov[i].slice(0,3).map(s=>`<u style="background:${STC[Math.max(0,stayList().findIndex(x=>x.id===s.id))%STC.length]}"></u>`).join(''):'';
+  h+=`<button class="cd ${cls}" data-i="${i}"><b>${d}</b><span class="cl2">${i===ci?'入住':i===co?'退房':''}</span><span class="dts">${dots}</span></button>`}
+ return h+'</div>'}
+function staySheet(id){
+ const e=id?D.stay[id]:null,S=e||{n:'',addr:'',ci:null,co:null,amt:'',cur:'JPY',conf:'',url:'',note:''};let ci=S.ci,co=S.co;const e0=e?Object.assign({},e):null;
+ openSheet(`<h3 style="margin:0 0 6px">${e?'編輯住宿':'新增住宿'}</h3><div class="lab">住宿名稱</div><input type="text" id="yn" placeholder="例：新宿格拉斯麗飯店" value="${esc(S.n)}">
+ <div class="lab">入住 / 退房日期（先點入住日，再點退房日；可跨很多晚）</div><div id="ycal"></div><div id="ysum" class="ysum"></div>
+ <div class="lab">地址或地圖搜尋字（用來顯示 Google 地圖，可留空，會用名稱搜）</div><input type="text" id="ya" placeholder="例：東京都新宿區歌舞伎町1-19-1" value="${esc(S.addr||'')}"><button class="opt" id="yv" style="margin-top:6px">🔍 預覽 Google 地圖</button><div id="yvp"></div>
+ <div class="lab">這個住宿的總金額（整段住宿加起來，可留空）</div><div style="display:flex;gap:6px"><select id="yc" style="flex:0 0 96px"><option value="JPY" ${S.cur!=='TWD'?'selected':''}>¥ 日幣</option><option value="TWD" ${S.cur==='TWD'?'selected':''}>NT$ 台幣</option></select><input type="number" inputmode="decimal" id="yp" placeholder="例：45000" value="${S.amt!==''&&S.amt!=null?esc(S.amt):''}"></div>
+ <div class="lab">訂房編號（可留空）</div><input type="text" id="yo" value="${esc(S.conf||'')}"><div class="lab">訂房頁面連結（可留空）</div><input type="url" id="yu" placeholder="https://" value="${esc(S.url||'')}">
+ <div class="lab">備註（入住時間、早餐、取消規定…）</div><input type="text" id="yt" placeholder="例：15:00 後入住，含早餐" value="${esc(S.note||'')}">
+ <button class="big" id="ys">${e?'儲存':'加入住宿'}</button><button class="big ghost" id="yx">取消</button>${e?'<button class="big ghost" id="ydel" style="color:#ff8a6b">🗑 刪除這筆住宿</button>':''}`);
+ const draw=()=>{$('#ycal').innerHTML=calHtml(ci,co,id);
+  const ov=(ci!=null&&co!=null)?stayList().filter(s=>s.id!==id&&s.ci<co&&s.co>ci):[];
+  $('#ysum').innerHTML=ci==null?'請點入住日':co==null?`入住 <b>${stayDW(ci)}</b> → 請點退房日`:`入住 <b>${stayDW(ci)}</b> → 退房 <b>${stayDW(co)}</b>　<b class="ynt">${co-ci} 晚</b>`+(ov.length?`<div class="ywarn">⚠️ 跟「${ov.map(s=>esc(s.n)).join('、')}」有重疊的晚上（還是可以儲存）</div>`:'');
+  $('#ycal').querySelectorAll('.cd[data-i]').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;
+   if(ci==null||co!=null){if(i===8)return;ci=i;co=null}
+   else if(i>ci)co=i;else{if(i===8)return;ci=i}
+   draw()})};
+ draw();
+ $('#yx').onclick=closeSheet;
+ $('#yv').onclick=()=>{const q=($('#ya').value.trim()||$('#yn').value.trim());if(!q)return $('#yn').focus();$('#yvp').innerHTML=`<iframe loading="lazy" src="${gmEmbed(q)}" style="height:200px"></iframe>`};
+ if(e)$('#ydel').onclick=()=>{const b=$('#ydel');if(!b.dataset.c){b.dataset.c=1;b.textContent='再按一次確定刪除';return}closeSheet();if(openStay===id)openStay=null;del('stay',id)};
+ $('#ys').onclick=()=>{const n=$('#yn').value.trim();if(!n)return $('#yn').focus();if(ci==null||co==null){$('#ysum').innerHTML='<b class="ywarn" style="display:block">請先選好入住日和退房日</b>';return}
+  const amt=$('#yp').value.trim(),f={n,ci,co,addr:$('#ya').value.trim(),amt:amt===''||!(+amt>=0)?'':+amt,cur:$('#yc').value,conf:$('#yo').value.trim(),url:$('#yu').value.trim(),note:$('#yt').value.trim()};
+  closeSheet();
+  if(!e){const nid=Date.now().toString(36)+uid.slice(0,3);openStay=nid;put('stay',nid,Object.assign({},f,{by:uid,ts:Date.now()}))}
+  else{const ch={};Object.keys(f).forEach(k=>{if(f[k]!==(e0[k]==null?'':e0[k]))ch[k]=f[k]});if(Object.keys(ch).length){updFields('stay',id,ch);refresh()}else stayView()}};
+}
+function stayView(){
+ const L=stayList(),cov=nightCover(L),miss=[],dup=[];cov.forEach((c,n)=>{if(!c.length)miss.push(n);else if(c.length>1)dup.push(n)});
+ let h=`<div class="card"><b>🏨 住宿安排</b><span style="float:right;font-size:13px;opacity:.75">${8-miss.length} / 8 晚有著落</span><div class="lab" style="margin:8px 0 4px">每一格＝那天晚上住哪（${stayD(0)} 晚上 ～ ${stayD(7)} 晚上；${stayD(8)} 是回程日）</div><div class="nts">${cov.map((c,n)=>`<div class="nt ${c.length===0?'em':c.length>1?'dp':''}" ${c.length===1?`style="background:${stayColor(L,c[0].id)}"`:''}><b>${DAYS[n].getDate()}</b><small>${WK[DAYS[n].getDay()]}</small></div>`).join('')}</div>`;
+ if(L.length){h+=miss.length?`<div class="ysm warn">還沒訂：${fmtList(miss)}</div>`:'<div class="ysm ok">✅ 每一晚都有住宿了</div>';if(dup.length)h+=`<div class="ysm warn">⚠️ 重複訂到：${fmtList(dup)}</div>`}
+ h+='</div>';
+ const tot=L.reduce((s,x)=>s+stayJPY(x),0);
+ if(tot>0){const n=Math.max(1,allIds().length);h+=`<div class="card"><div class="kv"><span>住宿總計</span><b>¥${fnum(tot)} <small style="font-weight:400">≈ NT$${fnum(tot*rate())}</small></b></div><div class="kv"><span>平均每人（${n} 人）</span><b>¥${fnum(tot/n)} <small style="font-weight:400">≈ NT$${fnum(tot*rate()/n)}</small></b></div></div>`}
+ if(!L.length)h+='<div class="card" style="text-align:center;opacity:.85">還沒有住宿，大家一起把訂好的飯店記下來吧 🏨<br><small>可以一次選好幾天，記錄住在同一個地方</small></div>';
+ L.forEach(s=>{const nn=s.co-s.ci,q=s.addr||s.n,op=openStay===s.id,u=stayUrl(s.url),col=stayColor(L,s.id),px=+s.amt>0?`${s.cur==='TWD'?'NT$':'¥'}${fnum(s.amt)}`:'';
+  h+=`<div class="card stc" style="border-left:8px solid ${col}"><div class="sth"><div><b class="stn">${esc(s.n)}</b><div class="std">${stayDW(s.ci)} → ${stayDW(s.co)} · <b>${nn} 晚</b></div></div><button class="x" data-ed="${s.id}" title="編輯">✏️</button></div>
+  ${s.addr?`<div class="sta">📍 ${esc(s.addr)}</div>`:''}
+  ${px?`<div class="sta">💴 ${px}${s.cur==='TWD'?`（≈ ¥${fnum(+s.amt/rate())}）`:`（≈ NT$${fnum(s.amt*rate())}）`}　每晚約 ${s.cur==='TWD'?'NT$':'¥'}${fnum(s.amt/nn)}</div>`:''}
+  ${s.conf?`<div class="sta">🔖 訂房編號 <b>${esc(s.conf)}</b></div>`:''}${s.note?`<div class="sta">📝 ${esc(s.note)}</div>`:''}
+  <div class="stb"><button class="opt" data-map="${s.id}">🗺 ${op?'收起地圖':'看地圖'}</button><a class="opt" href="${gmOpen(q)}" target="_blank" rel="noopener">↗ Google 地圖</a>${u?`<a class="opt" href="${esc(u)}" target="_blank" rel="noopener">🔗 訂房頁面</a>`:''}</div>
+  ${op?`<iframe loading="lazy" src="${gmEmbed(q)}" style="height:220px;margin-top:8px"></iframe>`:''}<small style="opacity:.5;display:block;margin-top:6px">${esc(nameOf(s.by))} 新增</small></div>`});
+ h+='<button class="big" id="yadd">＋ 新增住宿</button>';
+ $('#view').innerHTML=h;
+ $('#yadd').onclick=()=>staySheet();
+ $('#view').querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>staySheet(b.dataset.ed));
+ $('#view').querySelectorAll('[data-map]').forEach(b=>b.onclick=()=>{openStay=openStay===b.dataset.map?null:b.dataset.map;stayView()});
+}
+
 /* ---- flights ---- */
 const AL={BR:['長榮航空','#00704a','https://www.evaair.com'],CI:['中華航空','#c4002f','https://www.china-airlines.com'],JX:['星宇航空','#9a7b3f','https://www.starlux-airlines.com'],IT:['台灣虎航','#f26a21','https://www.tigerairtw.com'],MM:['樂桃航空','#c3007a','https://www.flypeach.com'],TR:['酷航','#c9a000','https://www.flyscoot.com'],JL:['日本航空','#c8102e','https://www.jal.co.jp'],NH:['全日空','#1d3f94','https://www.ana.co.jp'],CX:['國泰航空','#006564','https://www.cathaypacific.com'],GK:['捷星日本','#ff5000','https://www.jetstar.com'],BC:['天馬航空','#0066b3','https://www.skymark.co.jp'],AE:['華信航空','#c4002f','https://www.mandarin-airlines.com'],B7:['立榮航空','#00843d','https://www.uniair.com.tw'],UA:['聯合航空','#0033a0','https://www.united.com'],SQ:['新加坡航空','#c98a00','https://www.singaporeair.com'],KE:['大韓航空','#0083c9','https://www.koreanair.com']};
 const AP={TPE:'桃園',TSA:'松山',KHH:'高雄',RMQ:'台中',NRT:'成田',HND:'羽田'};
@@ -1121,26 +1223,57 @@ function mapView(){
 }
 
 /* ---- expenses ---- */
-function settle(){const b={},ids=allIds();Object.values(D.exp).forEach(e=>{const p=e.sp&&e.sp.length?e.sp:ids;b[e.by]=(b[e.by]||0)+e.amt;p.forEach(i=>b[i]=(b[i]||0)-e.amt/p.length)});
+/* ===== 記帳／平帳（可編輯、預設全員平分、成員可排除或合併） ===== */
+function splitIds(e){const ids=allIds();const p=(e.sp&&e.sp.length)?[...new Set(e.sp.map(memOf))].filter(i=>!memX(i)):ids;return p.length?p:ids}
+function settle(){const b={},ids=allIds();Object.values(D.exp).forEach(e=>{if(!e||!(e.amt>0))return;const by=memOf(e.by);if(memX(by))return;const p=splitIds(e);b[by]=(b[by]||0)+e.amt;p.forEach(i=>b[i]=(b[i]||0)-e.amt/p.length)});
  const cr=[],de=[];Object.entries(b).forEach(([i,v])=>{if(v>.5)cr.push([i,v]);else if(v<-.5)de.push([i,-v])});cr.sort((a,c)=>c[1]-a[1]);de.sort((a,c)=>c[1]-a[1]);
  const out=[];let i=0,j=0;while(i<cr.length&&j<de.length){const m=Math.min(cr[i][1],de[j][1]);out.push([de[j][0],cr[i][0],m]);cr[i][1]-=m;de[j][1]-=m;if(cr[i][1]<.5)i++;if(de[j][1]<.5)j++}return{b,out}}
+const expList=()=>Object.entries(D.exp).map(([id,e])=>({id,...e})).filter(e=>e.t&&e.amt>0).sort((a,b)=>b.ts-a.ts);
+const selfOnly=e=>{const by=memOf(e.by);if(memX(by))return false;const p=splitIds(e);return allIds().length>1&&p.length===1&&p[0]===by};
 function expView(){
- const E=Object.entries(D.exp).map(([id,e])=>({id,...e})).sort((a,b)=>b.ts-a.ts),{b,out}=settle(),tot=E.reduce((s,e)=>s+e.amt,0);
+ const E=expList(),{b,out}=settle(),ids=allIds(),tot=E.filter(e=>!memX(memOf(e.by))).reduce((s,e)=>s+e.amt,0),so=E.filter(selfOnly);
  let h=`<div class="card"><b>💴 即時平帳</b><span style="float:right;opacity:.7;font-size:13px">總共 ¥${fnum(tot)} ≈ NT$${fnum(tot*rate())}</span>`;
  h+=out.length?out.map(([f,t,m])=>`<div class="kv"><span>${esc(nameOf(f))} → ${esc(nameOf(t))}</span><b class="neg">¥${fnum(m)}<small style="font-weight:400"> ≈NT$${fnum(m*rate())}</small></b></div>`).join(''):'<div style="opacity:.7;font-size:13px;margin-top:6px">目前沒有人欠錢 🎉</div>';
- h+=`<div class="lab" style="margin-top:10px">每人淨額</div>`+allIds().map(i=>`<div class="kv"><span>${esc(nameOf(i))}</span><b class="${(b[i]||0)>=0?'pos':'neg'}">${(b[i]||0)>=0?'+':'−'}¥${fnum(Math.abs(b[i]||0))}</b></div>`).join('')+`</div>`;
+ if(so.length)h+=`<div class="ysm warn" style="margin-top:8px">⚠️ 有 ${so.length} 筆花費只分給「付款人自己」，所以不會有人欠錢。點下面那筆花費，改成「全員平分」就會算出來。</div>`;
+ h+=`<div class="lab" style="margin-top:10px">每人淨額</div>`+ids.map(i=>`<div class="kv"><span>${esc(nameOf(i))}</span><b class="${(b[i]||0)>=0?'pos':'neg'}">${(b[i]||0)>=0?'+':'−'}¥${fnum(Math.abs(b[i]||0))}</b></div>`).join('')+`</div>`;
+ h+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="min-width:0"><b>👥 分帳成員：${ids.length} 人</b><div style="font-size:12px;opacity:.7;word-break:break-all">${ids.map(i=>esc(nameOf(i))).join('、')}</div></div><button class="opt" id="mbm">管理</button></div>`;
  h+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><b>匯率 ¥1 = NT$${rate().toFixed(4)}</b><div style="font-size:12px;opacity:.65">${info.rateAt?'更新於 '+esc(info.rateAt):'預設估計值，出發前請更新'}</div></div><button class="opt" id="rt2">更新</button></div>`;
  h+=`<button class="big" id="ae">＋ 新增一筆花費</button>`;
- E.forEach(e=>{h+=`<div class="stop"><div style="flex:1"><b>${esc(e.t)}</b><div style="font-size:12px;opacity:.7">${esc(nameOf(e.by))} 付 · ${(e.sp&&e.sp.length)||allIds().length} 人分</div></div><b style="text-align:right">¥${fnum(e.amt)}<div style="font-size:11px;opacity:.6;font-weight:400">${e.cur==='TWD'?'輸入 NT$'+fnum(e.orig):'≈NT$'+fnum(e.amt*rate())}</div></b><button class="x" data-x="${e.id}">✕</button></div>`});
- $('#view').innerHTML=h;$('#ae').onclick=expSheet;$('#rt2').onclick=rateSheet;$('#view').querySelectorAll('[data-x]').forEach(x=>x.onclick=()=>del('exp',x.dataset.x));
+ E.forEach(e=>{const ex=memX(memOf(e.by)),p=splitIds(e),all=!(e.sp&&e.sp.length)||p.length===ids.length,who=all?`全員平分（${p.length} 人）`:p.map(i=>esc(nameOf(i))).join('、')+' 分';
+  h+=`<div class="stop ${ex?'exx':''}" data-e="${e.id}" style="cursor:pointer"><div style="flex:1;min-width:0"><b>${esc(e.t)}</b><div style="font-size:12px;opacity:.75">${esc(nameOf(memOf(e.by)))} 付 · ${ex?'付款人已排除，不計入':who}</div>${selfOnly(e)?'<div class="ywarn">⚠️ 只分給付款人自己，不會有人欠錢（點一下修改）</div>':''}</div><b style="text-align:right">¥${fnum(e.amt)}<div style="font-size:11px;opacity:.6;font-weight:400">${e.cur==='TWD'?'輸入 NT$'+fnum(e.orig):'≈NT$'+fnum(e.amt*rate())}</div></b><button class="x" data-x="${e.id}">✕</button></div>`});
+ $('#view').innerHTML=h;$('#ae').onclick=()=>expSheet();$('#rt2').onclick=rateSheet;$('#mbm').onclick=memberSheet;
+ $('#view').querySelectorAll('[data-e]').forEach(r=>r.onclick=()=>expSheet(r.dataset.e));
+ $('#view').querySelectorAll('[data-x]').forEach(x=>x.onclick=ev=>{ev.stopPropagation();if(!x.dataset.c){x.dataset.c=1;x.textContent='確定刪除？';x.style.width='auto';x.style.padding='0 8px';setTimeout(()=>{if(x.isConnected){x.dataset.c='';x.textContent='✕';x.style.width='';x.style.padding=''}},3000);return}del('exp',x.dataset.x)});
 }
-function expSheet(){
- const ids=allIds();
- openSheet(`<h3 style="margin:0 0 6px">新增花費</h3><div class="lab">項目</div><input type="text" id="et" placeholder="例：一蘭拉麵"><div class="lab">金額</div><div style="display:flex;gap:6px"><select id="ec" style="width:105px"><option value="JPY">¥ 日圓</option><option value="TWD">NT$ 台幣</option></select><input type="number" inputmode="decimal" id="ea" placeholder="3200"></div><div id="ep" style="font-size:12px;opacity:.65;margin-top:4px"></div><div class="lab">誰付的</div><select id="eb">${ids.map(i=>`<option value="${i}">${esc(nameOf(i))}</option>`).join('')}</select><div class="lab">平分給（取消勾選＝不用分）</div><div class="row">${ids.map(i=>`<label class="opt"><input type="checkbox" style="width:auto" data-s="${i}" checked> ${esc(nameOf(i))}</label>`).join('')}</div><button class="big" id="es">儲存</button><button class="big ghost" id="ex">取消</button>`);
- $('#eb').value=uid;$('#ex').onclick=closeSheet;
- const pv=()=>{const a=parseFloat($('#ea').value)||0,t=$('#ec').value==='TWD';$('#ep').textContent=a?(t?`≈ ¥${fnum(a/rate())}`:`≈ NT$${fnum(a*rate())}`):''};$('#ea').oninput=pv;$('#ec').onchange=pv;
- $('#es').onclick=()=>{const t=$('#et').value.trim(),a=parseFloat($('#ea').value);if(!t||!(a>0))return;const sp=[...sheet.querySelectorAll('[data-s]')].filter(c=>c.checked).map(c=>c.dataset.s);if(!sp.length)return;closeSheet();{const tw=$('#ec').value==='TWD';put('exp',Date.now().toString(36)+uid.slice(0,3),{t,amt:tw?Math.round(a/rate()):a,cur:tw?'TWD':'JPY',orig:a,by:$('#eb').value,sp,ts:Date.now()})}};
+function expSheet(id){
+ const e=id?D.exp[id]:null;if(id&&!e)return;const ids=allIds(),by0=e?memOf(e.by):memOf(uid),isAll=!e||!(e.sp&&e.sp.length),sel=new Set(e&&e.sp&&e.sp.length?e.sp.map(memOf):ids),e0=e?Object.assign({},e):null;
+ const payers=ids.includes(by0)?ids:[by0,...ids],v0=e?(e.cur==='TWD'?e.orig:(e.orig!=null?e.orig:e.amt)):'';
+ openSheet(`<h3 style="margin:0 0 6px">${e?'編輯花費':'新增花費'}</h3><div class="lab">項目</div><input type="text" id="et" placeholder="例：一蘭拉麵" value="${e?esc(e.t):''}"><div class="lab">金額</div><div style="display:flex;gap:6px"><select id="ec" style="width:105px"><option value="JPY" ${e&&e.cur==='TWD'?'':'selected'}>¥ 日圓</option><option value="TWD" ${e&&e.cur==='TWD'?'selected':''}>NT$ 台幣</option></select><input type="number" inputmode="decimal" id="ea" placeholder="3200" value="${v0}"></div><div id="ep" style="font-size:12px;opacity:.65;margin-top:4px"></div><div class="lab">誰付的</div><select id="eb">${payers.map(i=>`<option value="${i}">${esc(nameOf(i))}</option>`).join('')}</select>
+ <div class="lab">分給誰</div><label class="opt" style="display:block;margin-bottom:6px"><input type="checkbox" id="eall" style="width:auto" ${isAll?'checked':''}> 全員平分（目前 ${ids.length} 人，之後加入的旅伴也會算進去）</label><div class="row" id="esp" style="${isAll?'display:none':''}">${ids.map(i=>`<label class="opt"><input type="checkbox" style="width:auto" data-s="${i}" ${sel.has(i)?'checked':''}> ${esc(nameOf(i))}</label>`).join('')}</div><div class="ywarn" id="ewn"></div>
+ <button class="big" id="es">${e?'儲存':'儲存'}</button><button class="big ghost" id="ex">取消</button>`);
+ $('#eb').value=by0;$('#ex').onclick=closeSheet;
+ const pv=()=>{const a=parseFloat($('#ea').value)||0,t=$('#ec').value==='TWD';$('#ep').textContent=a?(t?`≈ ¥${fnum(a/rate())}`:`≈ NT$${fnum(a*rate())}`):''};$('#ea').oninput=pv;$('#ec').onchange=pv;pv();
+ $('#eall').onchange=()=>{$('#esp').style.display=$('#eall').checked?'none':'flex'};
+ $('#es').onclick=()=>{const t=$('#et').value.trim(),a=parseFloat($('#ea').value);if(!t||!(a>0))return;const all=$('#eall').checked,sp=all?[]:[...sheet.querySelectorAll('[data-s]')].filter(c=>c.checked).map(c=>c.dataset.s);
+  if(!all&&!sp.length){$('#ewn').textContent='請至少勾選一個人，或選「全員平分」';return}
+  const tw=$('#ec').value==='TWD',cur=tw?'TWD':'JPY',by=$('#eb').value;
+  if(!e){closeSheet();put('exp',Date.now().toString(36)+uid.slice(0,3),{t,amt:tw?Math.round(a/rate()):a,cur,orig:a,by,sp,ts:Date.now()});return}
+  const f={t,by,sp},ch={};if(f.t!==e0.t)ch.t=t;if(by!==memOf(e0.by))ch.by=by;if(JSON.stringify(sp)!==JSON.stringify(e0.sp||[]))ch.sp=sp;
+  const o0=e0.cur==='TWD'?e0.orig:(e0.orig!=null?e0.orig:e0.amt);if(cur!==(e0.cur==='TWD'?'TWD':'JPY')||a!==o0){ch.cur=cur;ch.orig=a;ch.amt=tw?Math.round(a/rate()):a}
+  closeSheet();if(Object.keys(ch).length){updFields('exp',id,ch);refresh()}else expView()};
 }
+/* 分帳成員：把測試帳號排除、把同一個人的兩台裝置合併 */
+const agoTxt=ts=>{if(!ts)return '很久以前';const m=Math.round((Date.now()-ts)/60000);return m<2?'剛剛':m<60?m+' 分鐘前':m<1440?Math.round(m/60)+' 小時前':Math.round(m/1440)+' 天前'};
+function memberSheet(){
+ const known=[...new Set([uid,...Object.keys(players)])].filter(i=>i===uid||(players[i]&&players[i].name)),nm=i=>i===uid?(me.name||'我'):players[i].name;
+ const dupName=i=>known.some(j=>j!==i&&nm(j)===nm(i));
+ const rows=known.map(i=>{const v=info['mb_'+i]||'',opts=[['','✅ 正常參與分帳'],['x','🚫 不分帳（測試帳號／不去的人）']].concat(known.filter(j=>j!==i&&memOf(j)!==i).map(j=>['m:'+j,'🔗 跟「'+nm(j)+'」是同一個人（合併）']));
+  return `<div class="mbr"><div><b>${esc(nm(i))}</b>${i===uid?'（你這台）':''}<div style="font-size:11px;opacity:.65">最後上線：${agoTxt(i===uid?Date.now():players[i].ts)}${dupName(i)?' · ⚠️ 名字重複，可能是同一人用兩台裝置':''}</div></div><select data-m="${i}">${opts.map(([k,l])=>`<option value="${esc(k)}" ${k===v?'selected':''}>${esc(l)}</option>`).join('')}</select></div>`}).join('');
+ openSheet(`<h3 style="margin:0 0 6px">分帳成員</h3><div style="font-size:12.5px;opacity:.8;line-height:1.5;margin-bottom:6px">「全員平分」會平分給這裡的每一位。測試用的帳號請設成「不分帳」；同一個人用了兩台手機，請把其中一個「合併」到另一個。大家共用這份設定，改了立刻同步。</div>${rows}<button class="big" id="mbx">完成</button>`);
+ sheet.querySelectorAll('[data-m]').forEach(s=>s.onchange=()=>{saveInfo({['mb_'+s.dataset.m]:s.value});memberSheet()});
+ $('#mbx').onclick=()=>{closeSheet();expView()};
+}
+
 
 /* ---- album ---- */
 function picView(){
@@ -1161,7 +1294,7 @@ function picView(){
  if(db){
   db.collection('players').onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});delete o[uid];players=o;renderPlayers()},()=>{});
   db.collection('trip').doc('info').onSnapshot(s=>{if(s.exists){info=cl(s.data());refresh()}},()=>{});
-  ['flights','stops','exp'].forEach(c=>db.collection(c).onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});if(sj(o)!==sj(D[c])){D[c]=o;refresh()}},()=>{}));db.collection('chat').onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});D.chat=o;renderLog()},()=>{});db.collection('notice').onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});D.notice=o;renderNotice()},()=>{});
+  ['flights','stops','exp','stay'].forEach(c=>db.collection(c).onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});if(sj(o)!==sj(D[c])){D[c]=o;refresh()}},()=>{}));db.collection('chat').onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});D.chat=o;renderLog()},()=>{});db.collection('notice').onSnapshot(sn=>{const o={};sn.docs.forEach(d=>{o[d.id]=cl(d.data())});D.notice=o;renderNotice()},()=>{});
   setInterval(()=>{if(document.visibilityState==='visible'&&me.name)save({})},90000);
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&me.name)save({})});
  }
